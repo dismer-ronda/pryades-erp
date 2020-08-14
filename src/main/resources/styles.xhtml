@@ -1,0 +1,124 @@
+		<style type="text/css">
+		
+			* {
+				font-family: "Arial", Helvetica; 
+				font-size: 12px;
+			}
+
+			*.titulo1 {
+				font-size: 48px;
+				text-align: center;
+				font-weight: bold;
+			}
+			
+			*.titulo2 {
+				font-size: 14px;
+				text-align: center;
+				font-weight: bold;
+			}
+
+			*.text_header_size {
+				font-size: 16px;
+			}
+
+			*.text_regular_size {
+				font-size: 11px;
+			}
+
+			*.text_left {
+				text-align: left;
+			}
+
+			*.text_center {
+				text-align: center;
+			}
+
+			*.text_right {
+				text-align: right;
+			}
+			
+			*.text_bold {
+				font-weight: bold;
+			}
+
+			*.text_red {
+				color: red;
+			}
+			
+			*.vtop {
+				vertical-align: top;
+			}
+
+			*.hcenter {
+				horizontal-align: center;
+			}
+			
+			*.vcenter {
+				vertical-align: center;
+			}
+
+			*.vbottom {
+				vertical-align: bottom;
+			}
+
+			*.sangria {
+				padding-left: 16px;
+				padding-right: 16px;
+			}
+
+			*.padding_left {
+				padding-left: 6px;
+			}
+			
+			*.padding_right {
+				padding-right: 6px;
+			}
+
+			*.padding_bottom {
+				padding-bottom: 5px;
+			}
+
+			*.padding_top {
+				padding-top: 5px;
+			}
+				
+			*.borde {
+				border: 1px solid black;
+			}
+
+			*.block {
+				display: inline-block;
+			}
+			
+			#block_container > div {
+   				display: inline-block;
+			}
+
+			@page {
+				size: $pagesize $orientation;
+				 
+				@top-left {
+				}
+
+				@top-right {
+				}
+				
+				@bottom-left {
+				}
+				
+				@bottom-right {
+					content: "Página " counter(page) " de " counter(pages);
+					font-size: 12px;
+					vertical-align: middle;
+					padding-bottom: 6px;
+				}
+
+				@bottom-center {
+				}
+				 
+				margin-top: 1cm;
+				margin-bottom: 1.5cm;
+				margin-left: 1cm;
+				margin-right: 1cm;
+			}
+		</style>

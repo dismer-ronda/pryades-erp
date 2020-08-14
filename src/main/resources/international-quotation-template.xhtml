@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+   
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+	<title>$context.getString( "template.quotation.quotation" ) $quotation.getFormattedNumber()</title>
+		
+	<meta name="author" content="pryades" />
+
+		<style type="text/css">
+		
+			* {
+				font-family: "Arial", Helvetica; 
+				font-size: 12px;
+			}
+
+			*.titulo1 {
+				font-size: 48px;
+				text-align: center;
+				font-weight: bold;
+			}
+			
+			*.titulo2 {
+				font-size: 14px;
+				text-align: center;
+				font-weight: bold;
+			}
+
+			*.text_header_size {
+				font-size: 16px;
+			}
+
+			*.text_regular_size {
+				font-size: 11px;
+			}
+
+			*.text_left {
+				text-align: left;
+			}
+
+			*.text_center {
+				text-align: center;
+			}
+
+			*.text_right {
+				text-align: right;
+			}
+			
+			*.text_bold {
+				font-weight: bold;
+			}
+
+			*.text_red {
+				color: red;
+			}
+			
+			*.vtop {
+				vertical-align: top;
+			}
+
+			*.hcenter {
+				horizontal-align: center;
+			}
+			
+			*.vcenter {
+				vertical-align: center;
+			}
+
+			*.vbottom {
+				vertical-align: bottom;
+			}
+
+			*.sangria {
+				padding-left: 16px;
+				padding-right: 16px;
+			}
+
+			*.padding_left {
+				padding-left: 6px;
+			}
+			
+			*.padding_right {
+				padding-right: 6px;
+			}
+
+			*.padding_bottom {
+				padding-bottom: 5px;
+			}
+
+			*.padding_top {
+				padding-top: 5px;
+			}
+				
+			*.padding_all {
+				padding-right: 6px;
+				padding-left: 6px;
+				padding-bottom: 6px;
+				padding-top: 6px;
+			}
+
+			*.padding_h {
+				padding-right: 6px;
+				padding-left: 6px;
+			}
+			
+			*.padding_v {
+				padding-bottom: 6px;
+				padding-top: 6px;
+			}
+
+			*.borde {
+				border: 0.5px solid black;
+				border-spacing: 0px;
+				border-collapse: collapse;
+				padding: 0px;
+			}
+
+			*.border_no_spacing
+			{
+				border-spacing: 0px;
+				padding: 0px;
+				border-collapse: collapse;
+			}
+
+			*.block {
+				display: inline-block;
+			}
+			
+			#block_container > div {
+   				display: inline-block;
+			}
+
+			@page {
+				size: $pagesize $orientation;
+				 
+				@top-left {
+				}
+
+				@top-right {
+				}
+				
+				@bottom-left {
+				}
+				
+				@bottom-right {
+					content: "Página " counter(page) " de " counter(pages);
+					font-size: 12px;
+					vertical-align: middle;
+					padding-bottom: 6px;
+				}
+
+				@bottom-center {
+				}
+				 
+				margin-top: 1cm;
+				margin-bottom: 1.5cm;
+				margin-left: 1cm;
+				margin-right: 1cm;
+			}
+		</style>
+		
+</head>
+
+<body>
+	
+	<table width="100%">
+		<tr>
+			<td class="text_left">
+				<img src="$context.getLogoUrl()" width="256px"> </img> 
+			</td>
+			<td>
+				<div class="text_right titulo1">$context.getString( "template.quotation.quotation" ).toUpperCase()</div>
+			</td>
+		</tr>
+		#if( !$quotation.getReference_request().isEmpty() )
+		<tr>
+			<td>
+			</td>
+			<td class="text_right">
+				<div id="block_container">
+					<div class="text_regular_size padding_bottom text_bold">$context.getString( "template.quotation.request.reference" ): </div>
+					<div class="text_regular_size padding_bottom">$quotation.getReference_request()</div>
+				</div>
+			</td>
+		</tr>
+		#end
+	</table>
+
+	<table width="100%">
+		<tr>
+			<td width="50%" class="text_left vtop">
+				<div class="text_regular_size text_bold">$context.getString( "template.quotation.from" ):</div>
+				<div class="text_regular_size sangria">
+					$context.getCompanyDataAsHtml()
+				</div>
+			</td>
+			
+			<td width="50%" class="text_left vtop">
+
+				<div class="ttrueext_regular_size text_bold">$context.getString( "template.quotation.to" ):</div>
+				<div class="text_regular_size sangria">
+					$quotation.getCustomerDataAsHtml( $context )
+				</div>
+			</td>
+		</tr>
+
+		<br/>
+
+		<tr>
+			<td width="50%" class="vtop">
+				<div id="block_container">
+					<div class="text_regular_size padding_bottom text_bold">$context.getString( "template.quotation.date" ): </div>
+					<div class="text_regular_size padding_bottom">$quotation.getFormattedDate()</div>
+				</div>
+			</td>
+			
+			<td width="50%" class="vtop">
+				<div id="block_container">
+					<div class="text_regular_size padding_bottom text_bold">$context.getString( "template.quotation.number" ): </div>
+					<div class="text_regular_size padding_bottom">$quotation.getFormattedNumber()</div>
+				</div>
+			</td>
+		</tr>
+	</table>
+
+	<table class="border_no_spacing text_regular_size text_center" width="100%">
+		<tr>
+			<th width="48px" class="borde">
+				<div class="text_regular_size">$context.getString( "template.quotation.item" )</div>
+			</th>
+			#if( $quotation.showReferences() )
+			<th class="borde">
+				<div class="text_regular_size">$context.getString( "template.quotation.references" )</div>
+			</th>
+			#end
+			<th class="borde">
+				<div class="text_regular_size">$context.getString( "template.quotation.product" )</div>
+			</th>
+			<th width="80px" class="borde">
+				<div class="text_regular_size">$context.getString( "template.quotation.unit.price" )</div>
+			</th>
+			#foreach( $delivery in $quotation.getDeliveries() )
+				<th width="64px" class="borde">
+					<div class="text_regular_size">$context.getString( "template.quotation.quantity" )</div>
+					#if( $quotation.getDeliveries().size() > 1 )
+					<div class="text_regular_size">$delivery.getDepartureDateFormatted()</div>
+					#end
+				</th>
+			#end
+			<th width="80px" class="borde">
+				<div class="text_regular_size">$context.getString( "template.quotation.total" )</div>
+			</th>
+		</tr>
+
+		#foreach( $line in $quotation.getLines() )
+			<tr>
+				<td class="borde text_center vcenter">
+					$quotation.getItemIndex( $line )
+				</td>
+				#if( $quotation.showReferences() )
+				<td class="borde text_center vcenter">
+					$line.getReferenceAsHtml()
+				</td>
+				#end
+				<td class="borde text_left vcenter">
+					<div class="text_regular_size text_bold padding_left padding_top">$line.getTitleAsHtml()</div>
+					<div class="text_regular_size sangria padding_bottom">$line.getDescriptionAsHtml()</div>
+					#if( !$line.getOrigin().isEmpty() )
+					<div class="padding_left" id="block_container">
+						<div class="text_regular_size padding_bottom text_bold">$context.getString( "template.quotation.origin" ): </div>
+						<div class="text_regular_size padding_bottom">$line.getOrigin()</div>
+					</div>
+					#end
+				</td>
+				<td class="borde vcenter">
+					<div class="text_regular_size text_right padding_right">$line.getPriceAsString() €</div>					
+				</td>
+				#foreach( $delivery in $quotation.getDeliveries() )
+					<td class="borde vcenter">
+						<div class="text_regular_size text_center">$line.getQuantity( $delivery )</div>
+					</td>
+				#end
+				<td class="borde vcenter">
+					<div class="text_regular_size text_right padding_right">$line.getTotalPriceAsString() €</div>					
+				</td>
+			</tr>
+		#end
+		
+		#if( $quotation.getDeliveries().size() > 1 )
+			<tr>
+				<td></td>
+				#if( $quotation.showReferences() )
+				<td></td>
+				#end
+				<td></td>
+				<td class="">
+					<div class="text_regular_size text_bold text_right">$context.getString( "template.quotation.transport" ):</div>
+				</td>
+				#foreach( $delivery in $quotation.getDeliveries() )
+					<td class="">
+						<div class="text_regular_size">$delivery.getIncoterms()</div>
+					</td>
+				#end
+				<td></td>
+			</tr>
+
+			<tr>
+				<td></td>
+				#if( $quotation.showReferences() )
+				<td></td>
+				#end
+				<td></td>
+				<td></td>
+				#foreach( $delivery in $quotation.getDeliveries() )
+					<td class="">
+						#if( $delivery.getFree_delivery().booleanValue() )
+							<div class="text_regular_size text_red">$delivery.getCostAsCurrency() € *</div>
+						#else
+							<div class="text_regular_size">$delivery.getCostAsCurrency() €</div>
+						#end						
+					</td>
+				#end
+				<td></td>
+			</tr>
+		#end
+	
+	</table>
+	
+	#if( $quotation.getDeliveries().size() > 1 )
+	<br/>
+	#end
+
+	<table class="text_regular_size text_left" width="100%">
+		<tr>
+			<td width="40%" class="vtop">
+
+				<table class="" width="100%">
+					#if( $quotation.getTotalTransportCostWithoutFree() != 0 )
+					<tr>
+						<td>
+							<div class="text_regular_size text_right text_bold ">$context.getString( "template.quotation.packaging" ):</div>
+						</td>
+						<td>
+							<div class="text_regular_size text_left">$quotation.getPackaging()</div>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div class="text_regular_size text_right text_bold ">$context.getString( "template.quotation.ports" ):</div>
+						</td>
+						<td>
+							<div class="text_regular_size text_left">$quotation.getDeparturePorts()</div>
+						</td>
+					</tr>
+					#end
+					<tr>
+						<td>
+							<div class="text_regular_size text_right text_bold ">$context.getString( "template.quotation.delivery.time" ):</div>
+						</td>
+						<td>
+							<div class="text_regular_size text_left">$quotation.getDelivery()</div>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div class="text_regular_size text_right text_bold">$context.getString( "template.quotation.validity" ):</div>
+						</td>
+						<td>
+							<div class="text_regular_size text_left">$quotation.getValidity() $context.getString( "template.quotation.days" )</div>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div class="text_regular_size text_right text_bold">$context.getString( "template.quotation.warranty" ):</div>
+						</td>
+						<td>
+							<div class="text_regular_size text_left">$quotation.getWarrantyAsHtml()</div>
+						</td>
+					</tr>
+				</table>
+
+			</td>
+
+			#if( $quotation.getCustomer_signature().booleanValue() )
+			<td width="" class="vtop">
+				
+				<table class="" width="100%">
+					<tr>
+						<td class="text_center">
+							<img src="$context.getSignatureUrl()" width="4cm"> </img> 
+						</td>
+					</tr>
+				</table>
+				
+			</td>
+			#end
+
+			<td width="" class="vtop">
+
+				<table class="" width="100%">
+					<tr>
+						<td class="">
+							<div class="text_regular_size text_right text_bold ">$context.getString( "template.quotation.total.exwork" ):</div>
+						</td>
+						<td width="80px" class="">
+							<div class="text_regular_size text_right padding_right">$quotation.getTotalPriceAsString() €</div>					
+						</td>
+					</tr>
+
+					#if( $quotation.getTotalTransportCostWithoutFree() != 0 )
+					<tr>
+						<td class="">
+							#if( $quotation.getFreeDeliveries() )
+							<div class="text_regular_size text_right text_red text_bold">$context.getString( "template.quotation.total.transport" ) *:</div>
+							#else
+							<div class="text_regular_size text_right text_bold">$context.getString( "template.quotation.total.transport" ):</div>
+							#end
+						</td>
+						<td class="">
+							<div class="text_regular_size text_right padding_right">$quotation.getTotalTransportCostWithoutFreeAsString() €</div>					
+						</td>
+					</tr>
+
+					<tr>
+						<td class="">
+							<div class="text_regular_size text_right text_bold">$context.getString( "template.quotation.total" ) $quotation.getDeliveries().get(0).getIncoterms():</div>
+						</td>
+						<td class="">
+							<div class="text_regular_size text_right padding_right">$quotation.getGrandTotalQuotationAsString() €</div>					
+						</td>
+					</tr>
+					#end
+
+				</table>
+
+			</td>
+		</tr>
+	</table>
+	
+	#if( $quotation.getTotalTransportCostWithoutFree() != 0 )
+		#if( $quotation.getFreeDeliveries() )
+			#if( $quotation.getTotalFreeDeliveries() )
+				<div class="text_regular_size text_right text_red">* $context.getString( "template.quotation.total.free.delivery" )</div>
+			#else
+				<div class="text_regular_size text_right text_red">* $context.getString( "template.quotation.partial.free.delivery" )</div>
+			#end
+		#end
+	#end
+	
+	<div class="text_regular_size text_bold ">$context.getString( "template.quotation.payment.terms" ):</div>
+	<div class="sangria text_regular_size">$quotation.getPaymentTermsAsHtml()</div>
+
+</body>
+
+</html>

@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="es.pryades.erp.dal.ibatis.UserDefaultMapper">
+
+	<sql id="es.pryades.erp.dal.ibatis.UserDefaultMapper.fields">
+		user_defaults.id, 
+		user_defaults.data_key,
+		user_defaults.data_value,
+		user_defaults.ref_user
+	</sql>
+	
+	<sql id="es.pryades.erp.dal.ibatis.UserDefaultMapper.joins">
+	</sql>
+	
+	<sql id="es.pryades.erp.dal.ibatis.UserDefaultMapper.where">
+		<where>
+			<if test="ref_user != null">
+				AND ref_user = #{ref_user}     
+	        </if>
+			<if test="data_key != null">
+				AND data_key = #{data_key}     
+	        </if>
+		</where>
+	</sql>
+	
+	<sql id="es.pryades.erp.dal.ibatis.UserDefaultMapper.orderby">
+		<choose>
+			<when test="orderby.equals( 'data_key' )">
+				user_defaults.data_key
+			</when>
+			<when test="orderby.equals( 'data_value' )">
+				user_defaults.data_value
+			</when>
+			<otherwise>
+				user_defaults.id
+			</otherwise>
+		</choose>
+
+		<choose>
+			<when test="order.equalsIgnoreCase( 'asc' )">
+				asc
+			</when>
+			<otherwise>
+				desc
+			</otherwise>
+		</choose>
+	</sql>
+	
+	<select id="getNumberOfRows" parameterType="es.pryades.erp.dto.Query" resultType="long">
+		select 
+			count(*) 
+		
+		from 
+			user_defaults 
+	</select>
+
+	<select id="getPage" parameterType="es.pryades.erp.dto.Query" resultType="es.pryades.erp.dto.UserDefault">
+		select
+    		<include refid="es.pryades.erp.dal.ibatis.UserDefaultMapper.fields" />
+						
+		from
+			user_defaults
+			
+    	<include refid="es.pryades.erp.dal.ibatis.UserDefaultMapper.joins" />
+    	<include refid="es.pryades.erp.dal.ibatis.UserDefaultMapper.where" />
+    	
+		order by 
+		   	<include refid="es.pryades.erp.dal.ibatis.UserDefaultMapper.orderby" />
+
+		LIMIT #{pageSize} OFFSET (#{pageSize} * (#{pageNumber} - 1))
+	</select>
+
+	<select id="getRows" parameterType="es.pryades.erp.dto.Query" resultType="es.pryades.erp.dto.UserDefault">
+		select
+    		<include refid="es.pryades.erp.dal.ibatis.UserDefaultMapper.fields" />
+						
+		from
+			user_defaults
+			
+    	<include refid="es.pryades.erp.dal.ibatis.UserDefaultMapper.joins" />
+    	<include refid="es.pryades.erp.dal.ibatis.UserDefaultMapper.where" />
+    	
+		order by 
+		   	<include refid="es.pryades.erp.dal.ibatis.UserDefaultMapper.orderby" />
+	</select>
+
+	<select id="getRow" parameterType="es.pryades.erp.dto.UserDefault" resultType="es.pryades.erp.dto.UserDefault">
+		select
+    		<include refid="es.pryades.erp.dal.ibatis.UserDefaultMapper.fields" />
+						
+		from
+			user_defaults
+			
+    	<include refid="es.pryades.erp.dal.ibatis.UserDefaultMapper.joins" />
+			
+		<where>
+			<choose>
+				<when test="data_key != null">
+					data_key = #{data_key} AND ref_user = #{ref_user} 
+	         	</when>
+	         	
+				<otherwise>
+					id = #{id}
+				</otherwise>
+			</choose>
+		</where>
+	</select>
+
+	<insert id="addRow" parameterType="es.pryades.erp.dto.UserDefault">
+
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			SELECT nextval('gencfg');
+		</selectKey>
+
+		insert into user_defaults
+		(
+			id,
+			data_key,
+			data_value,
+			ref_user
+		)
+		values
+		(
+			#{id},
+			#{data_key},
+			#{data_value},
+			#{ref_user}
+		)
+	</insert>
+
+	<update id="setRow" parameterType="es.pryades.erp.dto.UserDefault">
+		update user_defaults set
+			data_key=#{data_key},
+			data_value=#{data_value},
+			ref_user=#{ref_user}
+		where id = #{id}
+	</update>
+
+	<update id="delRow" parameterType="es.pryades.erp.dto.UserDefault">
+		delete from user_defaults where id = #{id}
+	</update>
+
+</mapper>

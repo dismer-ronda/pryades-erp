@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="es.pryades.erp.dal.ibatis.QuotationLineDeliveryMapper">
+
+	<sql id="es.pryades.erp.dal.ibatis.QuotationLineDeliveryMapper.fields">
+		quotations_lines_deliveries.id,
+		
+		quotations_lines_deliveries.ref_quotation_delivery,
+		quotations_lines_deliveries.ref_quotation_line,
+	
+		quotations_lines_deliveries.quantity
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.QuotationLineDeliveryMapper.joins">
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.QuotationLineDeliveryMapper.where">
+		<where>
+			<if test="ref_quotation != null">
+				AND quotations_lines_deliveries.ref_quotation = #{ref_quotation}
+			</if>
+		</where>
+	</sql>
+	
+	<sql id="es.pryades.erp.dal.ibatis.QuotationLineDeliveryMapper.orderby">
+		quotations_lines_deliveries.id
+
+		<choose>
+			<when test="order.equalsIgnoreCase( 'asc' )">
+				asc
+			</when>
+			<otherwise>
+				desc
+			</otherwise>
+		</choose>
+	</sql>
+	
+	<select id="getNumberOfRows" parameterType="es.pryades.erp.dto.Query" resultType="long">
+		select 
+			count(1) 
+		from 
+			quotations_lines_deliveries
+
+    	<include refid="es.pryades.erp.dal.ibatis.QuotationLineDeliveryMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.QuotationLineDeliveryMapper.where" />
+	</select>
+
+	<select id="getPage" parameterType="es.pryades.erp.dto.Query" resultType="es.pryades.erp.dto.QuotationLineDelivery">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.QuotationLineDeliveryMapper.fields" />
+		
+		from
+			quotations_lines_deliveries
+		
+   		<include refid="es.pryades.erp.dal.ibatis.QuotationLineDeliveryMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.QuotationLineDeliveryMapper.where" />
+
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.QuotationLineDeliveryMapper.orderby" />
+
+		LIMIT #{pageSize} OFFSET (#{pageSize} * (#{pageNumber} - 1))
+	</select>
+
+	<select id="getRows" parameterType="es.pryades.erp.dto.Query" resultType="es.pryades.erp.dto.QuotationLineDelivery">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.QuotationLineDeliveryMapper.fields" />
+		
+		from
+			quotations_lines_deliveries
+		
+    	<include refid="es.pryades.erp.dal.ibatis.QuotationLineDeliveryMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.QuotationLineDeliveryMapper.where" />
+		
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.QuotationLineDeliveryMapper.orderby" />
+	</select>
+
+	<select id="getRow" parameterType="es.pryades.erp.dto.QuotationLineDelivery" resultType="es.pryades.erp.dto.QuotationLineDelivery">
+		select
+			<include refid="es.pryades.erp.dal.ibatis.QuotationLineDeliveryMapper.fields" />
+		
+		from
+			quotations_lines_deliveries
+		
+		<include refid="es.pryades.erp.dal.ibatis.QuotationLineDeliveryMapper.joins" />
+		
+		where quotations_lines_deliveries.id = #{id}
+	</select>
+
+	<insert id="addRow" parameterType="es.pryades.erp.dto.QuotationLineDelivery">
+
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			SELECT nextval('gendat');
+		</selectKey>
+
+		insert into quotations_lines_deliveries
+		(
+			id,
+
+			ref_quotation_delivery,
+			ref_quotation_line,
+		
+			quantity
+		)
+		values
+		(
+			#{id},
+			
+			#{ref_quotation_delivery},
+			#{ref_quotation_line},
+		
+			#{quantity}
+		)
+	</insert>
+
+	<update id="setRow" parameterType="es.pryades.erp.dto.QuotationLineDelivery">
+		update quotations_lines_deliveries set
+			ref_quotation_delivery=#{ref_quotation_delivery},
+			ref_quotation_line=#{ref_quotation_line},
+			quantity=#{quantity}
+		where id = #{id}
+	</update>
+
+	<update id="delRow" parameterType="es.pryades.erp.dto.QuotationLineDelivery">
+		delete from quotations_lines_deliveries 
+		where 
+			ref_quotation_delivery=#{ref_quotation_delivery} AND
+			ref_quotation_line=#{ref_quotation_line}
+		
+	</update>
+
+</mapper>

@@ -1,0 +1,29 @@
+.v-ui {
+	font-size: 20px;
+}
+
+.v-widget {
+	font-size: 20px;
+}
+
+.v-caption {
+	font-size: 20px;
+}
+	
+.v-tooltip {
+	background: #E1EFED;
+	color: #003a79;
+	font-size: 20px;
+}
+
+.v-upload-immediate .v-button, .v-overlay-container .v-upload-immediate .v-button
+{
+	font-size: 20px;
+	line-height: 20px;
+}
+
+.v-panel-caption
+{
+	font-size: 20px;
+	padding-left: 0px;
+}

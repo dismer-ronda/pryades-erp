@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="es.pryades.erp.dal.ibatis.QuotationDeliveryMapper">
+
+	<sql id="es.pryades.erp.dal.ibatis.QuotationDeliveryMapper.fields">
+		quotations_deliveries.id,
+		
+		quotations_deliveries.ref_quotation,
+		
+		quotations_deliveries.departure_date,
+		quotations_deliveries.departure_port,
+		quotations_deliveries.arrival_port,
+	
+		quotations_deliveries.incoterms,
+		quotations_deliveries.cost,
+	
+		quotations_deliveries.free_delivery 	
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.QuotationDeliveryMapper.joins">
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.QuotationDeliveryMapper.where">
+		<where>
+			<if test="ref_quotation != null">
+				AND quotations_deliveries.ref_quotation = #{ref_quotation}
+			</if>
+		</where>
+	</sql>
+	
+	<sql id="es.pryades.erp.dal.ibatis.QuotationDeliveryMapper.orderby">
+		quotations_deliveries.id
+
+		<choose>
+			<when test="order.equalsIgnoreCase( 'asc' )">
+				asc
+			</when>
+			<otherwise>
+				desc
+			</otherwise>
+		</choose>
+	</sql>
+	
+	<select id="getNumberOfRows" parameterType="es.pryades.erp.dto.Query" resultType="long">
+		select 
+			count(1) 
+		from 
+			quotations_deliveries
+
+    	<include refid="es.pryades.erp.dal.ibatis.QuotationDeliveryMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.QuotationDeliveryMapper.where" />
+	</select>
+
+	<select id="getPage" parameterType="es.pryades.erp.dto.Query" resultType="es.pryades.erp.dto.QuotationDelivery">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.QuotationDeliveryMapper.fields" />
+		
+		from
+			quotations_deliveries
+		
+   		<include refid="es.pryades.erp.dal.ibatis.QuotationDeliveryMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.QuotationDeliveryMapper.where" />
+
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.QuotationDeliveryMapper.orderby" />
+
+		LIMIT #{pageSize} OFFSET (#{pageSize} * (#{pageNumber} - 1))
+	</select>
+
+	<select id="getRows" parameterType="es.pryades.erp.dto.Query" resultType="es.pryades.erp.dto.QuotationDelivery">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.QuotationDeliveryMapper.fields" />
+		
+		from
+			quotations_deliveries
+		
+    	<include refid="es.pryades.erp.dal.ibatis.QuotationDeliveryMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.QuotationDeliveryMapper.where" />
+		
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.QuotationDeliveryMapper.orderby" />
+	</select>
+
+	<insert id="addRow" parameterType="es.pryades.erp.dto.QuotationDelivery">
+
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			SELECT nextval('gendat');
+		</selectKey>
+
+		insert into quotations_deliveries
+		(
+			id,
+
+			ref_quotation,
+
+			departure_date,
+			departure_port,
+			arrival_port,
+	
+			incoterms,
+			cost,
+	
+			free_delivery 	
+		)
+		values
+		(
+			#{id},
+			#{ref_quotation},
+
+			#{departure_date},
+			#{departure_port},
+			#{arrival_port},
+	
+			#{incoterms},
+			#{cost},
+	
+			#{free_delivery}	
+		)
+	</insert>
+
+	<update id="setRow" parameterType="es.pryades.erp.dto.QuotationDelivery">
+		update quotations_deliveries set
+			ref_quotation=#{ref_quotation},
+			departure_date=#{departure_date},
+			departure_port=#{departure_port},
+			arrival_port=#{arrival_port},
+			incoterms=#{incoterms},
+			cost=#{cost},
+			free_delivery=#{free_delivery}	
+		where id = #{id}
+	</update>
+
+	<update id="delRow" parameterType="es.pryades.erp.dto.QuotationDelivery">
+		delete from quotations_deliveries where id = #{id}
+	</update>
+
+</mapper>

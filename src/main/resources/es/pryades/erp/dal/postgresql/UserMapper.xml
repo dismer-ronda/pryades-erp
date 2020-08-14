@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="es.pryades.erp.dal.ibatis.UserMapper">
+
+	<sql id="es.pryades.erp.dal.ibatis.UserMapper.fields">
+		users.id,
+		users.name,
+		users.login,
+		users.email,
+		users.pwd,
+		users.changed,
+		users.retries,
+		users.ref_profile,
+		users.status,
+		
+		profiles.description as profile_name
+	</sql>
+	
+	<sql id="es.pryades.erp.dal.ibatis.UserMapper.joins">
+		inner join profiles
+		on users.ref_profile = profiles.id
+	</sql>
+	
+	<sql id="es.pryades.erp.dal.ibatis.UserMapper.where">
+		<where>
+			<if test="ref_profile != null">
+				AND users.ref_profile = #{ref_profile}     
+	        </if>
+
+			<if test="login != null">
+				login = #{login} OR email = #{login}  
+	        </if>
+		</where>
+	</sql>
+	
+	<sql id="es.pryades.erp.dal.ibatis.UserMapper.orderby">
+		<choose>
+			<when test="orderby.equals( 'name' )">
+				users.name
+			</when>
+			<when test="orderby.equals( 'login' )">
+				users.login
+			</when>
+			<when test="orderby.equals( 'email' )">
+				users.email
+			</when>
+			<when test="orderby.equals( 'profile_name' )">
+				profile_name
+			</when>
+			<otherwise>
+				users.id
+			</otherwise>
+		</choose>
+
+		<choose>
+			<when test="order.equalsIgnoreCase( 'asc' )">
+				asc
+			</when>
+			<otherwise>
+				desc
+			</otherwise>
+		</choose>
+	</sql>
+	
+	<select id="getNumberOfRows" parameterType="es.pryades.erp.dto.User" resultType="long">
+		select 
+			count(1) 
+		
+		from 
+			users 
+	
+    	<include refid="es.pryades.erp.dal.ibatis.UserMapper.joins" />
+    	<include refid="es.pryades.erp.dal.ibatis.UserMapper.where" />
+	</select>
+
+	<select id="getPage" parameterType="es.pryades.erp.dto.User" resultType="es.pryades.erp.dto.User">
+	    select
+    		<include refid="es.pryades.erp.dal.ibatis.UserMapper.fields" />
+    		
+		from
+			users
+			
+    	<include refid="es.pryades.erp.dal.ibatis.UserMapper.joins" />
+    	<include refid="es.pryades.erp.dal.ibatis.UserMapper.where" />
+
+		order by 
+    		<include refid="es.pryades.erp.dal.ibatis.UserMapper.orderby" />
+
+		LIMIT #{pageSize} OFFSET (#{pageSize} * (#{pageNumber} - 1))
+	</select>
+
+	<select id="getRows" parameterType="es.pryades.erp.dto.User" resultType="es.pryades.erp.dto.User">
+	    select
+    		<include refid="es.pryades.erp.dal.ibatis.UserMapper.fields" />
+    		
+		from
+			users
+			
+    	<include refid="es.pryades.erp.dal.ibatis.UserMapper.joins" />
+    	<include refid="es.pryades.erp.dal.ibatis.UserMapper.where" />
+
+		order by 
+    		<include refid="es.pryades.erp.dal.ibatis.UserMapper.orderby" />
+	</select>
+
+	<select id="getRow" parameterType="es.pryades.erp.dto.User" resultType="es.pryades.erp.dto.User">
+	    select
+    		<include refid="es.pryades.erp.dal.ibatis.UserMapper.fields"/>
+    		,
+    		users.signature
+    		
+		from
+			users
+			
+    	<include refid="es.pryades.erp.dal.ibatis.UserMapper.joins" />
+
+		<where>
+			<choose>
+				<when test="login != null">
+					users.login = #{login} OR users.email = #{login}
+				</when>
+				<otherwise>
+					users.id = #{id}
+				</otherwise>
+			</choose>
+		</where>
+	</select>
+
+	<insert id="addRow" parameterType="es.pryades.erp.dto.User">
+
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			SELECT	nextval('gencfg');
+		</selectKey>
+
+		insert into users
+		(
+			id,
+			signature, 
+			login,
+			email,
+			pwd,
+			changed,
+			retries,
+			ref_profile,
+			status,
+			name
+		)
+		values
+		(
+			#{id},
+			#{signature}, 
+			#{login},
+			#{email},
+			#{pwd},
+			#{changed},
+			#{retries},
+			#{ref_profile},
+			#{status},
+			#{name}
+		)
+	</insert>
+
+	<update id="setRow" parameterType="es.pryades.erp.dto.User">
+		update users set
+			<if test="signature != null">
+				signature=#{signature}, 
+	        </if>
+			login = #{login},
+			email = #{email},
+			ref_profile = #{ref_profile},
+			name=#{name},
+			status=#{status}
+		where id = #{id}
+	</update>
+
+	<update id="delRow" parameterType="es.pryades.erp.dto.User">
+		delete from users where id = #{id}
+	</update>
+	
+	<update id="setPassword" parameterType="es.pryades.erp.dto.User">
+		update users set
+			pwd = #{pwd},
+			changed = #{changed},
+			retries = #{retries},
+			status = #{status}
+		where id = #{id}
+	</update>
+
+	<update id="setRetries" parameterType="es.pryades.erp.dto.User">
+		update users set
+			retries = #{retries},
+			status = #{status}
+		where id = #{id}
+	</update>
+
+	<update id="setStatus" parameterType="es.pryades.erp.dto.User">
+		update users set
+			status = #{status}
+		where id = #{id}
+	</update>
+		
+</mapper>

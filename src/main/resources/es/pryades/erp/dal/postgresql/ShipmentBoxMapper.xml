@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="es.pryades.erp.dal.ibatis.ShipmentBoxMapper">
+
+	<select id="selectShipmentSubBoxes" parameterType="long" resultMap="mapShipmentBox">
+		select 
+			shipments_boxes.id,
+		
+			shipments_boxes.box_type,
+			shipments_boxes.label,
+			
+			shipments_boxes.ref_shipment,
+			shipments_boxes.ref_container,
+			
+			shipments_boxes.width,
+			shipments_boxes.length,
+			shipments_boxes.height
+			
+		from
+			shipments_boxes
+	
+		where 
+			shipments_boxes.ref_container = #{id} 
+			
+		order by shipments_boxes.id asc
+	</select>
+
+	<resultMap id="mapShipmentBox" type="es.pryades.erp.dto.ShipmentBox">
+		<id property="id" column="id"/>
+		
+		<result property="ref_shipment" column="ref_shipment"/>
+		<result property="ref_container" column="ref_container"/>
+		<result property="label" column="label"/>
+		<result property="box_type" column="box_type"/>
+		<result property="width" column="width"/>
+		<result property="height" column="height"/>
+		<result property="length" column="length"/>
+
+		<collection property="sub_boxes" column="id" ofType="mapShipmentBox" select="selectShipmentSubBoxes"> </collection>
+	</resultMap>
+
+	<sql id="es.pryades.erp.dal.ibatis.ShipmentBoxMapper.fields">
+		shipments_boxes.id,
+		
+		shipments_boxes.box_type,
+		shipments_boxes.label,
+
+		shipments_boxes.ref_shipment,
+		shipments_boxes.ref_container,
+		
+		shipments_boxes.width,
+		shipments_boxes.length,
+		shipments_boxes.height
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.ShipmentBoxMapper.joins">
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.ShipmentBoxMapper.where">
+		<where>
+			<if test="ref_shipment != null">
+				AND shipments_boxes.ref_shipment = #{ref_shipment}    
+	        </if>
+			<if test="ref_container != null">
+				AND shipments_boxes.ref_container = #{ref_container}    
+	        </if>
+		</where>
+	</sql>
+	
+	<sql id="es.pryades.erp.dal.ibatis.ShipmentBoxMapper.orderby">
+		shipments_boxes.id
+
+		<choose>
+			<when test="order.equalsIgnoreCase( 'asc' )">
+				asc
+			</when>
+			<otherwise>
+				desc
+			</otherwise>
+		</choose>
+	</sql>
+	
+	<select id="getNumberOfRows" parameterType="es.pryades.erp.dto.Query" resultType="long">
+		select 
+			count(1) 
+		from 
+			shipments_boxes
+
+    	<include refid="es.pryades.erp.dal.ibatis.ShipmentBoxMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.ShipmentBoxMapper.where" />
+	</select>
+
+	<select id="getPage" parameterType="es.pryades.erp.dto.Query" resultMap="mapShipmentBox">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.ShipmentBoxMapper.fields" />
+		
+		from
+			shipments_boxes
+		
+   		<include refid="es.pryades.erp.dal.ibatis.ShipmentBoxMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.ShipmentBoxMapper.where" />
+
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.ShipmentBoxMapper.orderby" />
+
+		LIMIT #{pageSize} OFFSET (#{pageSize} * (#{pageNumber} - 1))
+	</select>
+
+	<select id="getRows" parameterType="es.pryades.erp.dto.Query" resultMap="mapShipmentBox">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.ShipmentBoxMapper.fields" />
+		
+		from
+			shipments_boxes
+		
+    	<include refid="es.pryades.erp.dal.ibatis.ShipmentBoxMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.ShipmentBoxMapper.where" />
+		
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.ShipmentBoxMapper.orderby" />
+	</select>
+
+	<select id="getRow" parameterType="es.pryades.erp.dto.Shipment" resultMap="mapShipmentBox">
+		select
+			<include refid="es.pryades.erp.dal.ibatis.ShipmentBoxMapper.fields" />
+		
+		from
+			shipments_boxes
+		
+		<include refid="es.pryades.erp.dal.ibatis.ShipmentBoxMapper.joins" />
+		
+		where shipments_boxes.id = #{id}
+	</select>
+
+	<insert id="addRow" parameterType="es.pryades.erp.dto.ShipmentBox">
+
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			SELECT nextval('gendat');
+		</selectKey>
+
+		insert into shipments_boxes
+		(
+			id,
+
+			ref_shipment,
+			ref_container,
+
+			label,
+			box_type,
+	
+			width,						
+			length,						
+			height
+		)
+		values
+		(
+			#{id},
+			
+			#{ref_shipment},
+			#{ref_container},
+
+			#{label},
+			#{box_type},
+	
+			#{width},						
+			#{length},						
+			#{height}
+		)
+	</insert>
+
+	<update id="setRow" parameterType="es.pryades.erp.dto.ShipmentBox">
+		update shipments_boxes set
+			ref_shipment=#{ref_shipment},
+			ref_container=#{ref_container},
+			label=#{label},
+			box_type=#{box_type},
+			width=#{width},						
+			length=#{length},						
+			height=#{height}
+		where id = #{id}
+	</update>
+
+	<update id="delRow" parameterType="es.pryades.erp.dto.Shipment">
+		delete from shipments_boxes where id = #{id}
+	</update>
+
+</mapper>

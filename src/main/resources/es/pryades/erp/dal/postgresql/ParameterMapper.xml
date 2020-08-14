@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="es.pryades.erp.dal.ibatis.ParameterMapper">
+
+	<sql id="es.pryades.erp.dal.ibatis.ParameterMapper.fields">
+		parameters.id, 
+		parameters.description,
+		parameters.value,
+		parameters.display_order
+	</sql>
+	
+	<sql id="es.pryades.erp.dal.ibatis.ParameterMapper.joins">
+	</sql>
+	
+	<sql id="es.pryades.erp.dal.ibatis.ParameterMapper.where">
+	</sql>
+	
+	<sql id="es.pryades.erp.dal.ibatis.ParameterMapper.orderby">
+	</sql>
+	
+	<select id="getNumberOfRows" parameterType="es.pryades.erp.dto.Query" resultType="long">
+		select 
+			count(*) 
+		
+		from 
+			parameters 
+	</select>
+
+	<select id="getPage" parameterType="es.pryades.erp.dto.Query" resultType="es.pryades.erp.dto.Parameter">
+		select
+    		<include refid="es.pryades.erp.dal.ibatis.ParameterMapper.fields" />
+						
+		from
+			parameters
+			
+    	<include refid="es.pryades.erp.dal.ibatis.ParameterMapper.joins" />
+    	<include refid="es.pryades.erp.dal.ibatis.ParameterMapper.where" />
+    	
+		order by 
+		   	parameters.display_order
+
+		LIMIT #{pageSize} OFFSET (#{pageSize} * (#{pageNumber} - 1))
+	</select>
+
+	<select id="getRows" parameterType="es.pryades.erp.dto.Query" resultType="es.pryades.erp.dto.Parameter">
+		select
+    		<include refid="es.pryades.erp.dal.ibatis.ParameterMapper.fields" />
+						
+		from
+			parameters
+			
+    	<include refid="es.pryades.erp.dal.ibatis.ParameterMapper.joins" />
+    	<include refid="es.pryades.erp.dal.ibatis.ParameterMapper.where" />
+    	
+		order by 
+		   	parameters.display_order
+	</select>
+
+	<select id="getRow" parameterType="es.pryades.erp.dto.Parameter" resultType="es.pryades.erp.dto.Parameter">
+		select
+    		<include refid="es.pryades.erp.dal.ibatis.ParameterMapper.fields" />
+						
+		from
+			parameters
+			
+    	<include refid="es.pryades.erp.dal.ibatis.ParameterMapper.joins" />
+			
+		where 
+			parameters.id = #{id}
+	</select>
+
+	<insert id="addRow" parameterType="es.pryades.erp.dto.Parameter">
+	</insert>
+
+	<update id="setRow" parameterType="es.pryades.erp.dto.Parameter">
+		update parameters set
+			description=#{description},
+			value=#{value}
+		where id = #{id}
+	</update>
+
+	<update id="delRow" parameterType="es.pryades.erp.dto.Parameter">
+	</update>
+
+</mapper>

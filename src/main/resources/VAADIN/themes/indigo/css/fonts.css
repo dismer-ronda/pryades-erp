@@ -1,0 +1,35 @@
+@font-face {
+	font-family: "Linde";
+ 	font-weight: normal;
+ 	src: url("../fonts/linde.eot") /* EOT file for IE */
+}
+
+@font-face {
+	font-family: "Linde";
+	font-weight: bold;
+	src: url("../fonts/linde-bold.eot") /* EOT file for IE */
+}
+
+@font-face {
+	font-family: "Linde";
+	font-style: italic;
+	src: url("../fonts/linde-ita.eot") /* EOT file for IE */
+}
+
+@font-face {
+	font-family: "Linde";
+ 	font-weight: normal;
+ 	src: url("../fonts/linde.ttf") format("truetype") /* TTF file for CSS3 browsers */
+}
+
+@font-face {
+	font-family: "Linde";
+	font-weight: bold;
+	src: url("../fonts/linde-bold.ttf") format("truetype") /* TTF file for CSS3 browsers */
+}
+
+@font-face {
+	font-family: "Linde";
+	font-style: italic;
+	src: url("../fonts/linde-ita.ttf") format("truetype") /* TTF file for CSS3 browsers */
+}

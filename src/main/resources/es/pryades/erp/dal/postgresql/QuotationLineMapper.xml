@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="es.pryades.erp.dal.ibatis.QuotationLineMapper">
+
+	<select id="selectQuotationLineDeliveries" parameterType="long" resultMap="mapQuotationLineDelivery">
+		select 
+			quotations_lines_deliveries.id,
+		
+			quotations_lines_deliveries.ref_quotation_line,
+			quotations_lines_deliveries.ref_quotation_delivery,
+			
+			quotations_lines_deliveries.quantity
+
+		from quotations_lines_deliveries
+		 		
+		where 
+			quotations_lines_deliveries.ref_quotation_line = #{id}
+			
+		order by quotations_lines_deliveries.ref_quotation_delivery asc
+	</select>
+
+	<resultMap id="mapQuotationLineDelivery" type="es.pryades.erp.dto.QuotationLineDelivery">
+		<id property="id" column="id"/>
+		
+		<result property="ref_quotation_delivery" column="ref_quotation_delivery"/>
+		<result property="ref_quotation_line" column="ref_quotation_line"/>
+		
+		<result property="quantity" column="quantity"/>
+	</resultMap>
+
+	<resultMap id="mapQuotationLine" type="es.pryades.erp.dto.QuotationLine">
+		<id property="id" column="id"/>
+		
+		<result property="ref_quotation" column="ref_quotation"/>
+		<result property="ref_provider" column="ref_provider"/>
+		
+		<result property="origin" column="origin"/>
+		<result property="reference" column="reference"/>
+		<result property="title" column="title"/>
+		<result property="description" column="description"/>
+		<result property="cost" column="cost"/>
+		<result property="real_cost" column="real_cost"/>
+		<result property="margin" column="margin"/>
+		<result property="tax_rate" column="tax_rate"/>
+		<result property="total_invoiced" column="total_invoiced"/>
+
+		<result property="provider_name" column="provider_name"/>
+		
+		<collection property="line_deliveries" column="id" ofType="mapQuotationLineDelivery" select="selectQuotationLineDeliveries"> </collection>
+	</resultMap>
+
+	<sql id="es.pryades.erp.dal.ibatis.QuotationLineMapper.fields">
+		quotations_lines.id,
+		
+		quotations_lines.ref_quotation,
+		quotations_lines.ref_provider,
+
+		quotations_lines.line_order,
+		
+		( 
+			select 
+				sum( quantity ) 
+				 
+			from 
+				invoices_lines lines2
+			
+			where 
+				lines2.ref_quotation_line = quotations_lines.id
+					
+		) as total_invoiced,
+	
+		quotations_lines.origin,
+		quotations_lines.reference,
+		quotations_lines.title,
+		quotations_lines.description,
+
+		quotations_lines.cost,
+		quotations_lines.real_cost,
+		quotations_lines.margin,
+		quotations_lines.tax_rate,
+		
+		companies.name as provider_name
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.QuotationLineMapper.joins">
+		left join companies
+		on quotations_lines.ref_provider = companies.id
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.QuotationLineMapper.where">
+		<where>
+			<if test="ref_quotation != null">
+				AND quotations_lines.ref_quotation = #{ref_quotation}
+			</if>
+		</where>
+	</sql>
+	
+	<sql id="es.pryades.erp.dal.ibatis.QuotationLineMapper.orderby">
+		quotations_lines.line_order
+
+		<choose>
+			<when test="order.equalsIgnoreCase( 'asc' )">
+				asc
+			</when>
+			<otherwise>
+				desc
+			</otherwise>
+		</choose>
+	</sql>
+	
+	<select id="getNumberOfRows" parameterType="es.pryades.erp.dto.Query" resultType="long">
+		select 
+			count(1) 
+		from 
+			quotations_lines
+
+    	<include refid="es.pryades.erp.dal.ibatis.QuotationLineMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.QuotationLineMapper.where" />
+	</select>
+
+	<select id="getPage" parameterType="es.pryades.erp.dto.Query" resultMap="mapQuotationLine">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.QuotationLineMapper.fields" />
+		
+		from
+			quotations_lines
+		
+   		<include refid="es.pryades.erp.dal.ibatis.QuotationLineMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.QuotationLineMapper.where" />
+
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.QuotationLineMapper.orderby" />
+
+		LIMIT #{pageSize} OFFSET (#{pageSize} * (#{pageNumber} - 1))
+	</select>
+
+	<select id="getRows" parameterType="es.pryades.erp.dto.Query" resultMap="mapQuotationLine">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.QuotationLineMapper.fields" />
+		
+		from
+			quotations_lines
+		
+    	<include refid="es.pryades.erp.dal.ibatis.QuotationLineMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.QuotationLineMapper.where" />
+		
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.QuotationLineMapper.orderby" />
+	</select>
+
+	<select id="getRow" parameterType="es.pryades.erp.dto.QuotationLine" resultMap="mapQuotationLine">
+		select
+			<include refid="es.pryades.erp.dal.ibatis.QuotationLineMapper.fields" />
+		
+		from
+			quotations_lines
+		
+		<include refid="es.pryades.erp.dal.ibatis.QuotationLineMapper.joins" />
+		
+		where quotations_lines.id = #{id}
+	</select>
+
+	<insert id="addRow" parameterType="es.pryades.erp.dto.QuotationLine">
+
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			SELECT nextval('gendat');
+		</selectKey>
+
+		insert into quotations_lines
+		(
+			id,
+
+			ref_quotation,
+			ref_provider,
+			
+			line_order,
+			origin,
+			reference,
+			title,
+			description,
+		
+			cost,
+			real_cost,
+			margin,
+			tax_rate
+		)
+		values
+		(
+			#{id},
+			
+			#{ref_quotation},
+			#{ref_provider},
+			
+			#{line_order},
+			#{origin},
+			#{reference},
+			#{title},
+			#{description},
+		
+			#{cost},
+			#{real_cost},
+			#{margin},
+			#{tax_rate}
+		)
+	</insert>
+
+	<update id="setRow" parameterType="es.pryades.erp.dto.QuotationLine">
+		update quotations_lines set
+			ref_quotation=#{ref_quotation},
+			ref_provider=#{ref_provider},
+			
+			line_order=#{line_order},
+			origin=#{origin},
+			reference=#{reference},
+			title=#{title},
+			description=#{description},
+		
+			cost=#{cost},
+			real_cost=#{real_cost},
+			margin=#{margin},
+			tax_rate=#{tax_rate}
+		where id = #{id}
+	</update>
+
+	<update id="delRow" parameterType="es.pryades.erp.dto.QuotationLine">
+		delete from quotations_lines where id = #{id}
+	</update>
+
+</mapper>

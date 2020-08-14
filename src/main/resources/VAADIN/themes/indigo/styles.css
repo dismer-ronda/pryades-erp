@@ -1,0 +1,20 @@
+@import url(../chameleon/legacy-styles.css);
+
+@import url(css/fonts.css);
+@import url(css/globals.css);
+
+@import url(css/tabsheets.css);
+@import url(css/windows.css);
+@import url(css/datefields.css);
+@import url(css/buttons.css);
+@import url(css/tables.css);
+@import url(css/notifications.css);
+@import url(css/comboboxes.css);
+@import url(css/labels.css);
+@import url(css/layouts.css);
+@import url(css/indicators.css);
+@import url(css/texts.css);
+@import url(css/trees.css);
+@import url(css/options.css);
+@import url(css/listboxes.css);
+

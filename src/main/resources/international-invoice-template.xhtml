@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+   
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+	<title>$context.getString( "template.invoice.invoice" ) $invoice.getFormattedNumber()</title>
+		
+	<meta name="author" content="pryades" />
+
+		<style type="text/css">
+		
+			* {
+				font-family: "Arial", Helvetica; 
+				font-size: 12px;
+			}
+
+			*.titulo1 {
+				font-size: 48px;
+				text-align: center;
+				font-weight: bold;
+			}
+			
+			*.titulo2 {
+				font-size: 14px;
+				text-align: center;
+				font-weight: bold;
+			}
+
+			*.text_header_size {
+				font-size: 16px;
+			}
+
+			*.text_regular_size {
+				font-size: 11px;
+			}
+
+			*.text_left {
+				text-align: left;
+			}
+
+			*.text_center {
+				text-align: center;
+			}
+
+			*.text_right {
+				text-align: right;
+			}
+			
+			*.text_bold {
+				font-weight: bold;
+			}
+
+			*.text_red {
+				color: red;
+			}
+			
+			*.vtop {
+				vertical-align: top;
+			}
+
+			*.hcenter {
+				horizontal-align: center;
+			}
+			
+			*.vcenter {
+				vertical-align: center;
+			}
+
+			*.vbottom {
+				vertical-align: bottom;
+			}
+
+			*.sangria {
+				padding-left: 16px;
+				padding-right: 16px;
+			}
+
+			*.padding_left {
+				padding-left: 6px;
+			}
+			
+			*.padding_right {
+				padding-right: 6px;
+			}
+
+			*.padding_bottom {
+				padding-bottom: 5px;
+			}
+
+			*.padding_top {
+				padding-top: 5px;
+			}
+
+			*.padding_all {
+				padding-right: 6px;
+				padding-left: 6px;
+				padding-bottom: 6px;
+				padding-top: 6px;
+			}
+
+			*.padding_h {
+				padding-right: 6px;
+				padding-left: 6px;
+			}
+			
+			*.padding_v {
+				padding-bottom: 6px;
+				padding-top: 6px;
+			}
+				
+			*.borde {
+				border: 0.5px solid black;
+				border-spacing: 0px;
+				border-collapse: collapse;
+				padding: 0px;
+			}
+
+			*.border_no_spacing
+			{
+				border-spacing: 0px;
+				padding: 0px;
+				border-collapse: collapse;
+			}
+
+			*.block {
+				display: inline-block;
+			}
+			
+			#block_container > div {
+   				display: inline-block;
+			}
+
+			@page {
+				size: $pagesize $orientation;
+				 
+				@top-left {
+				}
+
+				@top-right {
+				}
+				
+				@bottom-left {
+				}
+				
+				@bottom-right {
+					content: "Página " counter(page) " de " counter(pages);
+					font-size: 12px;
+					vertical-align: middle;
+					padding-bottom: 6px;
+				}
+
+				@bottom-center {
+				}
+				 
+				margin-top: 1cm;
+				margin-bottom: 1.5cm;
+				margin-left: 1cm;
+				margin-right: 1cm;
+			}
+		</style>
+		
+</head>
+
+<body>
+	
+	<table width="100%">
+		<tr>
+			<td class="text_left">
+				<img src="$context.getLogoUrl()" width="256px"> </img> 
+			</td>
+			<td>
+				<div class="text_right titulo1">$context.getString( "template.invoice.invoice" ).toUpperCase()</div>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			</td>
+			<td class="text_right">
+				<div id="block_container">
+					<div class="text_regular_size padding_bottom text_bold">$context.getString( "template.invoice.order.reference" ): </div>
+					<div class="text_regular_size padding_bottom">$invoice.getQuotation().getReference_order()</div>
+				</div>
+			</td>
+		</tr>
+	</table>
+
+	<table width="100%">
+		<tr>
+			<td width="50%" class="text_left vtop">
+				<div class="text_regular_size text_bold">$context.getString( "template.invoice.from" ):</div>
+				<div class="text_regular_size sangria">
+					$context.getCompanyDataAsHtml()
+				</div>
+			</td>
+			
+			<td width="50%" class="text_left vtop">
+
+				<div class="text_regular_size text_bold">$context.getString( "template.invoice.to" ):</div>
+				<div class="text_regular_size sangria">
+					$invoice.getCustomerDataAsHtml( $context )
+				</div>
+			</td>
+		</tr>
+
+		<br/>
+
+		<tr>
+			<td width="50%" class="vtop">
+				<div id="block_container">
+					<div class="text_regular_size padding_bottom text_bold">$context.getString( "template.invoice.date" ): </div>
+					<div class="text_regular_size padding_bottom">$invoice.getFormattedDate()</div>
+				</div>
+			</td>
+			
+			<td width="50%" class="vtop">
+				<div id="block_container">
+					<div class="text_regular_size padding_bottom text_bold">$context.getString( "template.invoice.number" ): </div>
+					<div class="text_regular_size padding_bottom">$invoice.getFormattedNumber()</div>
+				</div>
+			</td>
+		</tr>
+	</table>
+
+	<table class="border_no_spacing text_regular_size text_center" width="100%">
+		<tr>
+			<th width="48px" class="borde">
+				<div class="text_regular_size">$context.getString( "template.invoice.item" )</div>
+			</th>
+			#if( $invoice.getQuotation().showReferences() )
+			<th class="borde">
+				<div class="text_regular_size">$context.getString( "template.invoice.references" )</div>
+			</th>
+			#end
+			<th class="borde">
+				<div class="text_regular_size">$context.getString( "template.invoice.product" )</div>
+			</th>
+			<th width="80px" class="borde">
+				<div class="text_regular_size">$context.getString( "template.invoice.unit.price" )</div>
+			</th>
+			<th width="64px" class="borde">
+				<div class="text_regular_size">$context.getString( "template.invoice.quantity" )</div>
+			</th>
+			<th width="80px" class="borde">
+				<div class="text_regular_size">$context.getString( "template.invoice.total" )</div>
+			</th>
+		</tr>
+
+		#foreach( $line in $invoice.getLines() )
+			<tr>
+				<td class="borde text_center vcenter">
+					$invoice.getItemIndex( $line )
+				</td>
+				#if( $invoice.getQuotation().showReferences() )
+				<td class="borde text_center vcenter">
+					$line.getReferenceAsHtml()
+				</td>
+				#end
+				<td class="borde text_left vcenter">
+					<div class="text_regular_size text_bold padding_left padding_top">$line.getQuotation_line().getTitleAsHtml()</div>
+					<div class="text_regular_size sangria padding_bottom">$line.getQuotation_line().getDescriptionAsHtml()</div>
+					#if( !$line.getQuotation_line().getOrigin().isEmpty() )
+					<div class="padding_left" id="block_container">
+						<div class="text_regular_size padding_bottom text_bold">$context.getString( "template.invoice.origin" ): </div>
+						<div class="text_regular_size padding_bottom">$line.getQuotation_line().getOrigin()</div>
+					</div>
+					#end
+				</td>
+				<td class="borde vcenter">
+					<div class="text_regular_size text_right padding_right">$line.getPriceAsString() €</div>					
+				</td>
+				<td class="borde vcenter">
+					<div class="text_regular_size text_center">$line.getQuantity()</div>
+				</td>
+				<td class="borde vcenter">
+					<div class="text_regular_size text_right padding_right">$line.getTotalPriceAsString() €</div>					
+				</td>
+			</tr>
+		#end
+	
+	</table>
+	
+	<br/>
+
+	<table class="text_regular_size text_left" width="100%">
+		<tr>
+			<td width="40%" class="vtop">
+
+				<table class="" width="100%">
+					#if( $invoice.getTransport_cost() != 0 )
+					<tr>
+						<td>
+							<div class="text_regular_size text_right text_bold ">$context.getString( "template.invoice.packaging" ):</div>
+						</td>
+						<td>
+							<div class="text_regular_size text_left">$invoice.getQuotation().getPackaging()</div>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<div class="text_regular_size text_right text_bold ">$context.getString( "template.invoice.port" ):</div>
+						</td>
+						<td>
+							<div class="text_regular_size text_left">$invoice.getDeparture_port()</div>
+						</td>
+					</tr>
+					#end
+					<tr>
+						<td>
+							<div class="text_regular_size text_right text_bold">$context.getString( "template.invoice.warranty" ):</div>
+						</td>
+						<td>
+							<div class="text_regular_size text_left">$invoice.getQuotation().getWarrantyAsHtml()</div>
+						</td>
+					</tr>
+				</table>
+
+			</td>
+
+			#if( $invoice.getQuotation().getCustomer_signature().booleanValue() )
+			<td width="" class="vtop">
+				
+				<table class="" width="100%">
+					<tr>
+						<td class="text_center">
+							<img src="$context.getSignatureUrl()" width="4cm"> </img> 
+						</td>
+					</tr>
+				</table>
+				
+			</td>
+			#end
+
+			<td width="" class="vtop">
+
+				<table class="" width="100%">
+					<tr>
+						<td class="">
+							<div class="text_regular_size text_right text_bold ">$context.getString( "template.invoice.total.exwork" ):</div>
+						</td>
+						<td width="80px" class="">
+							<div class="text_regular_size text_right padding_right">$invoice.getTotalPriceAsString() €</div>					
+						</td>
+					</tr>
+
+					#if( $invoice.getTransport_cost() != 0 )
+					<tr>
+						<td class="">
+							#if( $invoice.getFree_delivery().booleanValue() )
+							<div class="text_regular_size text_right text_red text_bold">$context.getString( "template.invoice.total.transport" ) *:</div>
+							#else
+							<div class="text_regular_size text_right text_bold">$context.getString( "template.invoice.total.transport" ):</div>
+							#end
+						</td>
+						<td class="">
+							<div class="text_regular_size text_right padding_right">$invoice.getTransportCostAsString() €</div>					
+						</td>
+					</tr>
+
+					<tr>
+						<td class="">
+							<div class="text_regular_size text_right text_bold">$context.getString( "template.invoice.total" ) $invoice.getIncoterms():</div>
+						</td>
+						<td class="">
+							<div class="text_regular_size text_right padding_right">$invoice.getGrandTotalInvoiceAsString() €</div>					
+						</td>
+					</tr>
+					#end
+
+				</table>
+
+			</td>
+		</tr>
+	</table>
+	
+	#if( $invoice.getTotalTransportCost() != 0 )
+		#if( $invoice.getFree_delivery() )
+			<div class="text_regular_size text_right text_red">* $context.getString( "template.invoice.free.delivery" )</div>
+		#end
+	#end
+	
+	<div class="text_regular_size text_bold ">$context.getString( "template.invoice.payment.terms" ):</div>
+	<div class="sangria text_regular_size">$invoice.getQuotation().getPaymentTermsAsHtml()</div>
+
+</body>
+
+</html>

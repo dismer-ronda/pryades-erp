@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="es.pryades.erp.dal.ibatis.ShipmentMapper">
+
+	<select id="selectShipmentBoxLines" parameterType="long" resultMap="mapShipmentBoxLine">
+		select
+			shipments_boxes_lines.id,
+	
+			shipments_boxes_lines.ref_box,
+			shipments_boxes_lines.ref_invoice_line,
+			shipments_boxes_lines.quantity,
+			shipments_boxes_lines.net_weight,
+			shipments_boxes_lines.gross_weight,
+			
+			invoices_lines.id					as invoice_line_id,
+			invoices_lines.ref_invoice			as invoice_line_ref_invoice,
+			invoices_lines.ref_quotation_line	as invoice_line_ref_quotation_line,
+			invoices_lines.quantity				as invoice_line_quantity,
+		
+			( 
+				select 
+					sum( lines1.quantity ) 
+					 
+				from 
+					shipments_boxes_lines lines1
+					
+				where 
+					lines1.ref_invoice_line = invoices_lines.id
+						
+			) as invoice_line_total_packed,
+	
+			quotations_lines.id					as invoice_line_quotation_line_id,
+			quotations_lines.ref_quotation 		as invoice_line_quotation_line_ref_quotation,
+			quotations_lines.ref_provider 		as invoice_line_quotation_line_ref_provider,
+			quotations_lines.line_order			as invoice_line_quotation_line_line_order,
+			quotations_lines.origin 			as invoice_line_quotation_line_origin,
+			quotations_lines.reference 			as invoice_line_quotation_line_reference,
+			quotations_lines.title 				as invoice_line_quotation_line_title,
+			quotations_lines.description 		as invoice_line_quotation_line_description,
+			quotations_lines.cost 				as invoice_line_quotation_line_cost,
+			quotations_lines.real_cost 			as invoice_line_quotation_line_real_cost,
+			quotations_lines.margin 			as invoice_line_quotation_line_margin,
+			quotations_lines.tax_rate 			as invoice_line_quotation_line_tax_rate,
+			
+			( 
+				select 
+					sum( quantity ) 
+					 
+				from 
+					invoices_lines lines2
+				
+				where 
+					lines2.ref_quotation_line = quotations_lines.id
+						
+			) as 								invoice_line_quotation_line_total_invoiced
+			
+		from
+			shipments_boxes_lines
+			
+		inner join invoices_lines
+		on shipments_boxes_lines.ref_invoice_line = invoices_lines.id
+	
+		inner join quotations_lines
+		on invoices_lines.ref_quotation_line = quotations_lines.id
+	
+		where 
+			shipments_boxes_lines.ref_box = #{id}
+			
+		order by shipments_boxes_lines.id asc
+	</select>
+	
+	<select id="selectShipmentBoxes" parameterType="long" resultMap="mapShipmentBox">
+		select 
+			shipments_boxes.id,
+		
+			shipments_boxes.label,
+			shipments_boxes.box_type,
+
+			shipments_boxes.ref_shipment,
+			shipments_boxes.ref_container,
+			
+			shipments_boxes.width,
+			shipments_boxes.length,
+			shipments_boxes.height
+			
+		from
+			shipments_boxes
+	
+		where 
+			shipments_boxes.ref_shipment = #{id}
+			
+		order by shipments_boxes.id asc
+	</select>
+
+	<select id="selectShipmentSubBoxes" parameterType="long" resultMap="mapShipmentBox">
+		select 
+			shipments_boxes.id,
+		
+			shipments_boxes.label,
+			shipments_boxes.box_type,
+			
+			shipments_boxes.ref_shipment,
+			shipments_boxes.ref_container,
+			
+			shipments_boxes.width,
+			shipments_boxes.length,
+			shipments_boxes.height
+			
+		from
+			shipments_boxes
+	
+		where 
+			shipments_boxes.ref_container = #{id} 
+			
+		order by shipments_boxes.id asc
+	</select>
+	
+	<resultMap id="mapQuotationLine" type="es.pryades.erp.dto.QuotationLine">
+		<id property="id" column="id"/>
+		
+		<result property="ref_quotation" column="ref_quotation"/>
+		<result property="ref_provider" column="ref_provider"/>
+		
+		<result property="line_order" column="line_order"/>
+		<result property="origin" column="origin"/>
+		<result property="reference" column="reference"/>
+		<result property="title" column="title"/>
+		<result property="description" column="description"/>
+		<result property="cost" column="cost"/>
+		<result property="real_cost" column="real_cost"/>
+		<result property="margin" column="margin"/>
+		<result property="tax_rate" column="tax_rate"/>
+		<result property="total_invoiced" column="total_invoiced"/>
+	</resultMap>
+
+	<resultMap id="mapInvoiceLine" type="es.pryades.erp.dto.InvoiceLine">
+		<id property="id" column="id"/>
+		
+		<result property="ref_invoice" column="ref_invoice"/>
+		<result property="ref_quotation_line" column="ref_quotation_line"/>
+		<result property="quantity" column="quantity"/>
+		<result property="total_packed" column="total_packed"/>
+
+		<association property="quotation_line" javaType="es.pryades.erp.dto.QuotationLine" resultMap="mapQuotationLine" columnPrefix="quotation_line_" />
+	</resultMap>
+
+	<resultMap id="mapShipmentBoxLine" type="es.pryades.erp.dto.ShipmentBoxLine">
+		<id property="id" column="id"/>
+		
+		<result property="ref_box" column="ref_box"/>
+		<result property="ref_invoice_line" column="ref_invoice_line"/>
+		
+		<result property="quantity" column="quantity"/>
+		<result property="net_weight" column="net_weight"/>
+		<result property="gross_weight" column="gross_weight"/>
+
+		<association property="invoice_line" javaType="es.pryades.erp.dto.InvoiceLine" resultMap="mapInvoiceLine" columnPrefix="invoice_line_" />
+	</resultMap>
+
+	<resultMap id="mapShipmentBox" type="es.pryades.erp.dto.ShipmentBox">
+		<id property="id" column="id"/>
+		
+		<result property="ref_shipment" column="ref_shipment"/>
+		<result property="ref_container" column="ref_container"/>
+		<result property="box_type" column="box_type"/>
+		<result property="label" column="label"/>
+		<result property="width" column="width"/>
+		<result property="height" column="height"/>
+		<result property="length" column="length"/>
+
+		<collection property="sub_boxes" column="id" ofType="mapShipmentBox" select="selectShipmentSubBoxes"> </collection>
+		<collection property="lines" column="id" ofType="mapShipmentBoxLine" select="selectShipmentBoxLines"> </collection>
+	</resultMap>
+
+	<resultMap id="mapShipment" type="es.pryades.erp.dto.Shipment">
+		<id property="id" column="id"/>
+		
+		<result property="number" column="number"/>
+		<result property="shipment_date" column="shipment_date"/>
+		<result property="departure_date" column="departure_date"/>
+		<result property="incoterms" column="incoterms"/>
+		<result property="title" column="title"/>
+		<result property="description" column="description"/>
+		<result property="departure_port" column="departure_port"/>
+		<result property="arrival_port" column="arrival_port"/>
+		<result property="carrier" column="carrier"/>
+		<result property="tracking" column="tracking"/>
+		<result property="ref_consignee" column="ref_consignee"/>
+		<result property="ref_notify" column="ref_notify"/>
+		
+		<result property="consignee_name" column="consignee_name"/>
+		<result property="consignee_address" column="consignee_address"/>
+		<result property="consignee_tax_id" column="consignee_tax_id"/>
+		<result property="consignee_email" column="consignee_email"/>
+		<result property="consignee_phone" column="consignee_phone"/>
+		<result property="consignee_taxable" column="consignee_taxable"/>
+		<result property="consignee_language" column="consignee_language"/>
+		<result property="consignee_signature" column="consignee_signature"/>
+		<result property="consignee_company_type" column="consignee_company_type"/>
+		<result property="consignee_contact_person" column="consignee_contact_person"/>
+
+		<result property="notify_name" column="notify_name"/>
+		<result property="notify_address" column="notify_address"/>
+		<result property="notify_tax_id" column="notify_tax_id"/>
+		<result property="notify_email" column="notify_email"/>
+		<result property="notify_phone" column="notify_phone"/>
+		<result property="notify_taxable" column="notify_taxable"/>
+		<result property="notify_language" column="notify_language"/>
+		<result property="notify_signature" column="notify_signature"/>
+		<result property="notify_company_type" column="notify_company_type"/>
+		<result property="notify_contact_person" column="notify_contact_person"/>
+
+		<collection property="boxes" column="id" ofType="mapShipmentBox" select="selectShipmentBoxes"> </collection>
+	</resultMap>
+
+	<sql id="es.pryades.erp.dal.ibatis.ShipmentMapper.fields">
+		shipments.id,
+		
+		shipments.number,						
+		shipments.shipment_date,						
+		shipments.departure_date,						
+
+		shipments.incoterms,
+
+		shipments.title,
+		shipments.description,
+	
+		shipments.departure_port,
+		shipments.arrival_port,
+
+		shipments.carrier,
+		shipments.tracking,
+	
+		shipments.ref_consignee,
+		shipments.ref_notify,
+		
+		shipments.status,
+		
+		companies1.name 			as consignee_name,
+		companies1.address 			as consignee_address,
+		companies1.email 			as consignee_email,
+		companies1.phone 			as consignee_phone,
+		companies1.tax_id 			as consignee_tax_id,
+		companies1.taxable 			as consignee_taxable,
+		companies1.language 		as consignee_language,
+		companies1.signature 		as consignee_signature,
+		companies1.contact_person 	as consignee_contact_person,
+		
+		companies2.name 			as notify_name,
+		companies2.address 			as notify_address,
+		companies2.email 			as notify_email,
+		companies2.phone 			as notify_phone,
+		companies2.tax_id 			as notify_tax_id,
+		companies2.taxable 			as notify_taxable,
+		companies2.language 		as notify_language,
+		companies2.signature 		as notify_signature,
+		companies2.contact_person 	as notify_contact_person
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.ShipmentMapper.joins">
+		inner join companies companies1
+		on shipments.ref_consignee = companies1.id
+
+		inner join companies companies2
+		on shipments.ref_notify = companies2.id
+		
+		<if test="ref_user != null">
+			inner join users_companies
+			on users_companies.ref_company = companies1.id
+        </if>
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.ShipmentMapper.where">
+		<where>
+			<if test="from_date != null">
+				AND shipments.shipment_date &gt;= #{from_date}    
+	        </if>
+			<if test="to_date != null">
+				AND shipments.shipment_date &lt; #{to_date}    
+	        </if>
+			<if test="ref_consignee != null">
+				AND shipments.ref_consignee = #{ref_consignee}    
+	        </if>
+			<if test="status != null">
+				AND shipments.status = #{status}    
+	        </if>
+			<if test="ref_user != null">
+				AND users_companies.ref_user = #{ref_user}    
+	        </if>
+		</where>
+	</sql>
+	
+	<sql id="es.pryades.erp.dal.ibatis.ShipmentMapper.orderby">
+		<choose>
+			<when test="orderby.equals( 'shipment_date' )">
+				shipments.shipment_date
+			</when>
+			<when test="orderby.equals( 'departure_date' )">
+				shipments.departure_date
+			</when>
+			<when test="orderby.equals( 'number' )">
+				shipments.number
+			</when>
+			<when test="orderby.equals( 'consignee_name' )">
+				companies1.name
+			</when>
+			<when test="orderby.equals( 'status' )">
+				shipments.status
+			</when>
+			<otherwise>
+				shipments.id
+			</otherwise>
+		</choose>
+
+		<choose>
+			<when test="order.equalsIgnoreCase( 'asc' )">
+				asc
+			</when>
+			<otherwise>
+				desc
+			</otherwise>
+		</choose>
+	</sql>
+	
+	<select id="getNumberOfRows" parameterType="es.pryades.erp.dto.Query" resultType="long">
+		select 
+			count(1) 
+		from 
+			shipments
+
+    	<include refid="es.pryades.erp.dal.ibatis.ShipmentMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.ShipmentMapper.where" />
+	</select>
+
+	<select id="getPage" parameterType="es.pryades.erp.dto.Query" resultMap="mapShipment">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.ShipmentMapper.fields" />
+		
+		from
+			shipments
+		
+   		<include refid="es.pryades.erp.dal.ibatis.ShipmentMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.ShipmentMapper.where" />
+
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.ShipmentMapper.orderby" />
+
+		LIMIT #{pageSize} OFFSET (#{pageSize} * (#{pageNumber} - 1))
+	</select>
+
+	<select id="getRows" parameterType="es.pryades.erp.dto.Query" resultMap="mapShipment">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.ShipmentMapper.fields" />
+		
+		from
+			shipments
+		
+    	<include refid="es.pryades.erp.dal.ibatis.ShipmentMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.ShipmentMapper.where" />
+		
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.ShipmentMapper.orderby" />
+	</select>
+
+	<select id="getRow" parameterType="es.pryades.erp.dto.Shipment" resultMap="mapShipment">
+		select
+			<include refid="es.pryades.erp.dal.ibatis.ShipmentMapper.fields" />
+		
+		from
+			shipments
+		
+		<include refid="es.pryades.erp.dal.ibatis.ShipmentMapper.joins" />
+		
+		where shipments.id = #{id}
+	</select>
+
+	<insert id="addRow" parameterType="es.pryades.erp.dto.Shipment">
+
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			SELECT nextval('gendat');
+		</selectKey>
+
+		insert into shipments
+		(
+			id,
+
+			number,						
+			
+			shipment_date,						
+			departure_date,						
+		
+			incoterms,
+		
+			title,
+			description,
+			
+			departure_port,
+			arrival_port,
+		
+			carrier,
+			tracking,
+			
+			ref_consignee,
+			ref_notify,
+		
+			status
+		)
+		values
+		(
+			#{id},
+			
+			(SELECT nextval('seq_shipments')),						
+			
+			#{shipment_date},						
+			#{departure_date},						
+		
+			#{incoterms},
+		
+			#{title},
+			#{description},
+			
+			#{departure_port},
+			#{arrival_port},
+		
+			#{carrier},
+			#{tracking},
+			
+			#{ref_consignee},
+			#{ref_notify},
+		
+			#{status}
+		)
+	</insert>
+
+	<update id="setRow" parameterType="es.pryades.erp.dto.Shipment">
+		update shipments set
+			shipment_date = #{shipment_date},						
+			departure_date = #{departure_date},						
+		
+			incoterms = #{incoterms},
+		
+			title = #{title},
+			description = #{description},
+			
+			departure_port = #{departure_port},
+			arrival_port = #{arrival_port},
+		
+			carrier = #{carrier},
+			tracking = #{tracking},
+			
+			ref_consignee = #{ref_consignee},
+			ref_notify = #{ref_notify},
+		
+			status = #{status}
+		where id = #{id}
+	</update>
+
+	<update id="delRow" parameterType="es.pryades.erp.dto.Shipment">
+		delete from shipments where id = #{id}
+	</update>
+
+</mapper>

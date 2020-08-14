@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="es.pryades.erp.dal.ibatis.ShipmentBoxLineMapper">
+
+	<resultMap id="mapQuotationLine" type="es.pryades.erp.dto.QuotationLine">
+		<id property="id" column="id"/>
+		
+		<result property="ref_quotation" column="ref_quotation"/>
+		<result property="ref_provider" column="ref_provider"/>
+		
+		<result property="line_order" column="line_order"/>
+		<result property="origin" column="origin"/>
+		<result property="reference" column="reference"/>
+		<result property="title" column="title"/>
+		<result property="description" column="description"/>
+		<result property="cost" column="cost"/>
+		<result property="real_cost" column="real_cost"/>
+		<result property="margin" column="margin"/>
+		<result property="tax_rate" column="tax_rate"/>
+		<result property="total_invoiced" column="total_invoiced"/>
+	</resultMap>
+
+	<resultMap id="mapInvoiceLine" type="es.pryades.erp.dto.InvoiceLine">
+		<id property="id" column="id"/>
+		
+		<result property="ref_invoice" column="ref_invoice"/>
+		<result property="ref_quotation_line" column="ref_quotation_line"/>
+		<result property="quantity" column="quantity"/>
+		<result property="total_packed" column="total_packed"/>
+
+		<association property="quotation_line" javaType="es.pryades.erp.dto.QuotationLine" resultMap="mapQuotationLine" columnPrefix="quotation_line_" />
+	</resultMap>
+
+	<resultMap id="mapShipmentBoxLine" type="es.pryades.erp.dto.ShipmentBoxLine">
+		<id property="id" column="id"/>
+		
+		<result property="ref_box" column="ref_box"/>
+		<result property="ref_invoice_line" column="ref_invoice_line"/>
+		
+		<result property="quantity" column="quantity"/>
+		<result property="net_weight" column="net_weight"/>
+		<result property="gross_weight" column="gross_weight"/>
+
+		<association property="invoice_line" javaType="es.pryades.erp.dto.InvoiceLine" resultMap="mapInvoiceLine" columnPrefix="invoice_line_" />
+	</resultMap>
+
+	<sql id="es.pryades.erp.dal.ibatis.ShipmentBoxLineMapper.fields">
+		shipments_boxes_lines.id,
+
+		shipments_boxes_lines.ref_box,
+		shipments_boxes_lines.ref_invoice_line,
+		shipments_boxes_lines.quantity,
+		shipments_boxes_lines.net_weight,
+		shipments_boxes_lines.gross_weight,
+		
+		invoices_lines.id					as invoice_line_id,
+		invoices_lines.ref_invoice			as invoice_line_ref_invoice,
+		invoices_lines.ref_quotation_line	as invoice_line_ref_quotation_line,
+		invoices_lines.quantity				as invoice_line_quantity,
+	
+		( 
+			select 
+				sum( lines1.quantity ) 
+				 
+			from 
+				shipments_boxes_lines lines1
+				
+			where 
+				lines1.ref_invoice_line = invoices_lines.id
+					
+		) as invoice_line_total_packed,
+
+		quotations_lines.id					as invoice_line_quotation_line_id,
+		quotations_lines.ref_quotation 		as invoice_line_quotation_line_ref_quotation,
+		quotations_lines.ref_provider 		as invoice_line_quotation_line_ref_provider,
+		quotations_lines.line_order			as invoice_line_quotation_line_line_order,
+		quotations_lines.origin 			as invoice_line_quotation_line_origin,
+		quotations_lines.reference 			as invoice_line_quotation_line_reference,
+		quotations_lines.title 				as invoice_line_quotation_line_title,
+		quotations_lines.description 		as invoice_line_quotation_line_description,
+		quotations_lines.cost 				as invoice_line_quotation_line_cost,
+		quotations_lines.real_cost 			as invoice_line_quotation_line_real_cost,
+		quotations_lines.margin 			as invoice_line_quotation_line_margin,
+		quotations_lines.tax_rate 			as invoice_line_quotation_line_tax_rate,
+		
+		( 
+			select 
+				sum( quantity ) 
+				 
+			from 
+				invoices_lines lines2
+			
+			where 
+				lines2.ref_quotation_line = quotations_lines.id
+					
+		) as 								invoice_line_quotation_line_total_invoiced
+		
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.ShipmentBoxLineMapper.joins">
+		inner join invoices_lines 
+		on shipments_boxes_lines.ref_invoice_line = invoices_lines.id
+
+		inner join quotations_lines 
+		on invoices_lines.ref_quotation_line = quotations_lines.id
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.ShipmentBoxLineMapper.where">
+		<where>
+			<if test="ref_box != null">
+				AND shipments_boxes_lines.ref_box = #{ref_box}
+			</if>
+		</where>
+	</sql>
+	
+	<sql id="es.pryades.erp.dal.ibatis.ShipmentBoxLineMapper.orderby">
+		shipments_boxes_lines.id
+
+		<choose>
+			<when test="order.equalsIgnoreCase( 'asc' )">
+				asc
+			</when>
+			<otherwise>
+				desc
+			</otherwise>
+		</choose>
+	</sql>
+	
+	<select id="getNumberOfRows" parameterType="es.pryades.erp.dto.Query" resultType="long">
+		select 
+			count(1) 
+		from 
+			shipments_boxes_lines
+
+    	<include refid="es.pryades.erp.dal.ibatis.ShipmentBoxLineMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.ShipmentBoxLineMapper.where" />
+	</select>
+
+	<select id="getPage" parameterType="es.pryades.erp.dto.Query" resultMap="mapShipmentBoxLine">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.ShipmentBoxLineMapper.fields" />
+		
+		from
+			shipments_boxes_lines
+		
+   		<include refid="es.pryades.erp.dal.ibatis.ShipmentBoxLineMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.ShipmentBoxLineMapper.where" />
+
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.ShipmentBoxLineMapper.orderby" />
+
+		LIMIT #{pageSize} OFFSET (#{pageSize} * (#{pageNumber} - 1))
+	</select>
+
+	<select id="getRows" parameterType="es.pryades.erp.dto.Query" resultMap="mapShipmentBoxLine">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.ShipmentBoxLineMapper.fields" />
+		
+		from
+			shipments_boxes_lines
+		
+    	<include refid="es.pryades.erp.dal.ibatis.ShipmentBoxLineMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.ShipmentBoxLineMapper.where" />
+		
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.ShipmentBoxLineMapper.orderby" />
+	</select>
+
+	<select id="getRow" parameterType="es.pryades.erp.dto.ShipmentBoxLine" resultMap="mapShipmentBoxLine">
+		select
+			<include refid="es.pryades.erp.dal.ibatis.ShipmentBoxLineMapper.fields" />
+		
+		from
+			shipments_boxes_lines
+		
+		<include refid="es.pryades.erp.dal.ibatis.ShipmentBoxLineMapper.joins" />
+		
+		where shipments_boxes_lines.id = #{id}
+	</select>
+
+	<insert id="addRow" parameterType="es.pryades.erp.dto.ShipmentBoxLine">
+
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			SELECT nextval('gendat');
+		</selectKey>
+
+		insert into shipments_boxes_lines
+		(
+			id,
+
+			ref_box,
+			ref_invoice_line,
+			
+			quantity,
+			
+			net_weight,
+			gross_weight 
+		)
+		values
+		(
+			#{id},
+			
+			#{ref_box},
+			#{ref_invoice_line},
+			
+			#{quantity},
+			
+			#{net_weight},
+			#{gross_weight} 
+		)
+	</insert>
+
+	<update id="setRow" parameterType="es.pryades.erp.dto.ShipmentBoxLine">
+		update shipments_boxes_lines set
+			ref_box=#{ref_box},
+			ref_invoice_line=#{ref_invoice_line},
+			quantity=#{quantity},
+			net_weight=#{net_weight},
+			gross_weight=#{gross_weight} 
+		where id = #{id}
+	</update>
+
+	<update id="delRow" parameterType="es.pryades.erp.dto.ShipmentBoxLine">
+		delete from shipments_boxes_lines 
+		where 
+			ref_box=#{ref_box} AND
+			ref_invoice_line=#{ref_invoice_line}
+	</update>
+
+</mapper>

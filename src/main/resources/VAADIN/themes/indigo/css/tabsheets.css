@@ -1,0 +1,31 @@
+.v-tabsheet-tabitem-selected {
+	background-color: #0D5C91;
+	border: none;
+	border-radius: 0px;
+}
+
+.v-tabsheet-tabitem-selected .v-caption {
+	background: none;
+	border-radius: 0px;
+}
+
+.v-tabsheet-tabitem .v-captiontext {
+	font-size: 20px;
+	color: black;
+	font-weight: normal;
+}
+
+.v-tabsheet-tabitem-selected .v-captiontext {
+	font-size: 20px;
+	color: white;
+	font-weight: normal;
+}
+
+.v-tabsheet-tabitemcell .v-tabsheet-tabitemcell-selected {
+	border: none;
+}
+
+.v-tabsheet-content {
+	background-color: #E6E6E6;
+}
+

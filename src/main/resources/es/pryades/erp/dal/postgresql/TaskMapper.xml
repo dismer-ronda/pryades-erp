@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="es.pryades.erp.dal.ibatis.TaskMapper">
+
+	<sql id="es.pryades.erp.dal.ibatis.TaskMapper.fields">
+		tasks.id,
+		tasks.description,
+		tasks.month,
+		tasks.day,
+		tasks.hour,
+		tasks.times,
+		tasks.system,
+		tasks.clazz,
+		tasks.details,
+		tasks.timezone,
+		tasks.language
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.TaskMapper.joins">
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.TaskMapper.where">
+		<where>
+			<if test="clazz != null">
+				AND tasks.clazz = #{clazz}
+			</if>
+			<if test="system != null">
+				AND tasks.system = #{system}
+			</if>
+		</where>
+	</sql>
+	
+	<sql id="es.pryades.erp.dal.ibatis.TaskMapper.orderby">
+		<choose>
+			<when test="orderby.equals( 'clazz' )">
+				tasks.clazz
+			</when>
+			<when test="orderby.equals( 'description' )">
+				tasks.description
+			</when>
+			<otherwise>
+				tasks.id
+			</otherwise>
+		</choose>
+
+		<choose>
+			<when test="order.equalsIgnoreCase( 'asc' )">
+				asc
+			</when>
+			<otherwise>
+				desc
+			</otherwise>
+		</choose>
+	</sql>
+
+	<select id="getNumberOfRows" parameterType="es.pryades.erp.dto.Query" resultType="long">
+		select 
+			count(distinct tasks.id) 
+		from 
+			tasks
+
+    	<include refid="es.pryades.erp.dal.ibatis.TaskMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.TaskMapper.where" />
+	</select>
+
+	<select id="getPage" parameterType="es.pryades.erp.dto.Query" resultType="es.pryades.erp.dto.Task">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.TaskMapper.fields" />
+		
+		from
+			tasks
+		
+   		<include refid="es.pryades.erp.dal.ibatis.TaskMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.TaskMapper.where" />
+
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.TaskMapper.orderby" />
+
+		LIMIT #{pageSize} OFFSET (#{pageSize} * (#{pageNumber} - 1))
+	</select>
+
+	<select id="getRows" parameterType="es.pryades.erp.dto.Query" resultType="es.pryades.erp.dto.Task">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.TaskMapper.fields" />
+		
+		from
+			tasks
+		
+    	<include refid="es.pryades.erp.dal.ibatis.TaskMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.TaskMapper.where" />
+		
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.TaskMapper.orderby" />
+	</select>
+
+	<select id="getRow" parameterType="es.pryades.erp.dto.Task" resultType="es.pryades.erp.dto.Task">
+		select
+			<include refid="es.pryades.erp.dal.ibatis.TaskMapper.fields" />
+		
+		from
+			tasks
+		
+		where tasks.id = #{id}
+	</select>
+
+	<insert id="addRow" parameterType="es.pryades.erp.dto.Task">
+
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			SELECT nextval('gendat');
+		</selectKey>
+
+		insert into tasks
+		(
+			id,
+			description,
+			month,
+			day,
+			hour,
+			times,
+			system,
+			clazz,
+			details,
+			timezone,
+			language
+		)
+		values
+		(
+			#{id},
+			#{description},
+			#{month},
+			#{day},
+			#{hour},
+			#{times},
+			#{system},
+			#{clazz},
+			#{details},
+			#{timezone},
+			#{language}
+		)
+	</insert>
+
+	<update id="setRow" parameterType="es.pryades.erp.dto.Task">
+		update tasks set
+			description=#{description},
+			month=#{month},
+			day=#{day},
+			hour=#{hour},
+			times=#{times},
+			system=#{system},
+			clazz=#{clazz},
+			details=#{details},
+			timezone=#{timezone},
+			language=#{language}
+		where id = #{id}
+	</update>
+
+	<update id="delRow" parameterType="es.pryades.erp.dto.Task">
+		delete from tasks where id = #{id}
+	</update>
+
+</mapper>

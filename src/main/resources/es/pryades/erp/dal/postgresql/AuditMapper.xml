@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="es.pryades.erp.dal.ibatis.AuditMapper">
+
+	<sql id="es.pryades.erp.dal.ibatis.AuditMapper.fields">
+		audits.id,
+		audits.audit_date,
+		audits.audit_type,
+		audits.ref_user,
+		audits.audit_details,
+		audits.duration,
+		
+		users.name as user_name
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.AuditMapper.joins">
+		left join users
+		on audits.ref_user = users.id
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.AuditMapper.where">
+		<where>
+			<if test="audit_type != null">
+				AND audits.audit_type = #{audit_type}
+			</if>
+			<if test="ref_user != null">
+				AND audits.ref_user = #{ref_user}
+			</if>
+			<if test="from_date != null">
+				AND audits.audit_date &gt;= #{from_date}    
+	        </if>
+			<if test="to_date != null">
+				AND audits.audit_date &lt; #{to_date}    
+	        </if>
+			<if test="textQuery != null">
+				AND audits.audit_details like #{textQuery}    
+	        </if>
+		</where>
+	</sql>
+	
+	<sql id="es.pryades.erp.dal.ibatis.AuditMapper.orderby">
+		<choose>
+			<when test="orderby.equals( 'audit_date' )">
+				audits.audit_date
+			</when>
+			<when test="orderby.equals( 'audit_type' )">
+				audits.audit_type
+			</when>
+			<when test="orderby.equals( 'user_name' )">
+				user_name
+			</when>
+			<otherwise>
+				audits.id
+			</otherwise>
+		</choose>
+
+		<choose>
+			<when test="order.equalsIgnoreCase( 'asc' )">
+				asc
+			</when>
+			<otherwise>
+				desc
+			</otherwise>
+		</choose>
+	</sql>
+
+	<select id="getNumberOfRows" parameterType="es.pryades.erp.dto.Query" resultType="long">
+		select 
+			count(1) 
+		from 
+			audits
+
+    	<include refid="es.pryades.erp.dal.ibatis.AuditMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.AuditMapper.where" />
+	</select>
+
+	<select id="getPage" parameterType="es.pryades.erp.dto.Query" resultType="es.pryades.erp.dto.Audit">
+		select
+			<include refid="es.pryades.erp.dal.ibatis.AuditMapper.fields" />
+		
+		from
+			audits
+		
+   		<include refid="es.pryades.erp.dal.ibatis.AuditMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.AuditMapper.where" />
+
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.AuditMapper.orderby" />
+
+		LIMIT #{pageSize} OFFSET (#{pageSize} * (#{pageNumber} - 1))
+	</select>
+
+	<select id="getRows" parameterType="es.pryades.erp.dto.Query" resultType="es.pryades.erp.dto.Audit">
+		select
+			<include refid="es.pryades.erp.dal.ibatis.AuditMapper.fields" />
+		
+		from
+			audits
+		
+    	<include refid="es.pryades.erp.dal.ibatis.AuditMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.AuditMapper.where" />
+		
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.AuditMapper.orderby" />
+	</select>
+
+	<select id="getRow" parameterType="es.pryades.erp.dto.Audit" resultType="es.pryades.erp.dto.Audit">
+		select
+			<include refid="es.pryades.erp.dal.ibatis.AuditMapper.fields" />
+		
+		from
+			audits
+		
+		where audits.id = #{id}
+	</select>
+
+	<insert id="addRow" parameterType="es.pryades.erp.dto.Audit">
+
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			SELECT nextval('gendat');
+		</selectKey>
+
+		insert into audits
+		(
+			id,
+			audit_date,
+			audit_type,
+			ref_user,
+			audit_details,
+			duration
+		)
+		values
+		(
+			#{id},
+			#{audit_date},
+			#{audit_type},
+			#{ref_user},
+			#{audit_details},
+			#{duration}
+		)
+	</insert>
+
+	<update id="setRow" parameterType="es.pryades.erp.dto.Audit">
+	</update>
+
+	<update id="delRow" parameterType="es.pryades.erp.dto.Audit">
+		delete from audits where id = #{id}
+	</update>
+
+</mapper>

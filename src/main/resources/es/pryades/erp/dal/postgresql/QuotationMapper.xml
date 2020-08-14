@@ -1,0 +1,424 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="es.pryades.erp.dal.ibatis.QuotationMapper">
+
+	<select id="selectQuotationDeliveries" parameterType="long" resultMap="mapQuotationDelivery">
+		select 
+			quotations_deliveries.id,
+
+			quotations_deliveries.ref_quotation,
+		
+			quotations_deliveries.departure_date,
+			quotations_deliveries.departure_port,
+			quotations_deliveries.arrival_port,
+			
+			quotations_deliveries.incoterms,
+			quotations_deliveries.cost,
+			
+			quotations_deliveries.free_delivery	
+		
+		from quotations_deliveries
+		 		
+		where 
+			quotations_deliveries.ref_quotation = #{id}
+			
+		order by quotations_deliveries.departure_date asc
+	</select>
+
+	<select id="selectQuotationAttachments" parameterType="long" resultMap="mapQuotationAttachment">
+		select 
+			quotations_attachments.id,
+
+			quotations_attachments.ref_quotation,
+		
+			quotations_attachments.title,
+			quotations_attachments.format
+		
+		from quotations_attachments
+		 		
+		where 
+			quotations_attachments.ref_quotation = #{id}
+			
+		order by quotations_attachments.title asc
+	</select>
+
+	<select id="selectQuotationLines" parameterType="long" resultMap="mapQuotationLine">
+		select 
+			quotations_lines.id,
+		
+			quotations_lines.ref_quotation,
+			quotations_lines.ref_provider,
+			
+			quotations_lines.line_order,
+			quotations_lines.origin,
+			quotations_lines.reference,
+			quotations_lines.title,
+			quotations_lines.description,
+			quotations_lines.cost,
+			quotations_lines.real_cost,
+			quotations_lines.margin, 
+			quotations_lines.tax_rate, 
+
+			( 
+				select 
+					sum( quantity ) 
+				 
+				from 
+					invoices_lines lines2
+			
+				where 
+					lines2.ref_quotation_line = quotations_lines.id 
+					
+			) as total_invoiced,
+			
+			companies.name as provider_name 
+
+		from quotations_lines
+		
+		left join companies
+		on quotations_lines.ref_provider = companies.id
+		 		
+		where 
+			quotations_lines.ref_quotation = #{id}
+			
+		order by quotations_lines.line_order asc
+	</select>
+
+	<select id="selectQuotationLineDeliveries" parameterType="long" resultMap="mapQuotationLineDelivery">
+		select 
+			quotations_lines_deliveries.id,
+		
+			quotations_lines_deliveries.ref_quotation_line,
+			quotations_lines_deliveries.ref_quotation_delivery,
+			
+			quotations_lines_deliveries.quantity
+
+		from quotations_lines_deliveries
+		 		
+		where 
+			quotations_lines_deliveries.ref_quotation_line = #{id}
+			
+		order by quotations_lines_deliveries.ref_quotation_delivery asc
+	</select>
+
+	<resultMap id="mapQuotationDelivery" type="es.pryades.erp.dto.QuotationDelivery">
+		<id property="id" column="id"/>
+		
+		<result property="ref_quotation" column="ref_quotation"/>
+		
+		<result property="departure_date" column="departure_date"/>
+		<result property="departure_port" column="departure_port"/>
+		<result property="arrival_port" column="arrival_port"/>
+		<result property="incoterms" column="incoterms"/>
+		<result property="cost" column="cost"/>
+		<result property="free_delivery" column="free_delivery"/>
+	</resultMap>
+
+	<resultMap id="mapQuotationAttachment" type="es.pryades.erp.dto.QuotationAttachment">
+		<id property="id" column="id"/>
+		
+		<result property="ref_quotation" column="ref_quotation"/>
+		
+		<result property="title" column="title"/>
+		<result property="format" column="format"/>
+	</resultMap>
+
+	<resultMap id="mapQuotationLineDelivery" type="es.pryades.erp.dto.QuotationLineDelivery">
+		<id property="id" column="id"/>
+		
+		<result property="ref_quotation_delivery" column="ref_quotation_delivery"/>
+		<result property="ref_quotation_line" column="ref_quotation_line"/>
+		
+		<result property="quantity" column="quantity"/>
+	</resultMap>
+
+	<resultMap id="mapQuotation" type="es.pryades.erp.dto.Quotation">
+		<id property="id" column="id"/>
+		
+		<result property="number" column="number"/>
+		<result property="title" column="title"/>
+		<result property="quotation_date" column="quotation_date"/>
+		<result property="validity" column="validity"/>
+		<result property="ref_customer" column="ref_customer"/>
+		<result property="reference_request" column="reference_request"/>
+		<result property="reference_order" column="reference_order"/>
+		<result property="packaging" column="packaging"/>
+		<result property="delivery" column="delivery"/>
+		<result property="warranty" column="warranty"/>
+		<result property="payment_terms" column="payment_terms"/>
+		<result property="tax_rate" column="tax_rate"/>
+		<result property="status" column="status"/>
+		
+		<result property="transport_invoiced" column="transport_invoiced"/>
+
+		<result property="customer_name" column="customer_name"/>
+		<result property="customer_address" column="customer_address"/>
+		<result property="customer_tax_id" column="customer_tax_id"/>
+		<result property="customer_email" column="customer_email"/>
+		<result property="customer_phone" column="customer_phone"/>
+		<result property="customer_taxable" column="customer_taxable"/>
+		<result property="customer_language" column="customer_language"/>
+		<result property="customer_signature" column="customer_signature"/>
+		<result property="customer_contact_person" column="customer_contact_person"/>
+
+		<collection property="deliveries" column="id" ofType="mapQuotationDelivery" select="selectQuotationDeliveries"> </collection>
+		<collection property="lines" column="id" ofType="mapQuotationLine" select="selectQuotationLines"> </collection>
+		<collection property="attachments" column="id" ofType="mapQuotationAttachment" select="selectQuotationAttachments"> </collection>
+	</resultMap>
+
+	<resultMap id="mapQuotationLine" type="es.pryades.erp.dto.QuotationLine">
+		<id property="id" column="id"/>
+		
+		<result property="ref_quotation" column="ref_quotation"/>
+		<result property="ref_provider" column="ref_provider"/>
+		
+		<result property="line_order" column="line_order"/>
+		<result property="origin" column="origin"/>
+		<result property="reference" column="reference"/>
+		<result property="title" column="title"/>
+		<result property="description" column="description"/>
+		<result property="cost" column="cost"/>
+		<result property="real_cost" column="real_cost"/>
+		<result property="margin" column="margin"/>
+		<result property="tax_rate" column="tax_rate"/>
+		<result property="total_invoiced" column="total_invoiced"/>
+
+		<result property="provider_name" column="provider_name"/>
+		
+		<collection property="line_deliveries" column="id" ofType="mapQuotationLineDelivery" select="selectQuotationLineDeliveries"> </collection>
+	</resultMap>
+
+	<sql id="es.pryades.erp.dal.ibatis.QuotationMapper.fields">
+		quotations.id,
+		
+		quotations.number,						
+		quotations.title,						
+		quotations.quotation_date,						
+		quotations.validity,
+		
+		quotations.ref_customer,
+	
+		quotations.reference_request,
+		quotations.reference_order,
+		
+		quotations.packaging,
+		quotations.delivery,
+		quotations.warranty,
+		quotations.payment_terms,
+		
+		quotations.tax_rate,
+		quotations.status,
+		
+		( 
+			select 
+				sum(transport_cost) 
+			 
+			from 
+				invoices invoices1
+		
+			where 
+				invoices1.ref_quotation = quotations.id AND NOT invoices1.free_delivery
+				
+		) as transport_invoiced,
+		
+		companies.name as customer_name,
+		companies.address as customer_address,
+		companies.email as customer_email,
+		companies.phone as customer_phone,
+		companies.tax_id as customer_tax_id,
+		companies.taxable as customer_taxable,
+		companies.language as customer_language,
+		companies.signature as customer_signature,
+		companies.contact_person as customer_contact_person,
+		companies.type_company as type_company
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.QuotationMapper.joins">
+		inner join companies
+		on quotations.ref_customer = companies.id
+		
+		<if test="ref_user != null">
+			inner join users_companies
+			on users_companies.ref_company = companies.id 
+        </if>
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.QuotationMapper.where">
+		<where>
+			<if test="from_date != null">
+				AND quotations.quotation_date &gt;= #{from_date}    
+	        </if>
+			<if test="to_date != null">
+				AND quotations.quotation_date &lt; #{to_date}    
+	        </if>
+			<if test="reference_request != null">
+				AND quotations.reference_request like #{reference_request}    
+	        </if>
+			<if test="reference_order != null">
+				AND quotations.reference_order like #{reference_order}    
+	        </if>
+			<if test="ref_customer != null">
+				AND quotations.ref_customer = #{ref_customer}    
+	        </if>
+			<if test="status != null">
+				AND quotations.status = #{status}    
+	        </if>
+			<if test="ref_user != null">
+				AND users_companies.ref_user = #{ref_user}    
+	        </if>
+		</where>
+	</sql>
+	
+	<sql id="es.pryades.erp.dal.ibatis.QuotationMapper.orderby">
+		<choose>
+			<when test="orderby.equals( 'quotation_date' )">
+				quotations.quotation_date
+			</when>
+			<when test="orderby.equals( 'number' )">
+				quotations.number
+			</when>
+			<when test="orderby.equals( 'customer_name' )">
+				companies.name
+			</when>
+			<otherwise>
+				quotations.id
+			</otherwise>
+		</choose>
+
+		<choose>
+			<when test="order.equalsIgnoreCase( 'asc' )">
+				asc
+			</when>
+			<otherwise>
+				desc
+			</otherwise>
+		</choose>
+	</sql>
+	
+	<select id="getNumberOfRows" parameterType="es.pryades.erp.dto.Query" resultType="long">
+		select 
+			count(1) 
+		from 
+			quotations
+
+    	<include refid="es.pryades.erp.dal.ibatis.QuotationMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.QuotationMapper.where" />
+	</select>
+
+	<select id="getPage" parameterType="es.pryades.erp.dto.Query" resultMap="mapQuotation">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.QuotationMapper.fields" />
+		
+		from
+			quotations
+		
+   		<include refid="es.pryades.erp.dal.ibatis.QuotationMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.QuotationMapper.where" />
+
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.QuotationMapper.orderby" />
+
+		LIMIT #{pageSize} OFFSET (#{pageSize} * (#{pageNumber} - 1))
+	</select>
+
+	<select id="getRows" parameterType="es.pryades.erp.dto.Query" resultMap="mapQuotation">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.QuotationMapper.fields" />
+		
+		from
+			quotations
+		
+    	<include refid="es.pryades.erp.dal.ibatis.QuotationMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.QuotationMapper.where" />
+		
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.QuotationMapper.orderby" />
+	</select>
+
+	<select id="getRow" parameterType="es.pryades.erp.dto.Query" resultMap="mapQuotation">
+		select
+			<include refid="es.pryades.erp.dal.ibatis.QuotationMapper.fields" />
+		
+		from
+			quotations
+		
+		<include refid="es.pryades.erp.dal.ibatis.QuotationMapper.joins" />
+		
+		where quotations.id = #{id}
+	</select>
+
+	<insert id="addRow" parameterType="es.pryades.erp.dto.Quotation">
+
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			SELECT nextval('gendat');
+		</selectKey>
+
+		insert into quotations
+		(
+			id,
+
+			number,
+			title,
+			quotation_date,						
+			validity,
+			
+			ref_customer,
+		
+			reference_request,
+			reference_order,
+			
+			packaging,
+			delivery,
+			warranty,
+			payment_terms,
+			
+			tax_rate,
+			status
+		)
+		values
+		(
+			#{id},
+			
+			(SELECT nextval('seq_quotations')),						
+			#{title},						
+			#{quotation_date},						
+			#{validity},
+			
+			#{ref_customer},
+		
+			#{reference_request},
+			#{reference_order},
+			
+			#{packaging},
+			#{delivery},
+			#{warranty},
+			#{payment_terms},
+			
+			#{tax_rate},
+			#{status}
+		)
+	</insert>
+
+	<update id="setRow" parameterType="es.pryades.erp.dto.Quotation">
+		update quotations set
+			quotation_date = #{quotation_date},						
+			title = #{title},
+			validity = #{validity},
+			ref_customer = #{ref_customer},
+			reference_request = #{reference_request},
+			reference_order = #{reference_order},
+			packaging = #{packaging},
+			delivery = #{delivery},
+			warranty = #{warranty},
+			payment_terms = #{payment_terms},
+			tax_rate = #{tax_rate},
+			status = #{status}
+		where id = #{id}
+	</update>
+
+	<update id="delRow" parameterType="es.pryades.erp.dto.Quotation">
+		delete from quotations where id = #{id}
+	</update>
+
+</mapper>

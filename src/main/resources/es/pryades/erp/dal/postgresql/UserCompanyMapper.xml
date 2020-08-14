@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="es.pryades.erp.dal.ibatis.UserCompanyMapper">
+
+	<select id="getRows" parameterType="es.pryades.erp.dto.UserCompany" resultType="es.pryades.erp.dto.UserCompany">
+		select
+			users_companies.id,
+			users_companies.ref_user,
+			users_companies.ref_company,
+			
+			users.name as user_name,
+			companies.name as company_name
+						
+		from
+			users_companies
+			
+		inner join users
+		on users_companies.ref_user = users.id
+		
+		inner join companies
+		on users_companies.ref_company = companies.id
+		
+		where
+			users_companies.ref_user = #{ref_user}
+		
+		order by users_companies.id
+	</select>
+
+	<insert id="addRow" parameterType="es.pryades.erp.dto.UserCompany">
+
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			SELECT	nextval('gencfg');
+		</selectKey>
+
+		insert into users_companies
+		(
+			id,
+			ref_user,
+			ref_company
+		)
+		values
+		(
+			#{id},
+			#{ref_user},
+			#{ref_company}
+		)
+	</insert>
+
+	<update id="delRow" parameterType="es.pryades.erp.dto.UserCompany">
+		delete from users_companies where id = #{id}
+	</update>
+
+</mapper>

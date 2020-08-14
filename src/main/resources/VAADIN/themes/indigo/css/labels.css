@@ -1,0 +1,180 @@
+.v-label {
+	color: black;
+	font-size: 20px;
+}
+
+.v-label-centered {
+	text-align: center;
+}
+
+.v-label-right {
+	text-align: right;
+}
+
+.v-label-highlighted {
+	color: red;
+}
+
+.v-label-centercard_label {
+	color: black;
+	display: block;
+	font-size: 20px;
+	margin-left: 0px;
+	height: 32px;
+	cursor: pointer;
+	text-align: center;
+}
+
+.v-label-devicename {
+	display: block;
+	font-weight: bold;
+	text-align: center;
+}
+
+.v-label-devicedescription {
+	display: block;
+	font-size: 20px;
+	text-align: center;
+}
+
+.v-label-lcdnumber {
+	font-family: "lcd";
+	font-size: 20px;
+}
+
+.v-caption-lcdnumber {
+	/*display: block;*/
+	font-family: "lcd";
+	font-size: 20px;
+	text-align: center;
+}
+
+.v-label-lcdum {
+	display: block;
+	font-family: "lcd";
+	font-size: 20px;
+}
+
+.v-label-lcddate {
+	font-family: "lcd";
+	font-size: 20px;
+	text-align: center;
+}
+
+.v-label-lcddateyellow {
+	font-family: "lcd";
+	font-size: 20px;
+	color: orangered; /*#C9C85E;*/
+	text-align: center;
+}
+
+.v-label-lcdvariable {
+	font-size: 20px;
+	text-align: center;
+}
+
+.v-label-statisticlabel {
+	display: block;
+	font-size: 20px;
+	text-shadow: none;
+	padding-left: 3px;
+	padding-right: 3px;
+	text-align: right;
+}
+
+.v-label-statisticvalue {
+	display: block;
+	font-size: 20px;
+}
+
+.v-label-deviceperiod {
+	display: block;
+	font-size: 20px;
+	text-align: center;
+	cursor: pointer;
+}
+
+.v-label-reportdescription {
+	display: block;
+	text-align: center;
+}
+
+.v-label-right {
+	text-align: right;
+}
+
+.v-label-margin_right {
+	margin-right: 6px;
+}
+
+.v-label-center {
+	text-align: center;
+}
+
+.v-label-left {
+	text-align: left;
+}
+.v-label-margin_left {
+	margin-left: 6px;
+}
+
+.v-label-margin_top {
+	margin-top: 12px;
+}
+
+.v-label-bold {
+	font-weight: bold;
+}
+
+.v-label-underline {
+	text-decoration: underline;
+}
+
+.v-label-heading {
+	font-size: 20px;
+}
+
+.v-label-green {
+	color: green;
+	font-weight: bold;
+}
+
+.v-label-blue {
+	color: blue;
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 255;
+    top: 150%;
+    left: 50%;
+    margin-left: -60px;
+}
+
+.tooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent black transparent;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}

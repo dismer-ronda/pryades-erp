@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="es.pryades.erp.dal.ibatis.CompanyMapper">
+
+	<sql id="es.pryades.erp.dal.ibatis.CompanyMapper.fields">
+		companies.id,
+		companies.name,
+		companies.alias,
+		companies.tax_id,
+		companies.address,
+		companies.email,
+		companies.phone,
+		companies.type_company,
+		companies.taxable,
+		companies.language,
+		companies.contact_person,
+		companies.signature
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.CompanyMapper.joins">
+		<if test="ref_user != null">
+			inner join users_companies
+			on users_companies.ref_company = companies.id
+		</if>
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.CompanyMapper.where">
+		<where>
+			<if test="alias != null">
+				AND ( companies.alias like #{alias} OR companies.name like #{alias} ) 
+			</if>
+			<if test="tax_id != null">
+				AND companies.tax_id = #{tax_id}
+			</if>
+			<if test="type_company != null">
+				AND companies.type_company = #{type_company}
+			</if>
+			<if test="ref_user != null">
+				AND users_companies.ref_user = #{ref_user}
+			</if>
+		</where>
+	</sql>
+	
+	<sql id="es.pryades.erp.dal.ibatis.CompanyMapper.orderby">
+		<choose>
+			<when test="orderby.equals( 'name' )">
+				companies.name
+			</when>
+			<when test="orderby.equals( 'alias' )">
+				companies.alias
+			</when>
+			<when test="orderby.equals( 'tax_id' )">
+				companies.tax_id
+			</when>
+			<when test="orderby.equals( 'type_company' )">
+				companies.type_company
+			</when>
+			<otherwise>
+				companies.id
+			</otherwise>
+		</choose>
+
+		<choose>
+			<when test="order.equalsIgnoreCase( 'asc' )">
+				asc
+			</when>
+			<otherwise>
+				desc
+			</otherwise>
+		</choose>
+	</sql>
+
+	<select id="getNumberOfRows" parameterType="es.pryades.erp.dto.Query" resultType="long">
+		select 
+			count(1) 
+		from 
+			companies
+
+    	<include refid="es.pryades.erp.dal.ibatis.CompanyMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.CompanyMapper.where" />
+	</select>
+
+	<select id="getPage" parameterType="es.pryades.erp.dto.Query" resultType="es.pryades.erp.dto.Company">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.CompanyMapper.fields" />
+		
+		from
+			companies
+		
+   		<include refid="es.pryades.erp.dal.ibatis.CompanyMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.CompanyMapper.where" />
+
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.CompanyMapper.orderby" />
+
+		LIMIT #{pageSize} OFFSET (#{pageSize} * (#{pageNumber} - 1))
+	</select>
+
+	<select id="getRows" parameterType="es.pryades.erp.dto.Query" resultType="es.pryades.erp.dto.Company">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.CompanyMapper.fields" />
+		
+		from
+			companies
+		
+    	<include refid="es.pryades.erp.dal.ibatis.CompanyMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.CompanyMapper.where" />
+		
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.CompanyMapper.orderby" />
+	</select>
+
+	<select id="getRow" parameterType="es.pryades.erp.dto.Company" resultType="es.pryades.erp.dto.Company">
+		select
+			<include refid="es.pryades.erp.dal.ibatis.CompanyMapper.fields" />
+			,
+    		companies.logo
+		
+		from
+			companies
+		
+		<where>
+			<choose>
+				<when test="type_company != null">
+					companies.type_company = #{type_company}
+				</when>
+				<otherwise>
+					companies.id = #{id}
+				</otherwise>
+			</choose>
+		</where>
+	</select>
+
+	<insert id="addRow" parameterType="es.pryades.erp.dto.Company">
+
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			SELECT nextval('gendat');
+		</selectKey>
+
+		insert into companies
+		(
+			id,
+			alias,
+			name,
+			tax_id,
+			address,
+			email,
+			phone,
+			type_company,
+			taxable,
+			language,
+			logo, 
+			contact_person,
+			signature
+		)
+		values
+		(
+			#{id},
+			#{alias},
+			#{name},
+			#{tax_id},
+			#{address},
+			#{email},
+			#{phone},
+			#{type_company},
+			#{taxable},
+			#{language},
+			#{logo},
+			#{contact_person},
+			#{signature}
+		)
+	</insert>
+
+	<update id="setRow" parameterType="es.pryades.erp.dto.Company">
+		update companies set
+			alias=#{alias},
+			name=#{name},
+			tax_id=#{tax_id},
+			address=#{address},
+			email=#{email},
+			phone=#{phone},
+			type_company=#{type_company},
+			taxable=#{taxable},
+			language=#{language},
+			<if test="logo != null">
+				logo=#{logo}, 
+	        </if>
+			contact_person=#{contact_person},
+			signature=#{signature}
+		where id = #{id}
+	</update>
+
+	<update id="delRow" parameterType="es.pryades.erp.dto.Company">
+		delete from companies where id = #{id}
+	</update>
+
+</mapper>

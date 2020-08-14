@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+   
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+	<title>$context.getString( "template.shipment.packing" ) $shipment.getFormattedNumber()</title>
+		
+	<meta name="author" content="pryades" />
+
+		<style type="text/css">
+		
+			* {
+				font-family: "Arial", Helvetica; 
+				font-size: 12px;
+			}
+
+			*.titulo1 {
+				font-size: 48px;
+				text-align: center;
+				font-weight: bold;
+			}
+			
+			*.titulo2 {
+				font-size: 14px;
+				text-align: center;
+				font-weight: bold;
+			}
+
+			*.text_header_size {
+				font-size: 16px;
+			}
+
+			*.text_regular_size {
+				font-size: 11px;
+			}
+
+			*.text_left {
+				text-align: left;
+			}
+
+			*.text_center {
+				text-align: center;
+			}
+
+			*.text_right {
+				text-align: right;
+			}
+			
+			*.text_bold {
+				font-weight: bold;
+			}
+
+			*.text_red {
+				color: red;
+			}
+			
+			*.vtop {
+				vertical-align: top;
+			}
+
+			*.hcenter {
+				horizontal-align: center;
+			}
+			
+			*.vcenter {
+				vertical-align: center;
+			}
+
+			*.vbottom {
+				vertical-align: bottom;
+			}
+
+			*.sangria {
+				padding-left: 16px;
+				padding-right: 16px;
+				padding-top: 5px;
+				padding-bottom: 5px;
+			}
+
+			*.padding_left {
+				padding-left: 6px;
+			}
+			
+			*.padding_right {
+				padding-right: 6px;
+			}
+
+			*.padding_bottom {
+				padding-bottom: 6px;
+			}
+
+			*.padding_top {
+				padding-top: 6px;
+			}
+
+			*.padding_all {
+				padding-right: 6px;
+				padding-left: 6px;
+				padding-bottom: 6px;
+				padding-top: 6px;
+			}
+
+			*.padding_h {
+				padding-right: 6px;
+				padding-left: 6px;
+			}
+			
+			*.padding_v {
+				padding-bottom: 6px;
+				padding-top: 6px;
+			}
+			
+			*.full_height {
+			bottom: 0;
+    		top: 0;
+    		left: 0;
+    		right: 0;
+    		}
+				
+			*.borde {
+				border: 0.1px solid black;
+				border-spacing: 0px;
+				border-collapse: collapse;
+				padding: 0px;
+			}
+
+			*.border_no_spacing
+			{
+				border-spacing: 0px;
+				padding: 0px;
+				border-collapse: collapse;
+			}
+			
+			*.block {
+				display: inline-block;
+			}
+			
+			#block_container > div {
+   				display: inline-block;
+			}
+
+			@page {
+				size: $pagesize $orientation;
+				 
+				@top-left {
+				}
+
+				@top-right {
+				}
+				
+				@bottom-left {
+				}
+				
+				@bottom-right {
+					content: "Página " counter(page) " de " counter(pages);
+					font-size: 12px;
+					vertical-align: middle;
+					padding-bottom: 6px;
+				}
+
+				@bottom-center {
+				}
+				 
+				margin-top: 1cm;
+				margin-bottom: 1.5cm;
+				margin-left: 1cm;
+				margin-right: 1cm;
+			}
+		</style>
+		
+</head>
+
+<body>
+
+	<table width="100%">
+		<tr>
+			<td class="text_left">
+				<img src="$context.getLogoUrl()" width="256px"> </img> 
+			</td>
+			<td>
+				<div class="text_right titulo1">$context.getString( "template.shipment.packing" ).toUpperCase()</div>
+			</td>
+		</tr>
+	</table>
+
+	<table width="100%">
+		<tr>
+			<td width="50%" class="text_left vtop">
+				<div class="text_regular_size text_bold">$context.getString( "template.shipment.packing.issued" ):</div>
+				<div class="text_regular_size sangria">
+					$context.getCompanyDataAsHtml()
+				</div>
+			</td>
+			
+			<td width="50%" class="text_left vtop">
+
+				<div class="text_regular_size text_bold">$context.getString( "template.shipment.packing.send_to" ):</div>
+				<div class="text_regular_size sangria">
+					$shipment.getCustomerDataAsHtml( $context )
+				</div>
+			</td>
+		</tr>
+	</table>
+
+	<table width="100%" class="border_no_spacing">
+
+		<tr>
+			<td width="" class="vtop borde">
+				<div id="block_container">
+					<div class="padding_all text_regular_size text_bold">$context.getString( "template.shipment.packing.number" ): </div>
+					<div class="padding_all text_regular_size">$shipment.getFormattedNumber()</div>
+				</div>
+			</td>
+
+			<td width="" class="vtop borde">
+				<div id="block_container">
+					<div class="padding_all text_regular_size text_bold">$context.getString( "template.shipment.packing.date" ): </div>
+					<div class="padding_all text_regular_size ">$shipment.getFormattedDate()</div>
+				</div>
+			</td>
+			
+			<td width="" class="vtop borde">
+				<div id="block_container">
+					<div class="padding_all text_regular_size text_bold">$context.getString( "template.shipment.packing.shipment_date" ): </div>
+					<div class="padding_all text_regular_size">$shipment.getFormattedDepartureDate()</div>
+				</div>
+			</td>
+		</tr>
+
+		<tr>
+			<td width="" class="vtop borde">
+				<div id="block_container">
+					<div class="padding_all text_regular_size text_bold">$context.getString( "template.shipment.packing.consigned" ): </div>
+					<div class="padding_all text_regular_size">$shipment.getConsignee_name()</div>
+				</div>
+			</td>
+			
+			<td width="" class="vtop borde">
+				<div id="block_container">
+					<div class="padding_all text_regular_size text_bold">$context.getString( "template.shipment.packing.incoterms" ): </div>
+					<div class="padding_all text_regular_size">$shipment.getIncoterms()</div>
+				</div>
+			</td>
+			<td width="" class="vtop borde">
+			</td>
+		</tr>
+
+	</table>
+
+	$shipment.getPackingTable( $context )	
+	
+	<table class="" width="100%">
+		<tr>
+			<td class="text_center">
+				<img src="$context.getSignatureUrl()" width="4cm"> </img> 
+			</td>
+		</tr>
+	</table>
+
+</body>
+
+</html>
