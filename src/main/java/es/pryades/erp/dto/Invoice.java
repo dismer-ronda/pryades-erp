@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+
 import es.pryades.erp.common.AppContext;
 import es.pryades.erp.common.CalendarUtils;
 import es.pryades.erp.common.Utils;
@@ -32,8 +34,8 @@ public class Invoice extends BaseDto
 	private Long ref_shipment;
 
 	private Double transport_cost;
-
 	private Boolean free_delivery; 	
+	private String payment_terms;
 
 	private Quotation quotation;
 	private Shipment shipment;
@@ -222,5 +224,10 @@ public class Invoice extends BaseDto
 	public String getCustomerDataAsHtml( AppContext ctx )
 	{
 		return quotation.getCustomerDataAsHtml( ctx );
+	}
+
+	public String getPaymentTermsAsHtml()
+	{
+		return Utils.getStringAsHtml( StringEscapeUtils.escapeXml( payment_terms ) );
 	}
 }

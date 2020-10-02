@@ -88,12 +88,12 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 	@Override
 	public String[] getVisibleCols()
 	{
-		return new String[]{ "number", "invoice_date", "title", "customer_name", "reference_order", "total_price", "total_invoice" };
+		return new String[]{ "invoice_date", "number", "title", "customer_name", "reference_order", "total_price", "total_invoice" };
 	}
 
 	public String[] getSortableCols()
 	{
-		return new String[]{ "number", "quotation_date", "customer_name" };
+		return new String[]{ "invoice_date", "number", "title", "customer_name", "reference_order" };
 	}
 	
 	@Override

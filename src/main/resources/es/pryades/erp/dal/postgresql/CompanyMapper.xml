@@ -44,14 +44,20 @@
 	
 	<sql id="es.pryades.erp.dal.ibatis.CompanyMapper.orderby">
 		<choose>
-			<when test="orderby.equals( 'name' )">
-				companies.name
+			<when test="orderby.equals( 'tax_id' )">
+				companies.tax_id
 			</when>
 			<when test="orderby.equals( 'alias' )">
 				companies.alias
 			</when>
-			<when test="orderby.equals( 'tax_id' )">
-				companies.tax_id
+			<when test="orderby.equals( 'name' )">
+				companies.name
+			</when>
+			<when test="orderby.equals( 'email' )">
+				companies.email
+			</when>
+			<when test="orderby.equals( 'phone' )">
+				companies.phone
 			</when>
 			<when test="orderby.equals( 'type_company' )">
 				companies.type_company

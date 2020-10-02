@@ -72,11 +72,8 @@ public class SignatureResource extends ServerResource
 			}
 	        
 	        String ts = params.get( "ts" );
-	        final String id = params.get( "id" );
 	        long timeout = Utils.getLong( params.get( "timeout" ), 0 );
 	        
-	        LOG.info(  "id =" + id );
-	    
 			if ( Authorization.isValidRequest( token, ts+timeout, ts, password, timeout ) ) 
 			{
 				rep = new OutputRepresentation(MediaType.IMAGE_PNG ) 

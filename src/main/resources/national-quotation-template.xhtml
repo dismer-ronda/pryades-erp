@@ -424,6 +424,7 @@
 							<div class="text_regular_size text_right padding_right">$quotation.getGrandTotalQuotationAsString() €</div>					
 						</td>
 					</tr>
+					#end
 
 					#foreach( $tax_rate in $quotation.getDetailedTaxes() )
 					<tr>
@@ -444,7 +445,6 @@
 							<div class="text_regular_size text_right padding_right">$quotation.getGrandTotalQuotationAfterTaxesAsString() €</div>					
 						</td>
 					</tr>
-					#end
 
 				</table>
 

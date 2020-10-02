@@ -199,7 +199,8 @@ public class Authorization implements Serializable
 			log += " EXCEPTION";
 		}
 
-		LOG.info( log );
+		if ( !ret )
+			LOG.info( log );
 
 		return ret;
 	}

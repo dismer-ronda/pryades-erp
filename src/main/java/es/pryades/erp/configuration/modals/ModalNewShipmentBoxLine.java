@@ -8,10 +8,13 @@ import org.apache.log4j.Logger;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.util.BeanItem;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.Button.ClickEvent;
 
 import es.pryades.erp.common.AppContext;
 import es.pryades.erp.common.BaseException;

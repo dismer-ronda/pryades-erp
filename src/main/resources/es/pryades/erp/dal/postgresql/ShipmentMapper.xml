@@ -293,20 +293,29 @@
 	
 	<sql id="es.pryades.erp.dal.ibatis.ShipmentMapper.orderby">
 		<choose>
-			<when test="orderby.equals( 'shipment_date' )">
-				shipments.shipment_date
-			</when>
 			<when test="orderby.equals( 'departure_date' )">
 				shipments.departure_date
 			</when>
 			<when test="orderby.equals( 'number' )">
 				shipments.number
 			</when>
-			<when test="orderby.equals( 'consignee_name' )">
-				companies1.name
+			<when test="orderby.equals( 'title' )">
+				shipments.title
 			</when>
 			<when test="orderby.equals( 'status' )">
 				shipments.status
+			</when>
+			<when test="orderby.equals( 'consignee_name' )">
+				companies1.name
+			</when>
+			<when test="orderby.equals( 'incoterms' )">
+				shipments.incoterms
+			</when>
+			<when test="orderby.equals( 'carrier' )">
+				shipments.carrier
+			</when>
+			<when test="orderby.equals( 'tracking' )">
+				shipments.tracking
 			</when>
 			<otherwise>
 				shipments.id

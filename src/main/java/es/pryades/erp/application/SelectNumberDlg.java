@@ -27,7 +27,7 @@ public class SelectNumberDlg extends Window
 	@Getter
 	private String value;
 
-	public SelectNumberDlg( String title, AppContext ctx )
+	public SelectNumberDlg( AppContext ctx, String title )
 	{
 		super( title );
 		

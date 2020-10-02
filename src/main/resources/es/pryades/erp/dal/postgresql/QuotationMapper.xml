@@ -272,14 +272,26 @@
 	
 	<sql id="es.pryades.erp.dal.ibatis.QuotationMapper.orderby">
 		<choose>
-			<when test="orderby.equals( 'quotation_date' )">
-				quotations.quotation_date
-			</when>
 			<when test="orderby.equals( 'number' )">
 				quotations.number
 			</when>
+			<when test="orderby.equals( 'quotation_date' )">
+				quotations.quotation_date
+			</when>
+			<when test="orderby.equals( 'title' )">
+				quotations.title
+			</when>
 			<when test="orderby.equals( 'customer_name' )">
 				companies.name
+			</when>
+			<when test="orderby.equals( 'status' )">
+				quotations.status
+			</when>
+			<when test="orderby.equals( 'reference_request' )">
+				quotations.reference_request
+			</when>
+			<when test="orderby.equals( 'reference_order' )">
+				quotations.reference_order
 			</when>
 			<otherwise>
 				quotations.id

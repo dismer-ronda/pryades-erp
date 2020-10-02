@@ -112,7 +112,6 @@ public class InvoiceResource extends ServerResource
 							export.setTemplate( template );
 							export.setContext( ctx1 );
 						
-							LOG.info( "generating PDF ..." );
 							export.doExport( arg0 );
 						}
 						catch ( Throwable e )

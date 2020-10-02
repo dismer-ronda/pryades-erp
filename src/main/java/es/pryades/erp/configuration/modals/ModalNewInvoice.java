@@ -21,6 +21,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.PopupDateField;
+import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Window;
 
@@ -43,6 +44,7 @@ import es.pryades.erp.dto.Quotation;
 import es.pryades.erp.dto.QuotationLine;
 import es.pryades.erp.dto.Shipment;
 import es.pryades.erp.dto.query.CompanyQuery;
+import es.pryades.erp.dto.query.InvoiceQuery;
 import es.pryades.erp.dto.query.QuotationQuery;
 import es.pryades.erp.dto.query.ShipmentQuery;
 import es.pryades.erp.ioc.IOCManager;
@@ -73,6 +75,7 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 	private ComboBox comboShipments;
 	private TextField editTransport_cost;
 	private CheckBox checkFree_delivery;
+	private TextArea editPayment_terms;
 
 	private List<TextField> editsLines;
 	private List<CheckBox> checksLines;
@@ -167,6 +170,11 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 		checkFree_delivery.setWidth( "100%" );
 		checkFree_delivery.setValue( newInvoice.getFree_delivery() );
 
+		editPayment_terms = new TextArea( getContext().getString( "modalNewInvoice.editPayment_terms" ), bi.getItemProperty( "payment_terms" ) );
+		editPayment_terms.setWidth( "100%" );
+		editPayment_terms.setNullRepresentation( "" );
+		editPayment_terms.setRows( 3 );
+		
 		HorizontalLayout row1 = new HorizontalLayout();
 		row1.setWidth( "100%" );
 		row1.setSpacing( true );
@@ -184,8 +192,14 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 		row2.addComponent( checkFree_delivery );
 		row2.setComponentAlignment( checkFree_delivery, Alignment.BOTTOM_LEFT );
 
+		HorizontalLayout row4 = new HorizontalLayout();
+		row4.setWidth( "100%" );
+		row4.setSpacing( true );
+		row4.addComponent( editPayment_terms );
+
 		componentsContainer.addComponent( row1 );
 		componentsContainer.addComponent( row2 );
+		componentsContainer.addComponent( row4 );
 		
 		if ( !getOperation().equals( Operation.OP_ADD ) )
 		{
@@ -638,7 +652,7 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 		for ( Shipment shipment : shipments )
 		{
 			comboShipments.addItem( shipment.getId() );
-			comboShipments.setItemCaption( shipment.getId(), shipment.getFormattedNumber() + " - " + shipment.getIncoterms() );
+			comboShipments.setItemCaption( shipment.getId(), shipment.getFormattedNumber() + " - " + shipment.getTitle() );
 		}
 	}
 	
@@ -651,11 +665,12 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 	
 			Quotation quotation = (Quotation)IOCManager._QuotationsManager.getRow( getContext(), queryQuotation );
 		
-			LOG.info( quotation );
 			newInvoice.setTransport_cost( quotation.getPendingTansportCost() );
+			newInvoice.setPayment_terms( quotation.getPayment_terms() );
 			newInvoice.setQuotation( quotation );
 			
 			editTransport_cost.markAsDirty();
+			editPayment_terms.markAsDirty();
 		}
 		catch ( Throwable e )
 		{
@@ -695,113 +710,140 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 
 	public void onShowPdf()
 	{
-		try
+		if ( onModify() )
 		{
-			long ts = CalendarUtils.getTodayAsLong( "UTC" );
+			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+			dashboard.refreshInvoicesTab();
+			dashboard.refreshQuotationsTab();
+			dashboard.refreshShipmentsTab();
 			
-			String pagesize = "A4";
-			String template = newInvoice.getQuotation().getCustomer_taxable().booleanValue() ? "national-invoice-template" : "international-invoice-template";
-			String timeout = "0";
-			
-			String extra = "ts=" + ts + 
-					"&id=" + newInvoice.getId() + 
-					"&name=" + newInvoice.getFormattedNumber() + "-" + newInvoice.getQuotation().getTitle() + 
-					"&pagesize=" + pagesize + 
-					"&template=" + template +
-					"&url=" + getContext().getData( "Url" ) +
-					"&timeout=" + timeout;
-			
-			String user = getContext().getUser().getLogin();
-			String password = getContext().getUser().getPwd();
-			
-			String token = "token=" + Authorization.getTokenString( "" + ts + timeout, password );
-			String code = "code=" + Authorization.encrypt( extra, password ) ;
-
-			String url = getContext().getData( "Url" ) + "/services/invoice" + "?user=" + user + "&" + token + "&" + code + "&ts=" + ts;
-			
-			String caption = getContext().getString( "template.invoice.invoice" ) + " " + newInvoice.getFormattedNumber() ;
-
-			ShowExternalUrlDlg dlg = new ShowExternalUrlDlg(); 
+			try
+			{
+				InvoiceQuery query = new InvoiceQuery();
+				query.setId( newInvoice.getId() );
+				Invoice invoice = (Invoice)IOCManager._InvoicesManager.getRow( getContext(), query );
+				
+				long ts = CalendarUtils.getTodayAsLong( "UTC" );
+				
+				String pagesize = "A4";
+				String template = invoice.getQuotation().getCustomer_taxable().booleanValue() ? "national-invoice-template" : "international-invoice-template";
+				String timeout = "0";
+				
+				String extra = "ts=" + ts + 
+						"&id=" + invoice.getId() + 
+						"&name=" + invoice.getFormattedNumber() + "-" + invoice.getQuotation().getTitle() + 
+						"&pagesize=" + pagesize + 
+						"&template=" + template +
+						"&url=" + getContext().getData( "Url" ) +
+						"&timeout=" + timeout;
+				
+				String user = getContext().getUser().getLogin();
+				String password = getContext().getUser().getPwd();
+				
+				String token = "token=" + Authorization.getTokenString( "" + ts + timeout, password );
+				String code = "code=" + Authorization.encrypt( extra, password ) ;
 	
-			dlg.setContext( getContext() );
-			dlg.setUrl( url );
-			dlg.setCaption( caption );
-			dlg.createComponents();
-			
-			getUI().addWindow( dlg );
-		}
+				String url = getContext().getData( "Url" ) + "/services/invoice" + "?user=" + user + "&" + token + "&" + code + "&ts=" + ts;
+				
+				String caption = getContext().getString( "template.invoice.invoice" ) + " " + invoice.getFormattedNumber() ;
+	
+				ShowExternalUrlDlg dlg = new ShowExternalUrlDlg(); 
+		
+				dlg.setContext( getContext() );
+				dlg.setUrl( url );
+				dlg.setCaption( caption );
+				dlg.createComponents();
+				
+				getUI().addWindow( dlg );
 
-		catch ( Throwable e )
-		{
-			Utils.logException( e, LOG );
+				closeModalWindow( true, true );
+			}
+	
+			catch ( Throwable e )
+			{
+				Utils.logException( e, LOG );
+			}
 		}
 	}
 
 	public void onEmailQuotation()
 	{
-		try
+		if ( onModify() )
 		{
-			String template = newInvoice.getQuotation().getCustomer_taxable().booleanValue() ? "national-invoice-template" : "international-invoice-template";
-			String name = newInvoice.getFormattedNumber() + "-" + newInvoice.getQuotation().getTitle() + ".pdf";
+			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+			dashboard.refreshInvoicesTab();
+			dashboard.refreshQuotationsTab();
+			dashboard.refreshShipmentsTab();
 			
-			PdfExportInvoice export = new PdfExportInvoice( newInvoice );
+			try
+			{
+				InvoiceQuery queryInvoice = new InvoiceQuery();
+				queryInvoice.setId( newInvoice.getId() );
+				Invoice invoice = (Invoice)IOCManager._InvoicesManager.getRow( getContext(), queryInvoice );
+
+				String template = newInvoice.getQuotation().getCustomer_taxable().booleanValue() ? "national-invoice-template" : "international-invoice-template";
+				String name = newInvoice.getFormattedNumber() + "-" + invoice.getQuotation().getTitle() + ".pdf";
+				
+				PdfExportInvoice export = new PdfExportInvoice( invoice );
+				
+				export.setOrientation( "portrait" );
+				export.setPagesize( "A4" );
+				export.setTemplate( template );
 			
-			export.setOrientation( "portrait" );
-			export.setPagesize( "A4" );
-			export.setTemplate( template );
-		
-			AppContext ctx1 = new AppContext( newInvoice.getQuotation().getCustomer_language() );
-			IOCManager._ParametersManager.loadParameters( ctx1 );
-			ctx1.setUser( getContext().getUser() );
-			ctx1.addData( "Url", getContext().getData( "Url" ) );
+				AppContext ctx1 = new AppContext( invoice.getQuotation().getCustomer_language() );
+				IOCManager._ParametersManager.loadParameters( ctx1 );
+				ctx1.setUser( getContext().getUser() );
+				ctx1.addData( "Url", getContext().getData( "Url" ) );
+	
+				export.setContext( ctx1 );
+	
+				ByteArrayOutputStream os = new ByteArrayOutputStream();
+				export.doExport( os );
+	
+				List<Attachment> attachments = new ArrayList<Attachment>();
+				attachments.add( new Attachment( name, "application/pdf", os.toByteArray() ) );
+				
+				String subject = ctx1.getString( "modalNewInvoice.emailSubject" ).replaceAll( "%name%", name );  
+				String text = ctx1.getString( "modalNewInvoice.emailText" ).
+						replaceAll( "%contact_person%", invoice.getQuotation().getCustomer_contact_person() ).
+						replaceAll( "%reference_order%", invoice.getQuotation().getReference_order() );  
+	
+				CompanyQuery query = new CompanyQuery();
+				query.setType_company( Company.TYPE_OWNER );
+				Company company = (Company)IOCManager._CompaniesManager.getRow( getContext(), query );
+	
+				String body = text + "\n\n" + getContext().getCompanyDataAndLegal( company ); 
+				
+				final SendEmailDlg dlg = new SendEmailDlg( getContext(), getContext().getString( "modalNewInvoice.emailTitle" ), attachments );
+				dlg.setTo( invoice.getQuotation().getCustomer_email() );
+				dlg.setReply_to( company.getEmail() );
+				dlg.setSubject( subject );
+				dlg.setBody( body );
+				dlg.addCloseListener
+				( 
+					new Window.CloseListener() 
+					{
+						private static final long serialVersionUID = -5280799582624434015L;
+	
+						@Override
+					    public void windowClose( CloseEvent e ) 
+					    {
+							if ( dlg.isSuccess() )
+							{
+							}
+					    }
+					}
+				);
+				getUI().addWindow( dlg );
 
-			export.setContext( ctx1 );
-
-			ByteArrayOutputStream os = new ByteArrayOutputStream();
-			LOG.info( "generating PDF ..." );
-			export.doExport( os );
-
-			List<Attachment> attachments = new ArrayList<Attachment>();
-			attachments.add( new Attachment( name, "application/pdf", os.toByteArray() ) );
-			
-			String subject = ctx1.getString( "modalNewInvoice.emailSubject" ).replaceAll( "%name%", name );  
-			String text = ctx1.getString( "modalNewInvoice.emailText" ).
-					replaceAll( "%contact_person%", newInvoice.getQuotation().getCustomer_contact_person() ).
-					replaceAll( "%reference_order%", newInvoice.getQuotation().getReference_order() );  
-
-			CompanyQuery query = new CompanyQuery();
-			query.setType_company( Company.TYPE_OWNER );
-			Company company = (Company)IOCManager._CompaniesManager.getRow( getContext(), query );
-
-			String body = text + "\n\n" + getContext().getCompanyDataAndLegal( company ); 
-			
-			final SendEmailDlg dlg = new SendEmailDlg( getContext(), getContext().getString( "modalNewInvoice.emailTitle" ), attachments );
-			dlg.setTo( newInvoice.getQuotation().getCustomer_email() );
-			dlg.setReply_to( company.getEmail() );
-			dlg.setSubject( subject );
-			dlg.setBody( body );
-			dlg.addCloseListener
-			( 
-				new Window.CloseListener() 
-				{
-					private static final long serialVersionUID = -5280799582624434015L;
-
-					@Override
-				    public void windowClose( CloseEvent e ) 
-				    {
-						if ( dlg.isSuccess() )
-						{
-						}
-				    }
-				}
-			);
-			getUI().addWindow( dlg );
-		}
-		catch ( Throwable e )
-		{
-			Utils.logException( e, LOG );
-
-			Utils.showNotification( getContext(), getContext().getString( "modalNewQuotation.emailError" ), Notification.Type.ERROR_MESSAGE );
+				closeModalWindow( true, true );
+			}
+			catch ( Throwable e )
+			{
+				Utils.logException( e, LOG );
+	
+				Utils.showNotification( getContext(), getContext().getString( "modalNewQuotation.emailError" ), Notification.Type.ERROR_MESSAGE );
+			}
 		}
 	}
 }

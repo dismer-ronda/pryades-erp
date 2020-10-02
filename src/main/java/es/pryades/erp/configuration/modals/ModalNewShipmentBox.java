@@ -3,11 +3,17 @@ package es.pryades.erp.configuration.modals;
 import org.apache.log4j.Logger;
 
 import com.vaadin.data.util.BeanItem;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.Window;
 
+import es.pryades.erp.application.SelectNumberDlg;
 import es.pryades.erp.common.AppContext;
 import es.pryades.erp.common.ModalParent;
 import es.pryades.erp.common.ModalWindowsCRUD;
@@ -52,8 +58,6 @@ public class ModalNewShipmentBox extends ModalWindowsCRUD implements ModalParent
 	private Panel panelLines;
 	private ShipmentsBoxesLinesConfig configLines;
 
-	private boolean dirty;
-	
 	private UserDefault type;
 	private UserDefault length;
 	private UserDefault width;
@@ -85,6 +89,8 @@ public class ModalNewShipmentBox extends ModalWindowsCRUD implements ModalParent
 		try
 		{
 			newShipmentBox = (ShipmentBox) Utils.clone( (ShipmentBox) orgDto );
+			newShipmentBox.setLines( ((ShipmentBox) orgDto).getLines() );
+			newShipmentBox.setSub_boxes( ((ShipmentBox) orgDto).getSub_boxes() );
 		}
 		catch ( Throwable e1 )
 		{
@@ -101,8 +107,6 @@ public class ModalNewShipmentBox extends ModalWindowsCRUD implements ModalParent
 
 		layout.setHeight( "-1px" );
 		
-		dirty = false;
-
 		bi = new BeanItem<BaseDto>( newShipmentBox );
 
 		if ( getOperation().equals( Operation.OP_ADD ) )
@@ -156,6 +160,24 @@ public class ModalNewShipmentBox extends ModalWindowsCRUD implements ModalParent
 			{
 				showBoxLines();
 				componentsContainer.addComponent( panelLines );
+			}
+			
+			if ( newShipmentBox.getBox_type().equals( ShipmentBox.TYPE_CARDBOARD_BOX ) )
+			{
+				Button btnDuplicate = new Button();
+				btnDuplicate.setCaption( getContext().getString( "modalNewShipmentBox.replicate" ) );
+				btnDuplicate.addClickListener( new Button.ClickListener()
+				{
+					private static final long serialVersionUID = 4281084472150497059L;
+	
+					public void buttonClick( ClickEvent event )
+					{
+						onReplicateBox();
+					}
+				} );
+	
+				getDefaultOperationsRow().addComponentAsFirst( btnDuplicate );
+				getDefaultOperationsRow().setComponentAlignment( btnDuplicate, Alignment.MIDDLE_LEFT );
 			}
 		}
 	}
@@ -391,33 +413,14 @@ public class ModalNewShipmentBox extends ModalWindowsCRUD implements ModalParent
 		}
 	}
 
-	private void reloadShipmentBox()
-	{
-		try
-		{
-			ShipmentBox query = new ShipmentBox();
-			query.setId( newShipmentBox.getId() );
-			
-			newShipmentBox = (ShipmentBox)IOCManager._ShipmentsBoxesManager.getRow( getContext(), query );
-		}
-		catch ( Throwable e )
-		{
-			Utils.logException( e, LOG );
-		}
-	}
-	
 	@Override
 	public void refreshVisibleContent( boolean repage )
 	{
-		//reloadShipmentBox();
-		
 		if ( configBoxes != null )
 			configBoxes.refreshVisibleContent( repage );
 		
 		if ( configLines != null )
 			configLines.refreshVisibleContent( repage );
-		
-		dirty = true;
 		
 		getModalParent().refreshVisibleContent( true );
 	}
@@ -494,5 +497,52 @@ public class ModalNewShipmentBox extends ModalWindowsCRUD implements ModalParent
 	public boolean checkModifyRight()
 	{
 		return getContext().hasRight( "configuration.shipments.modify" );
+	}
+
+	public void onReplicateBox()
+	{
+		final SelectNumberDlg dlg = new SelectNumberDlg( getContext(), getContext().getString( "modalNewShipmentBox.selectReplication" ) );
+		dlg.addCloseListener
+		( 
+			new Window.CloseListener() 
+			{
+				private static final long serialVersionUID = 8649179067642794422L;
+
+				@Override
+			    public void windowClose( CloseEvent e ) 
+			    {
+					String value = dlg.getValue();
+					
+					if ( value != null && !value.isEmpty() )
+					{
+						try
+						{
+							int times = Utils.getInt( value, 1 );
+									
+							if ( !IOCManager._ShipmentsBoxesManager.canReplicateBox( getContext(), newShipmentBox.getId(), times ) )
+							{
+								String error = getContext().getString( "modalNewShipmentBox.replicationExceeded" );
+								Utils.showNotification( getContext(), error, Notification.Type.ERROR_MESSAGE );
+							}
+							else
+							{
+								IOCManager._ShipmentsBoxesManager.replicateBox( getContext(), newShipmentBox.getId(), times );
+								
+								refreshVisibleContent( true );
+								
+								Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+								dashboard.refreshQuotationsTab();
+								dashboard.refreshInvoicesTab();
+							}
+						}
+						catch ( Throwable e1 )
+						{
+							Utils.logException( e1, LOG );
+						}
+					}
+			    }
+			}
+		);
+		getUI().addWindow( dlg );
 	}
 }

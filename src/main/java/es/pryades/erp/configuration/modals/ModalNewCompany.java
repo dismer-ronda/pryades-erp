@@ -96,6 +96,8 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 		comboLanguage.setNullSelectionAllowed( false );
 		comboLanguage.setTextInputAllowed( false );
 		comboLanguage.setImmediate( true );
+		comboLanguage.setRequired( true );
+		comboLanguage.setRequiredError( getContext().getString( "words.required" ) );
 		fillComboLanguage();
 		comboLanguage.setPropertyDataSource( bi.getItemProperty( "language" ) );
 
@@ -106,6 +108,8 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 			comboTypes.setNullSelectionAllowed( false );
 			comboTypes.setTextInputAllowed( false );
 			comboTypes.setImmediate( true );
+			comboTypes.setRequired( true );
+			comboTypes.setRequiredError( getContext().getString( "words.required" ) );
 			fillComboTypes();
 			comboTypes.setPropertyDataSource( bi.getItemProperty( "type_company" ) );
 		}
@@ -113,12 +117,16 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 		editAlias = new TextField( getContext().getString( "modalNewCompany.editAlias" ), bi.getItemProperty( "alias" ) );
 		editAlias.setWidth( "100%" );
 		editAlias.setNullRepresentation( "" );
+		editAlias.setRequired( true );
+		editAlias.setRequiredError( getContext().getString( "words.required" ) );
 		
 		editName = new TextField( getContext().getString( "modalNewCompany.editName" ), bi.getItemProperty( "name" ) );
 		editName.setWidth( "100%" );
 		editName.setNullRepresentation( "" );
+		editName.setRequired( true );
+		editName.setRequiredError( getContext().getString( "words.required" ) );
 		
-		editTax_id= new TextField( getContext().getString( "modalNewCompany.editTax_id" ), bi.getItemProperty( "tax_id" ) );
+		editTax_id = new TextField( getContext().getString( "modalNewCompany.editTax_id" ), bi.getItemProperty( "tax_id" ) );
 		editTax_id.setWidth( "100%" );
 		editTax_id.setNullRepresentation( "" );
 		
@@ -129,7 +137,9 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 		editEmail = new TextField( getContext().getString( "modalNewCompany.editEmail" ), bi.getItemProperty( "email" ) );
 		editEmail.setWidth( "100%" );
 		editEmail.setNullRepresentation( "" );
-
+		editEmail.setRequired( true );
+		editEmail.setRequiredError( getContext().getString( "words.required" ) );
+		
 		editPhone = new TextField( getContext().getString( "modalNewCompany.editPhone" ), bi.getItemProperty( "phone" ) );
 		editPhone.setWidth( "100%" );
 		editPhone.setNullRepresentation( "" );
@@ -137,6 +147,8 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 		editContact_person = new TextField( getContext().getString( "modalNewCompany.editContact_person" ), bi.getItemProperty( "contact_person" ) );
 		editContact_person.setWidth( "100%" );
 		editContact_person.setNullRepresentation( "" );
+		editContact_person.setRequired( true );
+		editContact_person.setRequiredError( getContext().getString( "words.required" ) );
 
 		checkTaxable = new CheckBox( getContext().getString( "modalNewCompany.checkTaxable" ), bi.getItemProperty( "taxable" ) );
 		checkTaxable.setWidth( "100%" );
@@ -230,10 +242,7 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 			if ( newCompany.getType_company().equals( Company.TYPE_CUSTOMER ) )
 			{
 				Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
-				
-				dashboard.refreshQuotationsTab();
-				dashboard.refreshInvoicesTab();
-				dashboard.refreshShipmentsTab();
+				dashboard.refreshCustomers();
 			}
 			
 			return true;
@@ -251,15 +260,14 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 	{
 		try
 		{
+			LOG.info( newCompany );
+			
 			IOCManager._CompaniesManager.setRow( getContext(), (Company) orgDto, newCompany );
 
 			if ( newCompany.getType_company().equals( Company.TYPE_CUSTOMER ) )
 			{
 				Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
-				
-				dashboard.refreshQuotationsTab();
-				dashboard.refreshInvoicesTab();
-				dashboard.refreshShipmentsTab();
+				dashboard.refreshCustomers();
 			}
 
 			return true;
@@ -289,10 +297,7 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 			if ( newCompany.getType_company().equals( Company.TYPE_CUSTOMER ) )
 			{
 				Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
-				
-				dashboard.refreshQuotationsTab();
-				dashboard.refreshInvoicesTab();
-				dashboard.refreshShipmentsTab();
+				dashboard.refreshCustomers();
 			}
 			
 			return true;

@@ -264,6 +264,7 @@
 		<result property="ref_shipment" column="ref_shipment"/>
 		<result property="transport_cost" column="transport_cost"/>
 		<result property="free_delivery" column="free_delivery"/>
+		<result property="payment_terms" column="payment_terms"/>
 		
 		<association property="quotation" javaType="es.pryades.erp.dto.Quotation" resultMap="mapQuotation" columnPrefix="quotation_" />
 		<association property="shipment" javaType="es.pryades.erp.dto.Shipment" resultMap="mapShipment" columnPrefix="shipment_" />
@@ -281,6 +282,7 @@
 		invoices.ref_shipment,						
 		invoices.transport_cost,						
 		invoices.free_delivery,						
+		invoices.payment_terms,						
 
 		quotations.id					as quotation_id,						
 		quotations.ref_customer			as quotation_ref_customer,
@@ -409,14 +411,20 @@
 	
 	<sql id="es.pryades.erp.dal.ibatis.InvoiceMapper.orderby">
 		<choose>
-			<when test="orderby.equals( 'quotation_date' )">
-				invoices.invoices_date
+			<when test="orderby.equals( 'invoice_date' )">
+				invoices.invoice_date
 			</when>
 			<when test="orderby.equals( 'number' )">
 				invoices.number
 			</when>
+			<when test="orderby.equals( 'title' )">
+				invoices.title
+			</when>
 			<when test="orderby.equals( 'customer_name' )">
 				companies.name
+			</when>
+			<when test="orderby.equals( 'reference_order' )">
+				quotations.reference_order
 			</when>
 			<otherwise>
 				quotations.id
@@ -503,7 +511,8 @@
 			ref_shipment,
 		
 			transport_cost,						
-			free_delivery						
+			free_delivery,						
+			payment_terms						
 		)
 		values
 		(
@@ -517,7 +526,8 @@
 			#{ref_shipment},
 			
 			#{transport_cost},						
-			#{free_delivery}						
+			#{free_delivery},						
+			#{payment_terms}						
 		)
 	</insert>
 
@@ -528,6 +538,7 @@
 			ref_quotation = #{ref_quotation},
 			ref_shipment = #{ref_shipment},
 			transport_cost=#{transport_cost},						
+			payment_terms=#{payment_terms},						
 			free_delivery=#{free_delivery}						
 		where id = #{id}
 	</update>

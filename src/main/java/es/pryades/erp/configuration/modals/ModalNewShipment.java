@@ -9,13 +9,13 @@ import com.vaadin.data.util.BeanItem;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.PopupDateField;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.Button.ClickEvent;
 
 import es.pryades.erp.application.ShowExternalUrlDlg;
 import es.pryades.erp.common.AppContext;
@@ -26,11 +26,13 @@ import es.pryades.erp.common.ModalParent;
 import es.pryades.erp.common.ModalWindowsCRUD;
 import es.pryades.erp.common.Utils;
 import es.pryades.erp.configuration.tabs.ShipmentsBoxesConfig;
+import es.pryades.erp.dashboard.Dashboard;
 import es.pryades.erp.dto.BaseDto;
 import es.pryades.erp.dto.Company;
 import es.pryades.erp.dto.Shipment;
 import es.pryades.erp.dto.UserDefault;
 import es.pryades.erp.dto.query.CompanyQuery;
+import es.pryades.erp.dto.query.ShipmentQuery;
 import es.pryades.erp.ioc.IOCManager;
 import lombok.Getter;
 
@@ -369,6 +371,10 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 			
 			saveUserDefaults();
 
+			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+			dashboard.refreshInvoicesTab();
+			dashboard.refreshQuotationsTab();
+
 			return true;
 		}
 		catch ( Throwable e )
@@ -392,6 +398,10 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 
 			saveUserDefaults();
 
+			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+			dashboard.refreshInvoicesTab();
+			dashboard.refreshQuotationsTab();
+
 			return true;
 		}
 		catch ( Throwable e )
@@ -410,6 +420,10 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 		{
 			IOCManager._ShipmentsManager.delRow( getContext(), newShipment );
 
+			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+			dashboard.refreshInvoicesTab();
+			dashboard.refreshQuotationsTab();
+			
 			return true;
 		}
 		catch ( Throwable e )
@@ -532,44 +546,53 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 	
 	public void onShowPdf()
 	{
-		try
+		if ( onModify() )
 		{
-			long ts = CalendarUtils.getTodayAsLong( "UTC" );
+			try
+			{
+				ShipmentQuery queryShipment = new ShipmentQuery();
+				queryShipment.setId( newShipment.getId() );
+				Shipment shipment = (Shipment)IOCManager._ShipmentsManager.getRow( getContext(), queryShipment );
 			
-			String pagesize = "A4";
-			String template = newShipment.getConsignee_taxable().booleanValue() ? "national-packing-template" : "international-packing-template";
-			String timeout = "0";
-			
-			String extra = "ts=" + ts + 
-							"&id=" + newShipment.getId() + 
-							"&pagesize=" + pagesize + 
-							"&template=" + template +
-							"&url=" + getContext().getData( "Url" ) +
-							"&timeout=" + timeout;
-			
-			String user = getContext().getUser().getLogin();
-			String password = getContext().getUser().getPwd();
-			
-			String token = "token=" + Authorization.getTokenString( "" + ts + timeout, password );
-			String code = "code=" + Authorization.encrypt( extra, password ) ;
-
-			String url = getContext().getData( "Url" ) + "/services/packing" + "?user=" + user + "&" + token + "&" + code + "&ts=" + ts;
-			
-			String caption = getContext().getString( "template.shipment.packing" ) + " " + newShipment.getFormattedNumber() ;
-
-			ShowExternalUrlDlg dlg = new ShowExternalUrlDlg(); 
+				long ts = CalendarUtils.getTodayAsLong( "UTC" );
+				
+				String pagesize = "A4";
+				String template = shipment.getConsignee_taxable().booleanValue() ? "national-packing-template" : "international-packing-template";
+				String timeout = "0";
+				
+				String extra = "ts=" + ts + 
+								"&id=" + shipment.getId() + 
+								"&pagesize=" + pagesize + 
+								"&template=" + template +
+								"&url=" + getContext().getData( "Url" ) +
+								"&timeout=" + timeout;
+				
+				String user = getContext().getUser().getLogin();
+				String password = getContext().getUser().getPwd();
+				
+				String token = "token=" + Authorization.getTokenString( "" + ts + timeout, password );
+				String code = "code=" + Authorization.encrypt( extra, password ) ;
 	
-			dlg.setContext( getContext() );
-			dlg.setUrl( url );
-			dlg.setCaption( caption );
-			dlg.createComponents();
-			
-			getUI().addWindow( dlg );
-		}
-
-		catch ( Throwable e )
-		{
-			Utils.logException( e, LOG );
+				String url = getContext().getData( "Url" ) + "/services/packing" + "?user=" + user + "&" + token + "&" + code + "&ts=" + ts;
+				
+				String caption = getContext().getString( "template.shipment.packing" ) + " " + shipment.getFormattedNumber() ;
+	
+				ShowExternalUrlDlg dlg = new ShowExternalUrlDlg(); 
+		
+				dlg.setContext( getContext() );
+				dlg.setUrl( url );
+				dlg.setCaption( caption );
+				dlg.createComponents();
+				
+				getUI().addWindow( dlg );
+				
+				closeModalWindow( true, true );
+			}
+	
+			catch ( Throwable e )
+			{
+				Utils.logException( e, LOG );
+			}
 		}
 	}
 }

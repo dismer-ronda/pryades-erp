@@ -80,12 +80,12 @@ public class ShipmentsTabContent extends PagedContent implements ModalParent
 	@Override
 	public String[] getVisibleCols()
 	{
-		return new String[]{ "number", "departure_date", "title", "status", "consignee_name", "incoterms", "carrier", "tracking" };
+		return new String[]{ "departure_date", "number", "title", "status", "consignee_name", "incoterms", "carrier", "tracking" };
 	}
 
 	public String[] getSortableCols()
 	{
-		return new String[]{ "number", "departure_date", "title", "status", "consignee_name", "incoterms", "carrier", "tracking" };
+		return new String[]{ "departure_date", "number", "title", "status", "consignee_name", "incoterms", "carrier", "tracking" };
 	}
 	
 	@Override

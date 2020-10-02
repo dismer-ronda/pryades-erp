@@ -26,4 +26,10 @@ public class XmlUtils
 	{
 		return "<br/>";
 	}
+
+	public static String getBlockDiv( String contents )
+	{
+		return "<div id=\"block_container\">" + contents + "</div>";
+	}
+
 }

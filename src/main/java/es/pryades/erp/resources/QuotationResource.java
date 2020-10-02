@@ -110,7 +110,6 @@ public class QuotationResource extends ServerResource
 							export.setTemplate( template );
 							export.setContext( ctx1 );
 						
-							LOG.info( "generating PDF ..." );
 							export.doExport( arg0 );
 
 						}

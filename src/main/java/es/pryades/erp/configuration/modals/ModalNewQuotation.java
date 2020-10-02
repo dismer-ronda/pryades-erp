@@ -35,7 +35,6 @@ import es.pryades.erp.configuration.tabs.QuotationsLinesConfig;
 import es.pryades.erp.dashboard.Dashboard;
 import es.pryades.erp.dto.BaseDto;
 import es.pryades.erp.dto.Company;
-import es.pryades.erp.dto.Parameter;
 import es.pryades.erp.dto.Quotation;
 import es.pryades.erp.dto.QuotationAttachment;
 import es.pryades.erp.dto.QuotationDelivery;
@@ -625,45 +624,59 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 
 	public void onShowPdf()
 	{
-		try
+		if ( onModify() )
 		{
-			long ts = CalendarUtils.getTodayAsLong( "UTC" );
-			
-			String pagesize = "A4";
-			String template = newQuotation.getCustomer_taxable().booleanValue() ? "national-quotation-template" : "international-quotation-template";
-			String timeout = "0";
-			
-			String extra = "ts=" + ts + 
-					"&id=" + newQuotation.getId() + 
-					"&name=QT-" + newQuotation.getFormattedNumber() + "-" +  newQuotation.getReference_request() + ".pdf" + 
-					"&pagesize=" + pagesize + 
-					"&template=" + template +
-					"&url=" + getContext().getData( "Url" ) +
-					"&timeout=" + timeout;
-			
-			String user = getContext().getUser().getLogin();
-			String password = getContext().getUser().getPwd();
-			
-			String token = "token=" + Authorization.getTokenString( "" + ts + timeout, password );
-			String code = "code=" + Authorization.encrypt( extra, password ) ;
+			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+			dashboard.refreshInvoicesTab();
+			dashboard.refreshQuotationsTab();
+			dashboard.refreshShipmentsTab();
+		
+			try
+			{
+				QuotationQuery queryQuotation = new QuotationQuery();
+				queryQuotation.setId( newQuotation.getId() );
+				Quotation quotation = (Quotation)IOCManager._QuotationsManager.getRow( getContext(), queryQuotation );
 
-			String url = getContext().getData( "Url" ) + "/services/quotation" + "?user=" + user + "&" + token + "&" + code + "&ts=" + ts;
-			
-			String caption = getContext().getString( "template.quotation.quotation" ) + " " + newQuotation.getFormattedNumber() ;
-
-			ShowExternalUrlDlg dlg = new ShowExternalUrlDlg(); 
+				long ts = CalendarUtils.getTodayAsLong( "UTC" );
+				
+				String pagesize = "A4";
+				String template = newQuotation.getCustomer_taxable().booleanValue() ? "national-quotation-template" : "international-quotation-template";
+				String timeout = "0";
+				
+				String extra = "ts=" + ts + 
+						"&id=" + quotation.getId() + 
+						"&name=QT-" + quotation.getFormattedNumber() + "-" +  quotation.getReference_request() + ".pdf" + 
+						"&pagesize=" + pagesize + 
+						"&template=" + template +
+						"&url=" + getContext().getData( "Url" ) +
+						"&timeout=" + timeout;
+				
+				String user = getContext().getUser().getLogin();
+				String password = getContext().getUser().getPwd();
+				
+				String token = "token=" + Authorization.getTokenString( "" + ts + timeout, password );
+				String code = "code=" + Authorization.encrypt( extra, password ) ;
 	
-			dlg.setContext( getContext() );
-			dlg.setUrl( url );
-			dlg.setCaption( caption );
-			dlg.createComponents();
-			
-			getUI().addWindow( dlg );
-		}
-
-		catch ( Throwable e )
-		{
-			Utils.logException( e, LOG );
+				String url = getContext().getData( "Url" ) + "/services/quotation" + "?user=" + user + "&" + token + "&" + code + "&ts=" + ts;
+				
+				String caption = getContext().getString( "template.quotation.quotation" ) + " " + quotation.getFormattedNumber() ;
+	
+				ShowExternalUrlDlg dlg = new ShowExternalUrlDlg(); 
+		
+				dlg.setContext( getContext() );
+				dlg.setUrl( url );
+				dlg.setCaption( caption );
+				dlg.createComponents();
+				
+				getUI().addWindow( dlg );
+				
+				closeModalWindow( true, true );
+			}
+	
+			catch ( Throwable e )
+			{
+				Utils.logException( e, LOG );
+			}
 		}
 	}
 
@@ -686,74 +699,103 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 
 	public void onEmailQuotation()
 	{
-		try
+		if ( onModify() )
 		{
-			newQuotation.setQuotation_date( CalendarUtils.getTodayAsLong() );
-			
-			String template = newQuotation.getCustomer_taxable().booleanValue() ? "national-quotation-template" : "international-quotation-template";
-			String name = "QT-" + newQuotation.getFormattedNumber() + "-" +  newQuotation.getReference_request() + ".pdf";
-			
-			PdfExportQuotation export = new PdfExportQuotation( newQuotation );
-			
-			export.setOrientation( newQuotation.getDeliveries().size() > 1 ? "landscape" : "portrait" );
-			export.setPagesize( "A4" );
-			export.setTemplate( template );
-			
-			AppContext ctx1 = new AppContext( newQuotation.getCustomer_language() );
-			IOCManager._ParametersManager.loadParameters( ctx1 );
-			ctx1.setUser( getContext().getUser() );
-			ctx1.addData( "Url", getContext().getData( "Url" ) );
-
-			export.setContext( ctx1 );
+			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+			dashboard.refreshInvoicesTab();
+			dashboard.refreshQuotationsTab();
+			dashboard.refreshShipmentsTab();
 		
-			ByteArrayOutputStream os = new ByteArrayOutputStream();
-			LOG.info( "generating PDF ..." );
-			export.doExport( os );
-
-			List<Attachment> attachments = new ArrayList<Attachment>();
-			attachments.add( new Attachment( name, "application/pdf", os.toByteArray() ) );
+			try
+			{
+				QuotationQuery queryQuotation = new QuotationQuery();
+				queryQuotation.setId( newQuotation.getId() );
+				Quotation quotation = (Quotation)IOCManager._QuotationsManager.getRow( getContext(), queryQuotation );
 			
-			String subject = ctx1.getString( "modalNewQuotation.emailSubject" ).replaceAll( "%name%", name );  
-			String text = ctx1.getString( "modalNewQuotation.emailText" ).
-					replaceAll( "%reference_request%", newQuotation.getReference_request() ).
-					replaceAll( "%contact_person%", newQuotation.getCustomer_contact_person() );  
+				String template = quotation.getCustomer_taxable().booleanValue() ? "national-quotation-template" : "international-quotation-template";
+				String name = "QT-" + quotation.getFormattedNumber() + "-" +  quotation.getReference_request() + ".pdf";
+				
+				PdfExportQuotation export = new PdfExportQuotation( quotation );
+				
+				export.setOrientation( newQuotation.getDeliveries().size() > 1 ? "landscape" : "portrait" );
+				export.setPagesize( "A4" );
+				export.setTemplate( template );
+				
+				AppContext ctx1 = new AppContext( quotation.getCustomer_language() );
+				IOCManager._ParametersManager.loadParameters( ctx1 );
+				ctx1.setUser( getContext().getUser() );
+				ctx1.addData( "Url", getContext().getData( "Url" ) );
+	
+				export.setContext( ctx1 );
+			
+				ByteArrayOutputStream os = new ByteArrayOutputStream();
+				export.doExport( os );
+	
+				List<Attachment> attachments = new ArrayList<Attachment>();
+				attachments.add( new Attachment( name, "application/pdf", os.toByteArray() ) );
+				
+				String subject = ctx1.getString( "modalNewQuotation.emailSubject" ).replaceAll( "%name%", name );  
+				String text = ctx1.getString( "modalNewQuotation.emailText" ).
+						replaceAll( "%reference_request%", quotation.getReference_request() ).
+						replaceAll( "%contact_person%", quotation.getCustomer_contact_person() );  
+	
+				CompanyQuery query = new CompanyQuery();
+				query.setType_company( Company.TYPE_OWNER );
+				Company company = (Company)IOCManager._CompaniesManager.getRow( getContext(), query );
+	
+				String body = text + "\n\n" + getContext().getCompanyDataAndLegal( company ); 
+	
+				final SendEmailDlg dlg = new SendEmailDlg( getContext(), getContext().getString( "modalNewQuotation.emailTitle" ), attachments );
+				dlg.setTo( quotation.getCustomer_email() );
+				dlg.setReply_to( company.getEmail() );
+				dlg.setSubject( subject );
+				dlg.setBody( body );
+				dlg.setData( quotation );
+				dlg.addCloseListener
+				( 
+					new Window.CloseListener() 
+					{
+						private static final long serialVersionUID = -798063903136075292L;
 
-			CompanyQuery query = new CompanyQuery();
-			query.setType_company( Company.TYPE_OWNER );
-			Company company = (Company)IOCManager._CompaniesManager.getRow( getContext(), query );
+						@Override
+					    public void windowClose( CloseEvent e ) 
+					    {
+							if ( dlg.isSuccess() )
+							{
+								try
+								{
+									Quotation org = (Quotation)dlg.getData();
+									Quotation clone = (Quotation)Utils.clone( org ); 
 
-			String body = text + "\n\n" + getContext().getCompanyDataAndLegal( company ); 
-
-			final SendEmailDlg dlg = new SendEmailDlg( getContext(), getContext().getString( "modalNewQuotation.emailTitle" ), attachments );
-			dlg.setTo( newQuotation.getCustomer_email() );
-			dlg.setReply_to( company.getEmail() );
-			dlg.setSubject( subject );
-			dlg.setBody( body );
-			dlg.addCloseListener
-			( 
-				new Window.CloseListener() 
-				{
-					private static final long serialVersionUID = -7921174154171992358L;
-
-					@Override
-				    public void windowClose( CloseEvent e ) 
-				    {
-						if ( dlg.isSuccess() )
-						{
-							newQuotation.setStatus( Quotation.STATUS_SENT );
-							comboStatus.setValue( Quotation.STATUS_SENT );
-							fromDateField.setValue( CalendarUtils.getDateFromString( Long.toString( newQuotation.getQuotation_date() ), "yyyyMMddHHmmss" ) );
-						}
-				    }
-				}
-			);
-			getUI().addWindow( dlg );
-		}
-		catch ( Throwable e )
-		{
-			Utils.logException( e, LOG );
-
-			Utils.showNotification( getContext(), getContext().getString( "modalNewQuotation.emailError" ), Notification.Type.ERROR_MESSAGE );
+									org.setStatus( Quotation.STATUS_SENT );
+									
+									IOCManager._QuotationsManager.setRow( getContext(), clone, org );
+									
+									Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+									dashboard.refreshInvoicesTab();
+									dashboard.refreshQuotationsTab();
+									dashboard.refreshShipmentsTab();
+								}
+								catch ( Throwable e1 )
+								{
+									Utils.logException( e1, LOG );
+						
+									Utils.showNotification( getContext(), getContext().getString( "modalNewQuotation.emailError" ), Notification.Type.ERROR_MESSAGE );
+								}
+							}
+					    }
+					}
+				);
+				getUI().addWindow( dlg );
+				
+				closeModalWindow( true, true );
+			}
+			catch ( Throwable e )
+			{
+				Utils.logException( e, LOG );
+	
+				Utils.showNotification( getContext(), getContext().getString( "modalNewQuotation.emailError" ), Notification.Type.ERROR_MESSAGE );
+			}
 		}
 	}
 

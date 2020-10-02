@@ -26,6 +26,115 @@
 		order by shipments_boxes.id asc
 	</select>
 
+	<select id="selectShipmentBoxLines" parameterType="long" resultMap="mapShipmentBoxLine">
+		select
+			shipments_boxes_lines.id,
+	
+			shipments_boxes_lines.ref_box,
+			shipments_boxes_lines.ref_invoice_line,
+			shipments_boxes_lines.quantity,
+			shipments_boxes_lines.net_weight,
+			shipments_boxes_lines.gross_weight,
+			
+			invoices_lines.id					as invoice_line_id,
+			invoices_lines.ref_invoice			as invoice_line_ref_invoice,
+			invoices_lines.ref_quotation_line	as invoice_line_ref_quotation_line,
+			invoices_lines.quantity				as invoice_line_quantity,
+		
+			( 
+				select 
+					sum( lines1.quantity ) 
+					 
+				from 
+					shipments_boxes_lines lines1
+					
+				where 
+					lines1.ref_invoice_line = invoices_lines.id
+						
+			) as invoice_line_total_packed,
+	
+			quotations_lines.id					as invoice_line_quotation_line_id,
+			quotations_lines.ref_quotation 		as invoice_line_quotation_line_ref_quotation,
+			quotations_lines.ref_provider 		as invoice_line_quotation_line_ref_provider,
+			quotations_lines.line_order			as invoice_line_quotation_line_line_order,
+			quotations_lines.origin 			as invoice_line_quotation_line_origin,
+			quotations_lines.reference 			as invoice_line_quotation_line_reference,
+			quotations_lines.title 				as invoice_line_quotation_line_title,
+			quotations_lines.description 		as invoice_line_quotation_line_description,
+			quotations_lines.cost 				as invoice_line_quotation_line_cost,
+			quotations_lines.real_cost 			as invoice_line_quotation_line_real_cost,
+			quotations_lines.margin 			as invoice_line_quotation_line_margin,
+			quotations_lines.tax_rate 			as invoice_line_quotation_line_tax_rate,
+			
+			( 
+				select 
+					sum( quantity ) 
+					 
+				from 
+					invoices_lines lines2
+				
+				where 
+					lines2.ref_quotation_line = quotations_lines.id
+						
+			) as 								invoice_line_quotation_line_total_invoiced
+			
+		from
+			shipments_boxes_lines
+			
+		inner join invoices_lines
+		on shipments_boxes_lines.ref_invoice_line = invoices_lines.id
+	
+		inner join quotations_lines
+		on invoices_lines.ref_quotation_line = quotations_lines.id
+	
+		where 
+			shipments_boxes_lines.ref_box = #{id}
+			
+		order by shipments_boxes_lines.id asc
+	</select>
+
+	<resultMap id="mapQuotationLine" type="es.pryades.erp.dto.QuotationLine">
+		<id property="id" column="id"/>
+		
+		<result property="ref_quotation" column="ref_quotation"/>
+		<result property="ref_provider" column="ref_provider"/>
+		
+		<result property="line_order" column="line_order"/>
+		<result property="origin" column="origin"/>
+		<result property="reference" column="reference"/>
+		<result property="title" column="title"/>
+		<result property="description" column="description"/>
+		<result property="cost" column="cost"/>
+		<result property="real_cost" column="real_cost"/>
+		<result property="margin" column="margin"/>
+		<result property="tax_rate" column="tax_rate"/>
+		<result property="total_invoiced" column="total_invoiced"/>
+	</resultMap>
+
+	<resultMap id="mapInvoiceLine" type="es.pryades.erp.dto.InvoiceLine">
+		<id property="id" column="id"/>
+		
+		<result property="ref_invoice" column="ref_invoice"/>
+		<result property="ref_quotation_line" column="ref_quotation_line"/>
+		<result property="quantity" column="quantity"/>
+		<result property="total_packed" column="total_packed"/>
+
+		<association property="quotation_line" javaType="es.pryades.erp.dto.QuotationLine" resultMap="mapQuotationLine" columnPrefix="quotation_line_" />
+	</resultMap>
+
+	<resultMap id="mapShipmentBoxLine" type="es.pryades.erp.dto.ShipmentBoxLine">
+		<id property="id" column="id"/>
+		
+		<result property="ref_box" column="ref_box"/>
+		<result property="ref_invoice_line" column="ref_invoice_line"/>
+		
+		<result property="quantity" column="quantity"/>
+		<result property="net_weight" column="net_weight"/>
+		<result property="gross_weight" column="gross_weight"/>
+
+		<association property="invoice_line" javaType="es.pryades.erp.dto.InvoiceLine" resultMap="mapInvoiceLine" columnPrefix="invoice_line_" />
+	</resultMap>
+
 	<resultMap id="mapShipmentBox" type="es.pryades.erp.dto.ShipmentBox">
 		<id property="id" column="id"/>
 		
@@ -38,6 +147,7 @@
 		<result property="length" column="length"/>
 
 		<collection property="sub_boxes" column="id" ofType="mapShipmentBox" select="selectShipmentSubBoxes"> </collection>
+		<collection property="lines" column="id" ofType="mapShipmentBoxLine" select="selectShipmentBoxLines"> </collection>
 	</resultMap>
 
 	<sql id="es.pryades.erp.dal.ibatis.ShipmentBoxMapper.fields">

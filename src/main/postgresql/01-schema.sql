@@ -306,6 +306,7 @@ create table invoices
 	ref_shipment bigint,
 
 	title varchar(128) not null,
+	payment_terms text not null,
 	
 	number int not null,						
 	invoice_date bigint not null,						

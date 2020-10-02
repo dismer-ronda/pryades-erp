@@ -93,12 +93,12 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 	@Override
 	public String[] getVisibleCols()
 	{
-		return new String[]{ "number", "quotation_date", "title", "customer_name", "status", "reference_request", "reference_order", "total_cost", "total_price", "total_profit", "total_quotation" };
+		return new String[]{ "quotation_date", "number", "title", "customer_name", "status", "reference_request", "reference_order", "total_cost", "total_price", "total_profit", "total_quotation" };
 	}
 
 	public String[] getSortableCols()
 	{
-		return new String[]{ "number", "quotation_date", "customer_name", "status",  };
+		return new String[]{ "quotation_date", "number", "title", "customer_name", "status", "reference_request", "reference_order" };
 	}
 	
 	@Override

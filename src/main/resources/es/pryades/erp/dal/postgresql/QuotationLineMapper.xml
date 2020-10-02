@@ -97,7 +97,26 @@
 	</sql>
 	
 	<sql id="es.pryades.erp.dal.ibatis.QuotationLineMapper.orderby">
-		quotations_lines.line_order
+		<choose>
+			<when test="orderby.equals( 'line_order' )">
+				quotations_lines.line_order
+			</when>
+			<when test="orderby.equals( 'title' )">
+				quotations_lines.title
+			</when>
+			<when test="orderby.equals( 'cost' )">
+				quotations_lines.cost
+			</when>
+			<when test="orderby.equals( 'real_cost' )">
+				quotations_lines.real_cost
+			</when>
+			<when test="orderby.equals( 'margin' )">
+				quotations_lines.margin
+			</when>
+			<otherwise>
+				quotations_lines.line_order
+			</otherwise>
+		</choose>
 
 		<choose>
 			<when test="order.equalsIgnoreCase( 'asc' )">

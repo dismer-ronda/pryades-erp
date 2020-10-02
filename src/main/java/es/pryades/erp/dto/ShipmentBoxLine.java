@@ -3,6 +3,7 @@ package es.pryades.erp.dto;
 import org.apache.log4j.Logger;
 
 import es.pryades.erp.common.AppContext;
+import es.pryades.erp.common.Utils;
 import es.pryades.erp.common.XmlUtils;
 import es.pryades.erp.dto.query.InvoiceQuery;
 import es.pryades.erp.ioc.IOCManager;
@@ -67,8 +68,8 @@ public class ShipmentBoxLine extends BaseDto
 		
 		String cols = 
 				XmlUtils.getTableCol( "", 	"full_height text-regular-size text_left borde", item ) +
-				XmlUtils.getTableCol( "48px", 	"text-regular-size text_center borde", getNet_weight().toString() ) +
-				XmlUtils.getTableCol( "48px", 	"text-regular-size text_center borde", getGross_weight().toString() ) +
+				XmlUtils.getTableCol( "48px", 	"text-regular-size text_center borde", Double.toString( Utils.roundDouble( getNet_weight(), 1 ) ) ) +
+				XmlUtils.getTableCol( "48px", 	"text-regular-size text_center borde", Double.toString( Utils.roundDouble( getGross_weight(), 1 ) ) ) +
 				XmlUtils.getTableCol( "44px", 	"text-regular-size text_center borde", getQuantity().toString() );
 		
 		return cols;

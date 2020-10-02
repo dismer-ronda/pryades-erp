@@ -38,7 +38,7 @@ public class QuotationsLinesConfig extends PagedContent implements ModalParent
 	
 		this.parent = parent;
 		
-		setOrderby( "id" );
+		setOrderby( "line_order" );
 		setOrder( "asc" );
 	}
 

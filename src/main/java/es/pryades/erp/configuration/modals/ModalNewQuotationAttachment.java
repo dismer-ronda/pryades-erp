@@ -13,6 +13,9 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Upload;
+import com.vaadin.ui.Upload.FailedEvent;
+import com.vaadin.ui.Upload.FailedListener;
+import com.vaadin.ui.Upload.ProgressListener;
 import com.vaadin.ui.Upload.Receiver;
 import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
@@ -34,7 +37,7 @@ import es.pryades.erp.ioc.IOCManager;
  * 
  */
 
-public class ModalNewQuotationAttachment extends ModalWindowsCRUD implements Receiver, SucceededListener
+public class ModalNewQuotationAttachment extends ModalWindowsCRUD implements Receiver, SucceededListener, FailedListener, ProgressListener
 {
 	private static final long serialVersionUID = 6211386099409894453L;
 
@@ -216,6 +219,7 @@ public class ModalNewQuotationAttachment extends ModalWindowsCRUD implements Rec
 		os = new ByteArrayOutputStream();
 		fileName = filename;
 		
+		LOG.error( "upload file " + filename );
 		return os;
 	}
 
@@ -227,6 +231,22 @@ public class ModalNewQuotationAttachment extends ModalWindowsCRUD implements Rec
 		labelAttachment.setCaption( fileName + " " + getContext().getString( "words.success" ) );
 	}
 	
+	@Override
+	public void uploadFailed( FailedEvent event )
+	{
+		LOG.error( "Upload Fail <><> File: " + event.getFilename() );
+		
+		os = null;
+		//upload.setEnabled( true );
+		//editMd5.setEnabled( false );
+	}
+	
+	@Override
+	public void updateProgress( long readBytes, long contentLength )
+	{
+		LOG.info( "upload " + readBytes + " of " + contentLength );
+	}
+
 	public void showAttachment()
 	{
 		try

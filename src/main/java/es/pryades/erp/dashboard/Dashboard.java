@@ -162,11 +162,11 @@ public class Dashboard extends VerticalLayout implements SelectedTabChangeListen
 		if ( getContext().hasRight( "configuration.quotations" ) )
 			createQuotationsTab();
 
-		if ( getContext().hasRight( "configuration.shipments" ) )
-			createShipmentsTab();
-		
 		if ( getContext().hasRight( "configuration.invoices" ) )
 			createInvoicesTab();
+		
+		if ( getContext().hasRight( "configuration.shipments" ) )
+			createShipmentsTab();
 		
 		if ( getContext().hasRight( "main.log" )  )
 			createLogTab();
@@ -201,29 +201,35 @@ public class Dashboard extends VerticalLayout implements SelectedTabChangeListen
 	{
 		QuotationsTabContent content = quotationsTab.getQuotationsTable();
 		if ( content != null )
-		{
 			content.refreshVisibleContent( true );
-			content.refreshCustomers();
-		}
 	}
 
 	public void refreshInvoicesTab()
 	{
 		InvoicesTabContent content = invoicesTab.getInvoicesTable();
 		if ( content != null )
-		{
 			content.refreshVisibleContent( true );
-			content.refreshCustomers();
-		}
 	}
 
 	public void refreshShipmentsTab()
 	{
 		ShipmentsTabContent content = shipmentsTab.getShipmentsTable();
 		if ( content != null )
-		{
 			content.refreshVisibleContent( true );
-			content.refreshCustomers();
-		}
+	}
+	
+	public void refreshCustomers()
+	{
+		QuotationsTabContent content1 = quotationsTab.getQuotationsTable();
+		if ( content1 != null )
+			content1.refreshCustomers();
+		
+		InvoicesTabContent content2 = invoicesTab.getInvoicesTable();
+		if ( content2 != null )
+			content2.refreshCustomers();
+		
+		ShipmentsTabContent content3 = shipmentsTab.getShipmentsTable();
+		if ( content3 != null )
+			content3.refreshCustomers();
 	}
 }
