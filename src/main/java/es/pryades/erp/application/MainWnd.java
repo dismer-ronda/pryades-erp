@@ -47,7 +47,6 @@ public class MainWnd extends VerticalLayout implements MinimizerContainer
 	
 	private HashMap<Component, Window> minimizeds;
 
-
 	public MainWnd( AppContext context )
 	{
 		this.context = context;
@@ -83,6 +82,25 @@ public class MainWnd extends VerticalLayout implements MinimizerContainer
 		}
 
 		setExpandRatio( workSpace, 1.0f );
+		
+		/*
+		if ( showBox != null )
+		{
+    		try
+    		{
+		    	ShipmentBox query = new ShipmentBox();
+		    	query.setId( showBox );
+		    	
+		    	ShipmentBox box = (ShipmentBox)IOCManager._ShipmentsBoxesManager.getRow( getContext(), query );
+		    	
+		    	new ModalNewShipmentBox( getContext(), Operation.OP_MODIFY, (ShipmentBox)box, null ).showModalWindow();
+    		}
+			catch ( Throwable e )
+    		{
+				Utils.logException( e, LOG );
+    		}
+		}
+		*/
 	}
 
 	private Component buildWorkspace()

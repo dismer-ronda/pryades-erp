@@ -50,15 +50,26 @@ public class LoginResource extends ServerResource
 			try
 			{
 				HashMap<String,String> params = new HashMap<String,String>();
-				
 				Utils.getParameters( getRequest().getResourceRef().getQuery(), params );
 				
-				AppContext ctx = new AppContext( "en" );
+				final AppContext ctx = new AppContext("es");
 				IOCManager._ParametersManager.loadParameters( ctx );
 
-				String token = params.get( "token" );
 				String user = params.get( "user" );
-				String password = ""; //IOCManager._PlatformsManager.getPlatformPassword( ctx, user );
+		    	IOCManager._UsersManager.loadUsuario( ctx, user );
+				
+				String token = params.get( "token" );
+				String password = ctx.getUser().getPwd();
+				String code = params.get( "code" );
+				
+				if ( code != null )
+				{
+					code = Authorization.decrypt( code, password );
+				
+					params.clear();
+			        Utils.getParameters( code, params );
+				}
+		        
 		        String ts = params.get( "ts" );
 		        long timeout = Utils.getLong( params.get( "timeout" ), 0 );
 				

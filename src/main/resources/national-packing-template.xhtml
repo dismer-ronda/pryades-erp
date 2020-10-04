@@ -190,7 +190,7 @@
 			<td width="50%" class="text_left vtop">
 				<div class="text_regular_size text_bold">$context.getString( "template.shipment.packing.issued" ):</div>
 				<div class="text_regular_size sangria">
-					$context.getCompanyDataAsHtml( $shipment.getUser() )
+					$context.getCompanyDataAsHtml(  $shipment.getUser() )
 				</div>
 			</td>
 			
@@ -238,10 +238,6 @@
 			</td>
 			
 			<td width="" class="vtop borde">
-				<div id="block_container">
-					<div class="padding_all text_regular_size text_bold">$context.getString( "template.shipment.packing.incoterms" ): </div>
-					<div class="padding_all text_regular_size">$shipment.getIncoterms()</div>
-				</div>
 			</td>
 			<td width="" class="vtop borde">
 			</td>

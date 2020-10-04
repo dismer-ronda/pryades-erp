@@ -2,30 +2,39 @@ package es.pryades.erp.configuration.modals;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.Receiver;
 import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
+import com.vaadin.ui.VerticalLayout;
 
 import es.pryades.erp.common.AppContext;
+import es.pryades.erp.common.BaseException;
 import es.pryades.erp.common.ModalParent;
 import es.pryades.erp.common.ModalWindowsCRUD;
 import es.pryades.erp.common.Utils;
 import es.pryades.erp.dashboard.Dashboard;
 import es.pryades.erp.dto.BaseDto;
 import es.pryades.erp.dto.Company;
+import es.pryades.erp.dto.CompanyContact;
+import es.pryades.erp.dto.query.CompanyContactQuery;
 import es.pryades.erp.ioc.IOCManager;
 
 /**
@@ -53,11 +62,14 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 	private TextField editPhone;
 	private CheckBox checkTaxable;
 	private CheckBox checkSignature;
-	private TextField editContact_person;
 
 	private Label labelAttachment;
 	private String fileName;
 	private ByteArrayOutputStream os;
+	
+	private List<CompanyContact> contacts;
+	private Panel panelContacts;
+	private List<HorizontalLayout> contacts_rows;
 
 	/**
 	 * 
@@ -76,6 +88,8 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 	public void initComponents()
 	{
 		super.initComponents();
+
+		setWidth( "1024px" );
 
 		try
 		{
@@ -144,12 +158,6 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 		editPhone.setWidth( "100%" );
 		editPhone.setNullRepresentation( "" );
 
-		editContact_person = new TextField( getContext().getString( "modalNewCompany.editContact_person" ), bi.getItemProperty( "contact_person" ) );
-		editContact_person.setWidth( "100%" );
-		editContact_person.setNullRepresentation( "" );
-		editContact_person.setRequired( true );
-		editContact_person.setRequiredError( getContext().getString( "words.required" ) );
-
 		checkTaxable = new CheckBox( getContext().getString( "modalNewCompany.checkTaxable" ), bi.getItemProperty( "taxable" ) );
 		checkTaxable.setWidth( "100%" );
 		
@@ -198,23 +206,36 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 		row5.setSpacing( true );
 		row5.addComponent( editAddress );
 		
+		componentsContainer.addComponent( row1 );
+		componentsContainer.addComponent( row2 );
+		componentsContainer.addComponent( row3 );
+		componentsContainer.addComponent( row4 );
+		componentsContainer.addComponent( row5 );
+		
+		if ( !getOperation().equals( Operation.OP_ADD ) )
+		{
+			panelContacts = new Panel( getContext().getString( "modalNewCompany.contacts" ) );
+			panelContacts.setStyleName( "borderless light" );
+			panelContacts.setHeight( "240px" );
+			
+			contacts_rows = new ArrayList<HorizontalLayout>();
+			
+			VerticalLayout col = new VerticalLayout();
+			col.setWidth( "100%" );
+			col.setMargin( true );
+			panelContacts.setContent( col );
+			
+			showContacts();
+			
+			componentsContainer.addComponent( panelContacts );
+		}
+
 		HorizontalLayout row6 = new HorizontalLayout();
 		row6.setWidth( "100%" );
 		row6.setSpacing( true );
 		row6.addComponent( labelAttachment );
 		row6.setComponentAlignment( labelAttachment, Alignment.MIDDLE_CENTER );
 
-		HorizontalLayout row7 = new HorizontalLayout();
-		row7.setWidth( "100%" );
-		row7.setSpacing( true );
-		row7.addComponent( editContact_person );
-
-		componentsContainer.addComponent( row1 );
-		componentsContainer.addComponent( row2 );
-		componentsContainer.addComponent( row7 );
-		componentsContainer.addComponent( row3 );
-		componentsContainer.addComponent( row4 );
-		componentsContainer.addComponent( row5 );
 		componentsContainer.addComponent( row6 );
 	}
 
@@ -260,8 +281,6 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 	{
 		try
 		{
-			LOG.info( newCompany );
-			
 			IOCManager._CompaniesManager.setRow( getContext(), (Company) orgDto, newCompany );
 
 			if ( newCompany.getType_company().equals( Company.TYPE_CUSTOMER ) )
@@ -270,6 +289,8 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 				dashboard.refreshCustomers();
 			}
 
+			saveContacts();
+			
 			return true;
 		}
 		catch ( Throwable e )
@@ -362,5 +383,209 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 		newCompany.setLogo( os.toByteArray() );
 		
 		labelAttachment.setCaption( fileName + " " + getContext().getString( "words.success" ) );
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void loadContacts()
+	{
+		try
+		{
+			CompanyContactQuery query = new CompanyContactQuery();
+			query.setRef_company( newCompany.getId() );
+			
+			contacts = IOCManager._CompaniesContactsManager.getRows( getContext(), query );
+			contacts_rows.clear();
+		}
+		catch ( BaseException e )
+		{
+			e.printStackTrace();
+			contacts = new ArrayList<CompanyContact>();
+		}
+	}
+
+	private void showContacts()
+	{
+		((VerticalLayout)panelContacts.getContent()).removeAllComponents();
+		
+		loadContacts();
+		
+		for ( CompanyContact contact : contacts )
+		{
+			HorizontalLayout row = new HorizontalLayout();
+			row.setWidth( "100%" );
+			row.setSpacing( true );
+
+			HorizontalLayout rowEdits = new HorizontalLayout();
+			rowEdits.setWidth( "100%" );
+			rowEdits.setSpacing( true );
+
+			TextField editName = new TextField( getContext().getString( "modalNewCompany.editName" ) );
+			editName.setWidth( "100%" );
+			editName.setNullRepresentation( "" );
+			editName.setRequired( true );
+			editName.setRequiredError( getContext().getString( "words.required" ) );
+			editName.setValue( contact.getName() );
+			
+			TextField editEmail = new TextField( getContext().getString( "modalNewCompany.editEmail" ) );
+			editEmail.setWidth( "100%" );
+			editEmail.setNullRepresentation( "" );
+			editEmail.setRequired( true );
+			editEmail.setRequiredError( getContext().getString( "words.required" ) );
+			editEmail.setValue( contact.getEmail() );
+			
+			TextField editPhone = new TextField( getContext().getString( "modalNewCompany.editPhone" ) );
+			editPhone.setWidth( "100%" );
+			editPhone.setNullRepresentation( "" );
+			editPhone.setValue( contact.getPhone() );
+
+			Button btnDel = new Button("-");
+			btnDel.setWidth( "48px" );
+			btnDel.setData( contact );
+			btnDel.addClickListener( new Button.ClickListener()
+			{
+				private static final long serialVersionUID = 6139166285625663025L;
+
+				public void buttonClick( ClickEvent event )
+				{
+					onDeleteContact( (CompanyContact)event.getButton().getData() );
+				}
+			} );
+
+			rowEdits.addComponent( editName );
+			rowEdits.addComponent( editEmail );
+			rowEdits.addComponent( editPhone );
+			
+			row.addComponent( rowEdits );
+			row.addComponent( btnDel );
+			row.setComponentAlignment( btnDel, Alignment.BOTTOM_LEFT );
+			row.setExpandRatio( rowEdits, 1.0f );
+			
+			((VerticalLayout)panelContacts.getContent()).addComponent( row );
+			
+			rowEdits.setData( contact );
+			contacts_rows.add( rowEdits );
+		}
+		
+		HorizontalLayout row = new HorizontalLayout();
+		row.setWidth( "100%" );
+		row.setSpacing( true );
+
+		HorizontalLayout rowEdits = new HorizontalLayout();
+		rowEdits.setWidth( "100%" );
+		rowEdits.setSpacing( true );
+		
+		TextField editName = new TextField( getContext().getString( "modalNewCompany.editName" ) );
+		editName.setWidth( "100%" );
+		editName.setNullRepresentation( "" );
+		editName.setRequired( true );
+		editName.setRequiredError( getContext().getString( "words.required" ) );
+		
+		TextField editEmail = new TextField( getContext().getString( "modalNewCompany.editEmail" ) );
+		editEmail.setWidth( "100%" );
+		editEmail.setNullRepresentation( "" );
+		editEmail.setRequired( true );
+		editEmail.setRequiredError( getContext().getString( "words.required" ) );
+		
+		TextField editPhone = new TextField( getContext().getString( "modalNewCompany.editPhone" ) );
+		editPhone.setWidth( "100%" );
+		editPhone.setNullRepresentation( "" );
+
+		Button btnAdd = new Button("+");
+		btnAdd.setWidth( "48px" );
+		btnAdd.setData( rowEdits );
+		btnAdd.addClickListener( new Button.ClickListener()
+		{
+			private static final long serialVersionUID = 4835729502890544577L;
+
+			public void buttonClick( ClickEvent event )
+			{
+				HorizontalLayout row = (HorizontalLayout)event.getButton().getData();
+				
+				String name = ((TextField)row.getComponent( 0 )).getValue();
+				String email = ((TextField)row.getComponent( 1 )).getValue();
+				String phone = ((TextField)row.getComponent( 2 )).getValue();
+				
+				onAddContact( name, email, phone );
+			}
+		} );
+
+		rowEdits.addComponent( editName );
+		rowEdits.addComponent( editEmail );
+		rowEdits.addComponent( editPhone );
+		
+		row.addComponent( rowEdits );
+		row.addComponent( btnAdd );
+		row.setComponentAlignment( btnAdd, Alignment.BOTTOM_LEFT );
+		row.setExpandRatio( rowEdits, 1.0f );
+		
+		((VerticalLayout)panelContacts.getContent()).addComponent( row );
+	}
+	
+	private void onDeleteContact( CompanyContact contact )
+	{
+		try
+		{
+			IOCManager._CompaniesContactsManager.delRow( getContext(), contact );
+			
+			showContacts();
+		}
+		catch ( Throwable e  )
+		{
+			showErrorMessage( e );
+		}
+	}
+
+	private boolean onAddContact( String name, String email, String phone )
+	{
+		try
+		{
+			if ( !name.isEmpty() && !email.isEmpty() )
+			{
+				CompanyContact contact = new CompanyContact();
+				contact.setRef_company( newCompany.getId() );
+				contact.setName( name );
+				contact.setEmail( email );
+				contact.setPhone( phone );
+				
+				IOCManager._CompaniesContactsManager.setRow( getContext(), null, contact );
+				
+				showContacts();
+				
+				return true;
+			}
+		}
+		catch ( Throwable e  )
+		{
+			showErrorMessage( e );
+		}
+		
+		return false;
+	}
+	
+	private void saveContacts()
+	{
+		for ( HorizontalLayout row : contacts_rows )
+		{
+			CompanyContact contact = (CompanyContact)row.getData();
+			
+			String name = ((TextField)row.getComponent( 0 )).getValue();
+			String email = ((TextField)row.getComponent( 1 )).getValue();
+			String phone = ((TextField)row.getComponent( 2 )).getValue();
+
+			try
+			{
+				CompanyContact newContact = (CompanyContact)Utils.clone( contact );
+
+				newContact.setName( name );
+				newContact.setEmail( email );
+				newContact.setPhone( phone );
+				
+				IOCManager._CompaniesContactsManager.setRow( getContext(), contact, newContact );
+			}
+			catch ( Throwable e  )
+			{
+				showErrorMessage( e );
+			}
+		}
 	}
 }

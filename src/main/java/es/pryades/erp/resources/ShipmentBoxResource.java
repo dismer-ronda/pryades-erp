@@ -5,7 +5,6 @@ import java.io.OutputStream;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
-import org.restlet.data.Disposition;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.OutputRepresentation;
@@ -18,18 +17,17 @@ import org.restlet.resource.ServerResource;
 import es.pryades.erp.common.AppContext;
 import es.pryades.erp.common.Authorization;
 import es.pryades.erp.common.Utils;
-import es.pryades.erp.dto.Invoice;
-import es.pryades.erp.dto.query.InvoiceQuery;
+import es.pryades.erp.dto.ShipmentBox;
 import es.pryades.erp.ioc.IOCManager;
-import es.pryades.erp.reports.PdfExportInvoice;
+import es.pryades.erp.reports.PdfExportBox;
 import es.pryades.erp.services.Return;
 import es.pryades.erp.services.ReturnFactory;
 
-public class InvoiceResource extends ServerResource 
+public class ShipmentBoxResource extends ServerResource 
 {
-	private static final Logger LOG = Logger.getLogger( InvoiceResource.class );
+	private static final Logger LOG = Logger.getLogger( ShipmentBoxResource.class );
 
-	public InvoiceResource() 
+	public ShipmentBoxResource() 
 	{
 		super();
 	}
@@ -79,12 +77,9 @@ public class InvoiceResource extends ServerResource
 	        final String pagesize = params.get( "pagesize" );
 	        final String template = params.get( "template" );
 	        final String id = params.get( "id" );
-	        final String name = params.get( "name" );
 	        final String url = params.get( "url" );
 	        long timeout = Utils.getLong( params.get( "timeout" ), 0 );
 	        
-	        LOG.info(  "id =" + id );
-	    
 			if ( Authorization.isValidRequest( token, ts+timeout, ts, password, timeout ) ) 
 			{
 				rep = new OutputRepresentation(MediaType.APPLICATION_PDF) 
@@ -94,18 +89,20 @@ public class InvoiceResource extends ServerResource
 					{
 						try
 						{
-					    	InvoiceQuery query = new InvoiceQuery();
+					    	ShipmentBox query = new ShipmentBox();
 					    	query.setId( Long.parseLong( id ) );
 					    	
-					    	Invoice quotation = (Invoice)IOCManager._InvoicesManager.getRow( ctx, query );
-							
-							AppContext ctx1 = new AppContext( quotation.getQuotation().getCustomer().getLanguage() );
+					    	ShipmentBox box = (ShipmentBox)IOCManager._ShipmentsBoxesManager.getRow( ctx, query );
+					    	
+					    	LOG.info( "box " + box );
+					    	
+							AppContext ctx1 = new AppContext( "en" );
 							
 							IOCManager._ParametersManager.loadParameters( ctx1 );
 							ctx1.setUser( ctx.getUser() );
 							ctx1.addData( "Url", url );
 
-							PdfExportInvoice export = new PdfExportInvoice( quotation );
+							PdfExportBox export = new PdfExportBox( box );
 							
 							export.setOrientation( "portrait" );
 							export.setPagesize( pagesize );
@@ -120,10 +117,6 @@ public class InvoiceResource extends ServerResource
 						}
 					}
 				};				
-
-				Disposition disp = new Disposition( Disposition.TYPE_INLINE );
-				disp.setFilename( name );
-				rep.setDisposition( disp );
 			}
 			else
 			{

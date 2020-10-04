@@ -1,12 +1,9 @@
 package es.pryades.erp.dto;
 
-import org.apache.commons.lang3.StringEscapeUtils;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 
-import es.pryades.erp.common.AppContext;
-import es.pryades.erp.common.Authorization;
-import es.pryades.erp.common.CalendarUtils;
-import es.pryades.erp.common.Utils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -41,7 +38,9 @@ public class Company extends BaseDto
 	private String language;
   	private Boolean signature;
   	private Integer type_company;
-	private String contact_person;
 
   	private byte[] logo;
+  	
+	private List<CompanyContact> contacts;
+	private List<User> users;
 }

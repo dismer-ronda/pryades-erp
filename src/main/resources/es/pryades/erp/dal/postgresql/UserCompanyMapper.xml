@@ -21,8 +21,15 @@
 		inner join companies
 		on users_companies.ref_company = companies.id
 		
-		where
-			users_companies.ref_user = #{ref_user}
+		<where>
+			<if test="ref_user != null">
+				users_companies.ref_user = #{ref_user}     
+	        </if>
+
+			<if test="ref_company != null">
+				users_companies.ref_company = #{ref_company}     
+	        </if>
+		</where>
 		
 		order by users_companies.id
 	</select>

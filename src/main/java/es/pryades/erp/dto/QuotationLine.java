@@ -36,7 +36,7 @@ public class QuotationLine extends BaseDto
 
 	private Integer total_invoiced;
 
-	private String provider_name;
+	private Company provider;
 
 	private List<QuotationLineDelivery> line_deliveries;
 	
@@ -150,5 +150,18 @@ public class QuotationLine extends BaseDto
 	public String getOrigin()
 	{
 		return origin != null ? origin : "";
+	}
+
+	@Override
+	public void removePrivateFields()	
+	{
+		super.removePrivateFields();
+
+		if ( provider != null )
+			provider.removePrivateFields();
+		
+		cost = null;;
+		margin = null;
+		real_cost = null;
 	}
 }

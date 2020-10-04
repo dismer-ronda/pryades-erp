@@ -218,4 +218,52 @@ public class Authorization implements Serializable
 
 		return "";
 	}
+	
+	public static String getRemoteLoginUrl( String user, String password, String timeout )
+	{
+		try
+		{
+			long ts = CalendarUtils.getTodayAsLong( "UTC" );
+			String extra = "&timeout=" + timeout + "&ts=" + ts; 
+			String code = Authorization.encrypt( extra, Utils.MD5( password ).toLowerCase() ) ;
+
+			String token = Authorization.getTrustedToken( "" + ts + timeout, Utils.MD5( password ).toLowerCase() );
+			
+			return "/services/login?user=" + user +"&token=" + token +"&code=" + code;
+		}
+		catch ( BaseException e )
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+
+	public static String getPackingUrl( String user, String password, String timeout, Long id )
+	{
+		try
+		{
+			long ts = CalendarUtils.getTodayAsLong( "UTC" );
+			
+			String extra = "&id=" + id + "&timeout=" + timeout + "&ts=" + ts; 
+			String code = Authorization.encrypt( extra, Utils.MD5( password ).toLowerCase() ) ;
+			String token = Authorization.getTrustedToken( "" + ts + timeout, Utils.MD5( password ).toLowerCase() );
+			
+			return "/services/packing?user=" + user +"&token=" + token + "&code=" + code;
+		}
+		catch ( BaseException e )
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+
+	public static void main(String[] args) 
+	{
+		System.out.println( getRemoteLoginUrl( "dismer", "a", "0" ) );
+		System.out.println( getPackingUrl( "dismer", "a", "0", 12077L ) );
+	}
 }

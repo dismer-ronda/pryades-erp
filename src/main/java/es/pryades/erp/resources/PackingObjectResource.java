@@ -1,14 +1,9 @@
 package es.pryades.erp.resources;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
-import org.restlet.data.Disposition;
-import org.restlet.data.MediaType;
 import org.restlet.data.Status;
-import org.restlet.representation.OutputRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
@@ -18,18 +13,17 @@ import org.restlet.resource.ServerResource;
 import es.pryades.erp.common.AppContext;
 import es.pryades.erp.common.Authorization;
 import es.pryades.erp.common.Utils;
-import es.pryades.erp.dto.Invoice;
-import es.pryades.erp.dto.query.InvoiceQuery;
+import es.pryades.erp.dto.Shipment;
+import es.pryades.erp.dto.query.ShipmentQuery;
 import es.pryades.erp.ioc.IOCManager;
-import es.pryades.erp.reports.PdfExportInvoice;
 import es.pryades.erp.services.Return;
 import es.pryades.erp.services.ReturnFactory;
 
-public class InvoiceResource extends ServerResource 
+public class PackingObjectResource extends ServerResource 
 {
-	private static final Logger LOG = Logger.getLogger( InvoiceResource.class );
+	private static final Logger LOG = Logger.getLogger( PackingObjectResource.class );
 
-	public InvoiceResource() 
+	public PackingObjectResource() 
 	{
 		super();
 	}
@@ -43,7 +37,7 @@ public class InvoiceResource extends ServerResource
 	/**
 	 * GET
 	 */
-	@Get("pdf")
+	@Get("json")
     public Representation toJson() throws Exception 
     {
 		Representation rep;
@@ -76,55 +70,20 @@ public class InvoiceResource extends ServerResource
 			}
 	        
 	        String ts = params.get( "ts" );
-	        final String pagesize = params.get( "pagesize" );
-	        final String template = params.get( "template" );
 	        final String id = params.get( "id" );
-	        final String name = params.get( "name" );
-	        final String url = params.get( "url" );
 	        long timeout = Utils.getLong( params.get( "timeout" ), 0 );
 	        
-	        LOG.info(  "id =" + id );
-	    
 			if ( Authorization.isValidRequest( token, ts+timeout, ts, password, timeout ) ) 
 			{
-				rep = new OutputRepresentation(MediaType.APPLICATION_PDF) 
-				{
-					@Override
-					public void write( OutputStream arg0 ) throws IOException
-					{
-						try
-						{
-					    	InvoiceQuery query = new InvoiceQuery();
-					    	query.setId( Long.parseLong( id ) );
-					    	
-					    	Invoice quotation = (Invoice)IOCManager._InvoicesManager.getRow( ctx, query );
-							
-							AppContext ctx1 = new AppContext( quotation.getQuotation().getCustomer().getLanguage() );
-							
-							IOCManager._ParametersManager.loadParameters( ctx1 );
-							ctx1.setUser( ctx.getUser() );
-							ctx1.addData( "Url", url );
+		    	ShipmentQuery query = new ShipmentQuery();
+		    	query.setId( Long.parseLong( id ) );
+		    	
+		    	Shipment shipment = (Shipment)IOCManager._ShipmentsManager.getRow( ctx, query );
 
-							PdfExportInvoice export = new PdfExportInvoice( quotation );
-							
-							export.setOrientation( "portrait" );
-							export.setPagesize( pagesize );
-							export.setTemplate( template );
-							export.setContext( ctx1 );
-						
-							export.doExport( arg0 );
-						}
-						catch ( Throwable e )
-						{
-							Utils.logException( e, LOG );
-						}
-					}
-				};				
-
-				Disposition disp = new Disposition( Disposition.TYPE_INLINE );
-				disp.setFilename( name );
-				rep.setDisposition( disp );
-			}
+		    	shipment.removePrivateFields();
+		    	
+		    	rep = new StringRepresentation( Utils.toJson( shipment ) );
+		    }
 			else
 			{
 				ret.setCode( ReturnFactory.STATUS_4XX_FORBIDDEN );

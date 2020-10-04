@@ -997,7 +997,7 @@ public class Utils
 		{
 			try
 			{
-				String queries[] = URLDecoder.decode( queryString, "UTF-8" ).split( "&" );
+				String queries[] = queryString.split( "&" ); //URLDecoder.decode( queryString, "UTF-8" ).split( "&" );
 
 				for ( int i = 0; i < queries.length; i++ )
 				{
@@ -2610,7 +2610,20 @@ public class Utils
 			return value;
 		}
 	}
+
+	public static String getUrlDecoded( String value )
+	{
+		try 
+		{
+			return URLDecoder.decode( value, "UTF-8" );
+		} 
+		catch ( Throwable e) 
+		{
+			return value;
+		}
+	}
 	
+
 	public static Map<String, String> convertResourceBundleToMap( ResourceBundle resource ) 
 	{
 	    Map<String, String> map = new HashMap<String, String>();
@@ -2684,7 +2697,32 @@ public class Utils
     	
     	return null;
 	}
+
+	public static Image get2DBarcode( String text )
+	{
+    	try
+    	{
+        	Code128Bean code128 = new Code128Bean();
+        	code128.setHeight(15f);
+        	code128.setModuleWidth(0.3);
+        	code128.setQuietZone(10);
+        	code128.doQuietZone(true);
+
+	    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	    	BitmapCanvasProvider canvas = new BitmapCanvasProvider(baos, "image/x-png", 150, BufferedImage.TYPE_BYTE_BINARY, false, 0);
+	    	code128.generateBarcode( canvas, text );
+	    	canvas.finish();
 	
+	    	return new Image( null, new StreamResource( new ByteStreamStreamResource( baos.toByteArray() ), "barcode" ) );
+    	}
+    	catch( Throwable e )
+    	{
+    		Utils.logException( e, LOG );
+    	}
+    	
+    	return null;
+	}
+
 	public static List<String> getListOfFiles( String directory, FilenameFilter filter )
 	{
 		List<String> ret = new ArrayList<String>();

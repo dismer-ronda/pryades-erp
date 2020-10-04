@@ -16,4 +16,10 @@ public class BaseDto extends Query
 	private static final long serialVersionUID = 5525038683283246979L;
 	
 	private Long id;
+	
+	public void removePrivateFields()
+	{
+    	setOrder( null );
+    	setOrderby( null );
+	}
 }

@@ -9,7 +9,6 @@ import org.apache.log4j.Logger;
 import es.pryades.erp.common.AppContext;
 import es.pryades.erp.common.Attachment;
 import es.pryades.erp.common.BaseException;
-import es.pryades.erp.common.CalendarUtils;
 import es.pryades.erp.common.Constants;
 import es.pryades.erp.common.TaskAction;
 import es.pryades.erp.common.Utils;
@@ -43,7 +42,7 @@ public class QuotationsValidityTaskAction implements TaskAction, Serializable
 			String password = ctx.getParameter( Parameter.PAR_MAIL_SENDER_PASSWORD ); 
 
 			String text = ctx.getString( "tasks.quotation.validity.text" ).
-					replaceAll( "%contact_person%", quotation.getCustomer_contact_person() ).
+					replaceAll( "%contact_person%", quotation.getContact().getName() ).
 					replaceAll( "%number%", quotation.getFormattedNumber() ).
 					replaceAll( "%reference_request%", quotation.getReference_request() );
 
@@ -57,9 +56,9 @@ public class QuotationsValidityTaskAction implements TaskAction, Serializable
 			Company company = (Company)IOCManager._CompaniesManager.getRow( ctx, query );
 
 			String subject = ctx.getString( "tasks.quotation.validity.subject" ).replaceAll( "%reference_request%", quotation.getReference_request() );
-			String body = text + "\n\n" + ctx.getCompanyDataAndLegal( company ); 
+			String body = text + "\n\n" + ctx.getCompanyDataAndLegal( company, quotation.getUser() ); 
 			
-			Utils.sendMail( from, quotation.getCustomer_email(), owner.getEmail(), subject, host, port, sender, password, body, attachments, proxyHost, proxyPort, "true".equals( ctx.getParameter( Parameter.PAR_MAIL_AUTH ) ) );
+			Utils.sendMail( from, quotation.getContact().getEmail(), quotation.getUser().getEmail(), subject, host, port, sender, password, body, attachments, proxyHost, proxyPort, "true".equals( ctx.getParameter( Parameter.PAR_MAIL_AUTH ) ) );
 		}
 		catch ( Throwable e )
 		{

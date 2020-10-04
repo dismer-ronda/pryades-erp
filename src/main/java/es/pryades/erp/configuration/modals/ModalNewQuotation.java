@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.vaadin.data.Property;
+import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.ui.Alignment;
@@ -35,10 +37,13 @@ import es.pryades.erp.configuration.tabs.QuotationsLinesConfig;
 import es.pryades.erp.dashboard.Dashboard;
 import es.pryades.erp.dto.BaseDto;
 import es.pryades.erp.dto.Company;
+import es.pryades.erp.dto.CompanyContact;
 import es.pryades.erp.dto.Quotation;
 import es.pryades.erp.dto.QuotationAttachment;
 import es.pryades.erp.dto.QuotationDelivery;
+import es.pryades.erp.dto.UserCompany;
 import es.pryades.erp.dto.UserDefault;
+import es.pryades.erp.dto.query.CompanyContactQuery;
 import es.pryades.erp.dto.query.CompanyQuery;
 import es.pryades.erp.dto.query.QuotationQuery;
 import es.pryades.erp.ioc.IOCManager;
@@ -58,6 +63,8 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 	private static final Logger LOG = Logger.getLogger( ModalNewQuotation.class );
 
 	private List<Company> customers;
+	private List<CompanyContact>contacts;
+	private List<UserCompany> users;
 	
 	@Getter
 	protected Quotation newQuotation;
@@ -65,6 +72,8 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 	@Getter	private PopupDateField fromDateField;
 	private ComboBox comboCustomers;
 	private ComboBox comboStatus;
+	private ComboBox comboContacts;
+	private ComboBox comboUsers;
 	
 	private TextField editTitle;
 	private TextField editValidity;
@@ -131,13 +140,12 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 			newQuotation.setPayment_terms( payment.getData_value() );
 			newQuotation.setTax_rate( Utils.getDouble( tax_rate.getData_value(), 0 ) );
 			newQuotation.setStatus( Quotation.STATUS_CREATED );
+			newQuotation.setRef_user( getContext().getUser().getId() );
 		}
 
 		layout.setHeight( "-1px" );
 		
 		bi = new BeanItem<BaseDto>( newQuotation );
-
-		loadCompanies();
 
 		fromDateField = new PopupDateField(getContext().getString( "modalNewQuotation.popupDate" ));
 		fromDateField.setResolution( Resolution.DAY );
@@ -145,14 +153,45 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 		fromDateField.setWidth( "100%" );
 		fromDateField.setValue( CalendarUtils.getDateFromString( Long.toString( newQuotation.getQuotation_date() ), "yyyyMMddHHmmss" ) );
 		
+		loadCompanies();
 		comboCustomers = new ComboBox(getContext().getString( "modalNewQuotation.comboCustomer" ));
 		comboCustomers.setWidth( "100%" );
 		comboCustomers.setNullSelectionAllowed( false );
 		comboCustomers.setTextInputAllowed( true );
 		comboCustomers.setImmediate( true );
+		comboCustomers.setRequired( true );
 		fillComboCompanies();
 		comboCustomers.setPropertyDataSource( bi.getItemProperty( "ref_customer" ) );
-		
+		comboCustomers.addValueChangeListener( new Property.ValueChangeListener() 
+		{
+			private static final long serialVersionUID = -2464315287511518758L;
+
+			public void valueChange(ValueChangeEvent event) 
+		    {
+		        onSelectedCustomer();
+		    }
+		});
+
+		loadContacts();
+		comboContacts = new ComboBox(getContext().getString( "modalNewQuotation.comboContact" ));
+		comboContacts.setWidth( "100%" );
+		comboContacts.setNullSelectionAllowed( false );
+		comboContacts.setTextInputAllowed( true );
+		comboContacts.setImmediate( true );
+		comboContacts.setRequired( true );
+		fillComboContacts();
+		comboContacts.setPropertyDataSource( bi.getItemProperty( "ref_contact" ) );
+
+		loadUsers();
+		comboUsers = new ComboBox(getContext().getString( "modalNewQuotation.comboUser" ));
+		comboUsers.setWidth( "100%" );
+		comboUsers.setNullSelectionAllowed( false );
+		comboUsers.setTextInputAllowed( true );
+		comboUsers.setImmediate( true );
+		comboUsers.setRequired( true );
+		fillComboUsers();
+		comboUsers.setPropertyDataSource( bi.getItemProperty( "ref_user" ) );
+
 		if ( !getOperation().equals( Operation.OP_ADD ) )
 		{
 			comboStatus = new ComboBox(getContext().getString( "modalNewQuotation.comboStatus" ));
@@ -204,18 +243,22 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 		HorizontalLayout row1 = new HorizontalLayout();
 		row1.setWidth( "100%" );
 		row1.setSpacing( true );
+		row1.addComponent( comboUsers );
 		row1.addComponent( fromDateField );
 		row1.addComponent( comboCustomers );
+		row1.addComponent( comboContacts );
 		if ( !getOperation().equals( Operation.OP_ADD ) )
+		{
 			row1.addComponent( comboStatus );
+		}
 		row1.addComponent( editTitle );
-		row1.addComponent( editReference_request );
-		row1.addComponent( editReference_order );
 
 		HorizontalLayout row2 = new HorizontalLayout();
 		row2.setWidth( "100%" );
 		row2.setSpacing( true );
-		row1.addComponent( editValidity );
+		row2.addComponent( editReference_request );
+		row2.addComponent( editReference_order );
+		row2.addComponent( editValidity );
 		row2.addComponent( editDelivery );
 		row2.addComponent( editTax_rate );
 		row2.addComponent( editPackaging );
@@ -446,6 +489,9 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 		try
 		{
 			newQuotation.setQuotation_date( CalendarUtils.getDateAsLong( fromDateField.getValue() ) );
+			
+			LOG.info( "ref_contact " + newQuotation.getRef_contact() );
+			LOG.info( "ref_user " + newQuotation.getRef_user() );
 
 			IOCManager._QuotationsManager.setRow( getContext(), (Quotation) orgDto, newQuotation );
 
@@ -536,6 +582,67 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 		comboStatus.setItemCaption( Quotation.STATUS_DISCARDED, getContext().getString( "quotation.status." + Quotation.STATUS_DISCARDED ) );
 	}
 
+	@SuppressWarnings("unchecked")
+	private void loadContacts()
+	{
+		try
+		{
+			CompanyContactQuery query = new CompanyContactQuery();
+			query.setRef_company( newQuotation.getRef_customer() );
+			//query.setRef_user( getContext().getUser().getId() );
+			
+			contacts = IOCManager._CompaniesContactsManager.getRows( getContext(), query );
+			
+			LOG.info( "contacts " + contacts );
+		}
+		catch ( BaseException e )
+		{
+			e.printStackTrace();
+			contacts = new ArrayList<CompanyContact>();
+		}
+	}
+	
+	private void fillComboContacts()
+	{
+		comboContacts.removeAllItems();
+		
+		for ( CompanyContact contact : contacts )
+		{
+			comboContacts.addItem( contact.getId() );
+			comboContacts.setItemCaption( contact.getId(), contact.getName() );
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void loadUsers()
+	{
+		try
+		{
+			UserCompany query = new UserCompany();
+			query.setRef_company( newQuotation.getRef_customer() );
+			
+			users = IOCManager._UsersCompaniesManager.getRows( getContext(), query );
+			
+			LOG.info( "users " + users );
+		}
+		catch ( BaseException e )
+		{
+			e.printStackTrace();
+			users = new ArrayList<UserCompany>();
+		}
+	}
+
+	private void fillComboUsers()
+	{
+		comboUsers.removeAllItems();
+		
+		for ( UserCompany user : users )
+		{
+			comboUsers.addItem( user.getRef_user() );
+			comboUsers.setItemCaption( user.getRef_user(), user.getUser_name() );
+		}
+	}
+	
 	private void reloadQuotation()
 	{
 		try
@@ -544,6 +651,10 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 			query.setId( newQuotation.getId() );
 			
 			Quotation temp = (Quotation)IOCManager._QuotationsManager.getRow( getContext(), query );
+			
+			newQuotation.setCustomer( temp.getCustomer() );
+			newQuotation.setContact( temp.getContact() );
+			newQuotation.setUser( temp.getUser() );
 			
 			newQuotation.setAttachments( temp.getAttachments() );
 			newQuotation.setLines( temp.getLines() );
@@ -640,7 +751,7 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 				long ts = CalendarUtils.getTodayAsLong( "UTC" );
 				
 				String pagesize = "A4";
-				String template = newQuotation.getCustomer_taxable().booleanValue() ? "national-quotation-template" : "international-quotation-template";
+				String template = newQuotation.getCustomer().getTaxable().booleanValue() ? "national-quotation-template" : "international-quotation-template";
 				String timeout = "0";
 				
 				String extra = "ts=" + ts + 
@@ -712,7 +823,7 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 				queryQuotation.setId( newQuotation.getId() );
 				Quotation quotation = (Quotation)IOCManager._QuotationsManager.getRow( getContext(), queryQuotation );
 			
-				String template = quotation.getCustomer_taxable().booleanValue() ? "national-quotation-template" : "international-quotation-template";
+				String template = quotation.getCustomer().getTaxable().booleanValue() ? "national-quotation-template" : "international-quotation-template";
 				String name = "QT-" + quotation.getFormattedNumber() + "-" +  quotation.getReference_request() + ".pdf";
 				
 				PdfExportQuotation export = new PdfExportQuotation( quotation );
@@ -721,7 +832,7 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 				export.setPagesize( "A4" );
 				export.setTemplate( template );
 				
-				AppContext ctx1 = new AppContext( quotation.getCustomer_language() );
+				AppContext ctx1 = new AppContext( quotation.getCustomer().getLanguage() );
 				IOCManager._ParametersManager.loadParameters( ctx1 );
 				ctx1.setUser( getContext().getUser() );
 				ctx1.addData( "Url", getContext().getData( "Url" ) );
@@ -737,17 +848,17 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 				String subject = ctx1.getString( "modalNewQuotation.emailSubject" ).replaceAll( "%name%", name );  
 				String text = ctx1.getString( "modalNewQuotation.emailText" ).
 						replaceAll( "%reference_request%", quotation.getReference_request() ).
-						replaceAll( "%contact_person%", quotation.getCustomer_contact_person() );  
+						replaceAll( "%contact_person%", quotation.getContact().getName() );  
 	
 				CompanyQuery query = new CompanyQuery();
 				query.setType_company( Company.TYPE_OWNER );
 				Company company = (Company)IOCManager._CompaniesManager.getRow( getContext(), query );
 	
-				String body = text + "\n\n" + getContext().getCompanyDataAndLegal( company ); 
+				String body = text + "\n\n" + getContext().getCompanyDataAndLegal( company, newQuotation.getUser() ); 
 	
 				final SendEmailDlg dlg = new SendEmailDlg( getContext(), getContext().getString( "modalNewQuotation.emailTitle" ), attachments );
-				dlg.setTo( quotation.getCustomer_email() );
-				dlg.setReply_to( company.getEmail() );
+				dlg.setTo( quotation.getContact().getEmail() );
+				dlg.setReply_to( quotation.getUser().getEmail() );
 				dlg.setSubject( subject );
 				dlg.setBody( body );
 				dlg.setData( quotation );
@@ -815,5 +926,16 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 	public boolean checkModifyRight()
 	{
 		return getContext().hasRight( "configuration.quotations.modify" );
+	}
+
+	private void onSelectedCustomer()
+	{
+		newQuotation.setRef_contact( null );
+		loadContacts();
+		fillComboContacts();
+
+		newQuotation.setRef_user( null );
+		loadUsers();
+		fillComboUsers();
 	}
 }

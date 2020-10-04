@@ -65,7 +65,7 @@ public class Invoice extends BaseDto
 	{
 		double total_taxes = 0;
 		
-		if ( getQuotation().getCustomer_taxable().booleanValue() )
+		if ( getQuotation().getCustomer().getTaxable().booleanValue() )
 		{
 			for ( InvoiceLine line : getLines() )
 				total_taxes += line.getTotalTaxes();
@@ -86,7 +86,7 @@ public class Invoice extends BaseDto
 
 	public double getTotalTransportTaxes()
 	{
-		if ( getQuotation().getCustomer_taxable().booleanValue() )
+		if ( getQuotation().getCustomer().getTaxable().booleanValue() )
 			return getTransport_cost() * (getQuotation().getTax_rate() / 100.0);
 		 
 		return 0;

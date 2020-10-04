@@ -3,18 +3,100 @@
 
 <mapper namespace="es.pryades.erp.dal.ibatis.CompanyMapper">
 
+	<select id="selectCompanyContacts" parameterType="long" resultMap="mapCompanyContact">
+		select 
+			companies_contacts.id,
+		
+			companies_contacts.ref_company,
+			companies_contacts.name,
+			companies_contacts.email,
+			companies_contacts.phone
+
+		from companies_contacts
+		 		
+		where 
+			companies_contacts.ref_company = #{id}
+			
+		order by companies_contacts.id asc
+	</select>
+
+	<select id="selectCompanyUsers" parameterType="long" resultMap="mapCompanyUser">
+		select 
+			users.name,
+			users.login,
+			users.email,
+			users.pwd,
+			users.changed,
+			users.retries,
+			users.ref_profile,
+			users.status
+			
+		from users
+
+		inner join users_companies
+		on users_companies.ref_user = users.id
+		
+		inner join companies
+		on users_companies.ref_company = companies.id
+		 		
+		where 
+			users_companies.ref_company = #{id}
+			
+		order by users.name asc
+	</select>
+
+	<resultMap id="mapCompanyUser" type="es.pryades.erp.dto.User">
+		<id property="id" column="id"/>
+		
+		<result property="name" column="name"/>
+		<result property="login" column="login"/>
+		<result property="email" column="email"/>
+		<result property="pwd" column="pwd"/>
+		<result property="changed" column="changed"/>
+		<result property="retries" column="retries"/>
+		<result property="ref_profile" column="ref_profile"/>
+		<result property="status" column="status"/>
+	</resultMap>
+
+	<resultMap id="mapCompanyContact" type="es.pryades.erp.dto.CompanyContact">
+		<id property="id" column="id"/>
+		
+		<result property="ref_company" column="ref_company"/>
+		<result property="name" column="name"/>
+		<result property="email" column="email"/>
+		<result property="phone" column="phone"/>
+	</resultMap>
+
+	<resultMap id="mapCompany" type="es.pryades.erp.dto.Company">
+		<id property="id" column="id"/>
+		
+		<result property="name" column="name"/>
+		<result property="alias" column="alias"/>
+		<result property="tax_id" column="tax_id"/>
+		<result property="address" column="address"/>
+		<result property="email" column="email"/>
+		<result property="phone" column="phone"/>
+		<result property="type_company" column="type_company"/>
+		<result property="taxable" column="taxable"/>
+		<result property="language" column="language"/>
+		<result property="signature" column="signature"/>
+		<result property="logo" column="logo"/>
+		
+		<collection property="contacts" column="id" ofType="mapCompanyContact" select="selectCompanyContacts"> </collection>
+		<collection property="users" column="id" ofType="mapCompanyUser" select="selectCompanyUsers"> </collection>
+	</resultMap>
+
 	<sql id="es.pryades.erp.dal.ibatis.CompanyMapper.fields">
 		companies.id,
 		companies.name,
 		companies.alias,
 		companies.tax_id,
-		companies.address,
 		companies.email,
 		companies.phone,
+		companies.address,
 		companies.type_company,
 		companies.taxable,
 		companies.language,
-		companies.contact_person,
 		companies.signature
 	</sql>
 
@@ -87,7 +169,7 @@
 		<include refid="es.pryades.erp.dal.ibatis.CompanyMapper.where" />
 	</select>
 
-	<select id="getPage" parameterType="es.pryades.erp.dto.Query" resultType="es.pryades.erp.dto.Company">
+	<select id="getPage" parameterType="es.pryades.erp.dto.Query" resultMap="mapCompany">
 		select 
 			<include refid="es.pryades.erp.dal.ibatis.CompanyMapper.fields" />
 		
@@ -103,7 +185,7 @@
 		LIMIT #{pageSize} OFFSET (#{pageSize} * (#{pageNumber} - 1))
 	</select>
 
-	<select id="getRows" parameterType="es.pryades.erp.dto.Query" resultType="es.pryades.erp.dto.Company">
+	<select id="getRows" parameterType="es.pryades.erp.dto.Query" resultMap="mapCompany">
 		select 
 			<include refid="es.pryades.erp.dal.ibatis.CompanyMapper.fields" />
 		
@@ -117,7 +199,7 @@
 			<include refid="es.pryades.erp.dal.ibatis.CompanyMapper.orderby" />
 	</select>
 
-	<select id="getRow" parameterType="es.pryades.erp.dto.Company" resultType="es.pryades.erp.dto.Company">
+	<select id="getRow" parameterType="es.pryades.erp.dto.Company" resultMap="mapCompany">
 		select
 			<include refid="es.pryades.erp.dal.ibatis.CompanyMapper.fields" />
 			,
@@ -157,7 +239,6 @@
 			taxable,
 			language,
 			logo, 
-			contact_person,
 			signature
 		)
 		values
@@ -173,7 +254,6 @@
 			#{taxable},
 			#{language},
 			#{logo},
-			#{contact_person},
 			#{signature}
 		)
 	</insert>
@@ -192,7 +272,6 @@
 			<if test="logo != null">
 				logo=#{logo}, 
 	        </if>
-			contact_person=#{contact_person},
 			signature=#{signature}
 		where id = #{id}
 	</update>

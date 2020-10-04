@@ -1,11 +1,19 @@
 package es.pryades.erp.resources;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.Map;
+
+import javax.imageio.ImageIO;
 
 import org.apache.log4j.Logger;
-import org.restlet.data.Disposition;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.OutputRepresentation;
@@ -15,21 +23,24 @@ import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+
 import es.pryades.erp.common.AppContext;
 import es.pryades.erp.common.Authorization;
 import es.pryades.erp.common.Utils;
-import es.pryades.erp.dto.Invoice;
-import es.pryades.erp.dto.query.InvoiceQuery;
 import es.pryades.erp.ioc.IOCManager;
-import es.pryades.erp.reports.PdfExportInvoice;
 import es.pryades.erp.services.Return;
 import es.pryades.erp.services.ReturnFactory;
 
-public class InvoiceResource extends ServerResource 
+public class QrResource extends ServerResource 
 {
-	private static final Logger LOG = Logger.getLogger( InvoiceResource.class );
+	private static final Logger LOG = Logger.getLogger( QrResource.class );
 
-	public InvoiceResource() 
+	public QrResource() 
 	{
 		super();
 	}
@@ -43,13 +54,12 @@ public class InvoiceResource extends ServerResource
 	/**
 	 * GET
 	 */
-	@Get("pdf")
+	@Get("png")
     public Representation toJson() throws Exception 
     {
 		Representation rep;
 		
 		HashMap<String,String> params = new HashMap<String,String>();
-		
 		Utils.getParameters( getRequest().getResourceRef().getQuery(), params );
 
 		Return ret = new Return();
@@ -60,7 +70,6 @@ public class InvoiceResource extends ServerResource
 			IOCManager._ParametersManager.loadParameters( ctx );
 
 			String user = params.get( "user" );
-			
 	    	IOCManager._UsersManager.loadUsuario( ctx, user );
 			
 			String token = params.get( "token" );
@@ -70,49 +79,58 @@ public class InvoiceResource extends ServerResource
 			if ( code != null )
 			{
 				code = Authorization.decrypt( code, password );
+		        LOG.info( "code = " + code );
 			
 				params.clear();
 		        Utils.getParameters( code, params );
 			}
 	        
 	        String ts = params.get( "ts" );
-	        final String pagesize = params.get( "pagesize" );
-	        final String template = params.get( "template" );
-	        final String id = params.get( "id" );
-	        final String name = params.get( "name" );
-	        final String url = params.get( "url" );
 	        long timeout = Utils.getLong( params.get( "timeout" ), 0 );
+	        final String text = params.get( "text" );
 	        
-	        LOG.info(  "id =" + id );
-	    
+	        LOG.info( "ts = " + ts);
+	        LOG.info( "timeout = " + timeout );
+	        LOG.info( "text = " + Utils.getUrlDecoded( text ) );
+	        
 			if ( Authorization.isValidRequest( token, ts+timeout, ts, password, timeout ) ) 
 			{
-				rep = new OutputRepresentation(MediaType.APPLICATION_PDF) 
+				rep = new OutputRepresentation(MediaType.IMAGE_PNG ) 
 				{
 					@Override
 					public void write( OutputStream arg0 ) throws IOException
 					{
 						try
 						{
-					    	InvoiceQuery query = new InvoiceQuery();
-					    	query.setId( Long.parseLong( id ) );
-					    	
-					    	Invoice quotation = (Invoice)IOCManager._InvoicesManager.getRow( ctx, query );
+							Map<EncodeHintType, Object> hintMap = new EnumMap<EncodeHintType, Object>(EncodeHintType.class);
+							hintMap.put(EncodeHintType.CHARACTER_SET, "UTF-8");
 							
-							AppContext ctx1 = new AppContext( quotation.getQuotation().getCustomer().getLanguage() );
+							// Now with zxing version 3.2.1 you could change border size (white border size to just 1)
+							hintMap.put(EncodeHintType.MARGIN, 1); /* default = 4 */
+							hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
+				 
+							QRCodeWriter qrCodeWriter = new QRCodeWriter();
+							BitMatrix byteMatrix = qrCodeWriter.encode(Utils.getUrlDecoded( text ), BarcodeFormat.QR_CODE, 256, 256, hintMap);
+							int CrunchifyWidth = byteMatrix.getWidth();
+							BufferedImage image = new BufferedImage(CrunchifyWidth, CrunchifyWidth, BufferedImage.TYPE_INT_RGB);
+							image.createGraphics();
+				 
+							Graphics2D graphics = (Graphics2D) image.getGraphics();
+							graphics.setColor(Color.WHITE);
+							graphics.fillRect(0, 0, CrunchifyWidth, CrunchifyWidth);
+							graphics.setColor(Color.BLACK);
+				 
+							for (int i = 0; i < CrunchifyWidth; i++) {
+								for (int j = 0; j < CrunchifyWidth; j++) {
+									if (byteMatrix.get(i, j)) {
+										graphics.fillRect(i, j, 1, 1);
+									}
+								}
+							}
 							
-							IOCManager._ParametersManager.loadParameters( ctx1 );
-							ctx1.setUser( ctx.getUser() );
-							ctx1.addData( "Url", url );
-
-							PdfExportInvoice export = new PdfExportInvoice( quotation );
-							
-							export.setOrientation( "portrait" );
-							export.setPagesize( pagesize );
-							export.setTemplate( template );
-							export.setContext( ctx1 );
-						
-							export.doExport( arg0 );
+							ByteArrayOutputStream baos = new ByteArrayOutputStream();
+							ImageIO.write(image, "png", baos);
+							arg0.write( baos.toByteArray() );
 						}
 						catch ( Throwable e )
 						{
@@ -120,10 +138,6 @@ public class InvoiceResource extends ServerResource
 						}
 					}
 				};				
-
-				Disposition disp = new Disposition( Disposition.TYPE_INLINE );
-				disp.setFilename( name );
-				rep.setDisposition( disp );
 			}
 			else
 			{

@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
-	<title>$context.getString( "template.shipment.packing" ) $shipment.getFormattedNumber()</title>
+	<title>$context.getString( "template.box.contents" ) $box.getLabel()</title>
 		
 	<meta name="author" content="pryades" />
 
@@ -180,81 +180,17 @@
 				<img src="$context.getLogoUrl()" width="256px"> </img> 
 			</td>
 			<td>
-				<div class="text_right titulo1">$context.getString( "template.shipment.packing" ).toUpperCase()</div>
+				<div class="text_right titulo1">$context.getString( "template.box.contents.title" ).toUpperCase()</div>
 			</td>
 		</tr>
 	</table>
 
-	<table width="100%">
-		<tr>
-			<td width="50%" class="text_left vtop">
-				<div class="text_regular_size text_bold">$context.getString( "template.shipment.packing.issued" ):</div>
-				<div class="text_regular_size sangria">
-					$context.getCompanyDataAsHtml( $shipment.getUser() )
-				</div>
-			</td>
-			
-			<td width="50%" class="text_left vtop">
-
-				<div class="text_regular_size text_bold">$context.getString( "template.shipment.packing.send_to" ):</div>
-				<div class="text_regular_size sangria">
-					$shipment.getCustomerDataAsHtml( $context )
-				</div>
-			</td>
-		</tr>
-	</table>
-
-	<table width="100%" class="border_no_spacing">
-
-		<tr>
-			<td width="" class="vtop borde">
-				<div id="block_container">
-					<div class="padding_all text_regular_size text_bold">$context.getString( "template.shipment.packing.number" ): </div>
-					<div class="padding_all text_regular_size">$shipment.getFormattedNumber()</div>
-				</div>
-			</td>
-
-			<td width="" class="vtop borde">
-				<div id="block_container">
-					<div class="padding_all text_regular_size text_bold">$context.getString( "template.shipment.packing.date" ): </div>
-					<div class="padding_all text_regular_size ">$shipment.getFormattedDate()</div>
-				</div>
-			</td>
-			
-			<td width="" class="vtop borde">
-				<div id="block_container">
-					<div class="padding_all text_regular_size text_bold">$context.getString( "template.shipment.packing.shipment_date" ): </div>
-					<div class="padding_all text_regular_size">$shipment.getFormattedDepartureDate()</div>
-				</div>
-			</td>
-		</tr>
-
-		<tr>
-			<td width="" class="vtop borde">
-				<div id="block_container">
-					<div class="padding_all text_regular_size text_bold">$context.getString( "template.shipment.packing.consigned" ): </div>
-					<div class="padding_all text_regular_size">$shipment.getConsignee().getName()</div>
-				</div>
-			</td>
-			
-			<td width="" class="vtop borde">
-				<div id="block_container">
-					<div class="padding_all text_regular_size text_bold">$context.getString( "template.shipment.packing.incoterms" ): </div>
-					<div class="padding_all text_regular_size">$shipment.getIncoterms()</div>
-				</div>
-			</td>
-			<td width="" class="vtop borde">
-			</td>
-		</tr>
-
-	</table>
-
-	$shipment.getPackingTable( $context )	
+	$box.getBoxTable( $context )	
 	
 	<table class="" width="100%">
 		<tr>
 			<td class="text_center">
-				<img src="$context.getSignatureUrl( $shipment.getUser() )" width="4cm"> </img> 
+				<img src="$context.getSignatureUrl()" width="4cm"> </img> 
 			</td>
 		</tr>
 	</table>

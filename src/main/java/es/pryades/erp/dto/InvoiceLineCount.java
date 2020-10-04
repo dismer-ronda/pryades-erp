@@ -83,4 +83,13 @@ public class InvoiceLineCount extends BaseDto
 	{
 		return Utils.getFormattedCurrency( getGrandTotalPrice() );
 	}
+	
+	@Override
+	public void removePrivateFields()	
+	{
+		super.removePrivateFields();
+		
+		quotation_line.removePrivateFields();
+	}
+	
 }

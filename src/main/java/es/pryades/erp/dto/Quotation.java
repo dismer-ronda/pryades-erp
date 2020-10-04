@@ -56,24 +56,22 @@ public class Quotation extends BaseDto
 	private Integer status;
 	
 	private Double transport_invoiced;
-	
+
 	private List<QuotationDelivery> deliveries;
 	private List<QuotationLine> lines;
 	private List<QuotationAttachment> attachments;
 
-	private String customer_name;
-	private String customer_address;
-	private String customer_tax_id;
-	private String customer_email;
-	private String customer_phone;
-	private Boolean customer_taxable;
-	private String customer_language;
-	private Boolean customer_signature;
-	private String customer_contact_person;
+	private Company customer;
+
+	private Long ref_contact;
+	private CompanyContact contact;
+
+	private Long ref_user;
+	private User user;
 
 	public String getCustomerAddressAsHtml()
 	{
-		return Utils.getStringAsHtml( StringEscapeUtils.escapeXml( customer_address != null ? customer_address : "" ) );
+		return Utils.getStringAsHtml( StringEscapeUtils.escapeXml( customer.getAddress() != null ? customer.getAddress() : "" ) );
 	}
 	
 	public String getFormattedDate()
@@ -127,7 +125,7 @@ public class Quotation extends BaseDto
 	{
 		double total_taxes = 0;
 		
-		if ( customer_taxable.booleanValue() )
+		if ( customer.getTaxable().booleanValue() )
 			for ( QuotationLine line : getLines() )
 				total_taxes += line.getTotalPrice() * (line.getTax_rate() / 100.0);
 		
@@ -171,7 +169,7 @@ public class Quotation extends BaseDto
 
 	public double getTotalTransportTaxes()
 	{
-		if ( customer_taxable.booleanValue() )
+		if ( customer.getTaxable().booleanValue() )
 			return getTotalTransportCost() * (getTax_rate() / 100.0);
 		 
 		return 0;
@@ -314,12 +312,12 @@ public class Quotation extends BaseDto
 	
 	public String getCustomerDataAsHtml( AppContext ctx )
 	{
-		String data = getCustomer_contact_person() + "\n" + 
-				getCustomer_name() + "\n" +
-				ctx.getString( "template.common.tax_id" ) + ": " + getCustomer_tax_id() + "\n" + 
-				getCustomer_address() + "\n" +
-				ctx.getString( "template.common.phone" ) + ": " + getCustomer_phone() + "\n" + 
-				ctx.getString( "template.common.email" ) + ": " + getCustomer_email();
+		String data = getContact().getName() + "\n" + 
+				getCustomer().getName() + "\n" +
+				ctx.getString( "template.common.tax_id" ) + ": " + getCustomer().getTax_id() + "\n" + 
+				getCustomer().getAddress() + "\n" +
+				ctx.getString( "template.common.phone" ) + ": " + getContact().getPhone() + "\n" + 
+				ctx.getString( "template.common.email" ) + ": " + getContact().getEmail();
 		
 		return Utils.getStringAsHtml( StringEscapeUtils.escapeXml( data ) );
 	}

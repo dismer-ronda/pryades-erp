@@ -74,4 +74,12 @@ public class ShipmentBoxLine extends BaseDto
 		
 		return cols;
 	}
+
+	@Override
+	public void removePrivateFields()	
+	{
+		super.removePrivateFields();
+		
+		invoice_line.removePrivateFields();
+	}
 }

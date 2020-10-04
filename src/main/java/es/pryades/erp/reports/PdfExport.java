@@ -70,6 +70,8 @@ public class PdfExport extends ExportBase
 		} 
 		catch ( Throwable e ) 
 		{
+			e.printStackTrace();
+			
 			Utils.logException( e, LOG );
 			
 			if ( e instanceof IOException )

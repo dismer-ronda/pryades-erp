@@ -34,6 +34,4 @@ public class User extends BaseDto
 	private byte[] signature;
 
 	private String profile_name;
-	private String region_name;
-	private String plant_name;
 }

@@ -185,7 +185,7 @@ public class AppContext extends Object implements Serializable
 		return getParameter( id ).contains( operation );
 	}
 	
-	public String getSignatureUrl()
+	public String getSignatureUrl( User user )
 	{
 		try
 		{
@@ -195,13 +195,13 @@ public class AppContext extends Object implements Serializable
 			String extra = "ts=" + ts + 
 							"&timeout=" + timeout;
 			
-			String user = getUser().getLogin();
-			String password = getUser().getPwd();
+			String login = user.getLogin();
+			String password = user.getPwd();
 			
 			String token = "token=" + Authorization.getTokenString( "" + ts + timeout, password );
 			String code = "code=" + Authorization.encrypt( extra, password ) ;
 	
-			return StringEscapeUtils.escapeXml( getData( "Url" ) + "/services/signature" + "?user=" + user + "&" + token + "&" + code + "&ts=" + ts ); 
+			return StringEscapeUtils.escapeXml( getData( "Url" ) + "/services/signature" + "?user=" + login + "&" + token + "&" + code + "&ts=" + ts ); 
 		}
 		catch ( Throwable e )
 		{
@@ -237,7 +237,7 @@ public class AppContext extends Object implements Serializable
 		}
 	}
 
-	public String getCompanyData()
+	public String getCompanyData( User user )
 	{
 		try
 		{
@@ -246,12 +246,12 @@ public class AppContext extends Object implements Serializable
 			
 			Company company = (Company)IOCManager._CompaniesManager.getRow( this, query );
 			
-			String data = company.getContact_person() + "\n" + 
+			String data = user.getName() + "\n" + 
 					company.getName() + "\n" +
 					getString( "template.common.tax_id" ) + ": " + company.getTax_id() + "\n" + 
 					company.getAddress() + "\n" +
 					getString( "template.common.phone" ) + ": " + company.getPhone() + "\n" + 
-					getString( "template.common.email" ) + ": " +company.getEmail();
+					getString( "template.common.email" ) + ": " + company.getEmail();
 
 			return data;
 		}
@@ -262,21 +262,21 @@ public class AppContext extends Object implements Serializable
 		}
 	}
 
-	public String getCompanyDataAndLegal( Company company )
+	public String getCompanyDataAndLegal( Company company, User user )
 	{
 		try
 		{
 			String legal = getString( "template.common.email.legal" ).
 					replaceAll( "%owner_name%", company.getName() ).
 					replaceAll( "%owner_address%", company.getAddress().replaceAll( "\n", ", " ) ).
-					replaceAll( "%owner_email%", company.getEmail() );
+					replaceAll( "%owner_email%", user.getEmail() );
 
-			String data = company.getContact_person() + "\n" + 
+			String data = user.getName() + "\n" + 
 					company.getName() + "\n" +
 					getString( "template.common.tax_id" ) + ": " + company.getTax_id() + "\n" + 
 					company.getAddress() + "\n" +
 					getString( "template.common.phone" ) + ": " + company.getPhone() + "\n" + 
-					getString( "template.common.email" ) + ": " +company.getEmail() + "\n\n" +
+					getString( "template.common.email" ) + ": " + company.getEmail() + "\n\n" +
 					legal;
 
 			return data;
@@ -288,8 +288,8 @@ public class AppContext extends Object implements Serializable
 		}
 	}
 
-	public String getCompanyDataAsHtml()
+	public String getCompanyDataAsHtml( User user )
 	{
-		return Utils.getStringAsHtml( StringEscapeUtils.escapeXml( getCompanyData() ) );
+		return Utils.getStringAsHtml( StringEscapeUtils.escapeXml( getCompanyData( user ) ) );
 	}
 }

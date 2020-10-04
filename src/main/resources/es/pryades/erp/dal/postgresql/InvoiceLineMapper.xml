@@ -29,6 +29,22 @@
 		<result property="quantity" column="quantity"/>
 	</resultMap>
 
+	<resultMap id="mapCompany" type="es.pryades.erp.dto.Company">
+		<id property="id" column="id"/>
+		
+		<result property="name" column="name"/>
+		<result property="alias" column="alias"/>
+		<result property="tax_id" column="tax_id"/>
+		<result property="address" column="address"/>
+		<result property="email" column="email"/>
+		<result property="phone" column="phone"/>
+		<result property="type_company" column="type_company"/>
+		<result property="taxable" column="taxable"/>
+		<result property="language" column="language"/>
+		<result property="contact_person" column="contact_person"/>
+		<result property="signature" column="signature"/>
+	</resultMap>
+
 	<resultMap id="mapQuotationLine" type="es.pryades.erp.dto.QuotationLine">
 		<id property="id" column="id"/>
 		
@@ -46,7 +62,7 @@
 		<result property="tax_rate" column="tax_rate"/>
 		<result property="total_invoiced" column="total_invoiced"/>
 		
-		<result property="provider_name" column="provider_name"/>
+		<association property="provider" javaType="es.pryades.erp.dto.Company" resultMap="mapCompany" columnPrefix="provider_" />
 		
 		<collection property="line_deliveries" column="id" ofType="mapQuotationLineDelivery" select="selectQuotationLineDeliveries"> </collection>
 	</resultMap>
@@ -110,8 +126,18 @@
 					
 		) as quotation_line_total_invoiced,
 	
-		companies.name as quotation_line_provider_name
-		
+		companies.id				as quotation_line_provider_id,
+		companies.name				as quotation_line_provider_name,
+		companies.alias				as quotation_line_provider_alias,
+		companies.tax_id			as quotation_line_provider_tax_id,
+		companies.address			as quotation_line_provider_address,
+		companies.email				as quotation_line_provider_email,
+		companies.phone				as quotation_line_provider_phone,
+		companies.type_company		as quotation_line_provider_type_company,
+		companies.taxable			as quotation_line_provider_taxable,
+		companies.language			as quotation_line_provider_language,
+		companies.contact_person	as quotation_line_provider_contact_person,
+		companies.signature			as quotation_line_provider_signature
 	</sql>
 
 	<sql id="es.pryades.erp.dal.ibatis.InvoiceLineMapper.joins">

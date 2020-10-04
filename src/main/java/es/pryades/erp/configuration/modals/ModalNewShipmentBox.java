@@ -3,11 +3,13 @@ package es.pryades.erp.configuration.modals;
 import org.apache.log4j.Logger;
 
 import com.vaadin.data.util.BeanItem;
+import com.vaadin.server.ExternalResource;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Image;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
@@ -15,6 +17,8 @@ import com.vaadin.ui.Window;
 
 import es.pryades.erp.application.SelectNumberDlg;
 import es.pryades.erp.common.AppContext;
+import es.pryades.erp.common.Authorization;
+import es.pryades.erp.common.CalendarUtils;
 import es.pryades.erp.common.ModalParent;
 import es.pryades.erp.common.ModalWindowsCRUD;
 import es.pryades.erp.common.Utils;
@@ -51,6 +55,7 @@ public class ModalNewShipmentBox extends ModalWindowsCRUD implements ModalParent
 	private TextField editWidth;
 	private TextField editHeight;
 	private TextField editLabel;
+	private Image imageQR;
 	
 	private Panel panelBoxes;
 	private ShipmentsBoxesConfig configBoxes;
@@ -135,7 +140,7 @@ public class ModalNewShipmentBox extends ModalWindowsCRUD implements ModalParent
 		editLabel = new TextField( getContext().getString( "modalNewShipmentBox.editLabel" ), bi.getItemProperty( "label" ) );
 		editLabel.setWidth( "100%" );
 		editLabel.setNullRepresentation( "" );
-
+		
 		HorizontalLayout row1 = new HorizontalLayout();
 		row1.setWidth( "100%" );
 		row1.setSpacing( true );
@@ -179,9 +184,77 @@ public class ModalNewShipmentBox extends ModalWindowsCRUD implements ModalParent
 				getDefaultOperationsRow().addComponentAsFirst( btnDuplicate );
 				getDefaultOperationsRow().setComponentAlignment( btnDuplicate, Alignment.MIDDLE_LEFT );
 			}
+			
+			imageQR = new Image();
+			imageQR.setSource( new ExternalResource( getQRUrl() ) );
+			
+			componentsContainer.addComponent( imageQR );
 		}
 	}
 
+	private String getQRUrl()
+	{
+		String boxUrl = Utils.getUrlEncoded( getShipmentBoxUrl() );
+
+		LOG.info( "boxUrl = " + boxUrl  );
+
+		try
+		{
+			long ts = CalendarUtils.getTodayAsLong( "UTC" );
+			
+			String timeout = "0";
+			String extra = "ts=" + ts + 
+					"&text=" + boxUrl + 
+					"&timeout=" + timeout;
+			
+			LOG.info( "extra=" + extra);
+			
+			String user = getContext().getUser().getLogin();
+			String password = getContext().getUser().getPwd();
+			
+			String token = "token=" + Authorization.getTokenString( "" + ts + timeout, password );
+			String code = "code=" + Authorization.encrypt( extra, password ) ;
+	
+			return getContext().getData( "Url" ) + "/services/qr" + "?user=" + user + "&" + token + "&" + code + "&ts=" + ts;
+		}
+		catch ( Throwable e )
+		{
+			Utils.logException( e, LOG );
+		}
+		
+		return "";
+	}
+	
+	private String getShipmentBoxUrl()
+	{
+		try
+		{
+			long ts = CalendarUtils.getTodayAsLong( "UTC" );
+			
+			String timeout = "0";
+			String extra = "ts=" + ts + 
+					"&id=" + newShipmentBox.getId() + 
+					"&pagesize=A4" + 
+					"&template=box-contents-template" +
+					"&url=" + getContext().getData( "Url" ) +
+					"&timeout=" + timeout;
+			
+			String user = getContext().getUser().getLogin();
+			String password = getContext().getUser().getPwd();
+			
+			String token = "token=" + Authorization.getTokenString( "" + ts + timeout, password );
+			String code = "code=" + Authorization.encrypt( extra, password ) ;
+	
+			return getContext().getData( "Url" ) + "/services/box" + "?user=" + user + "&" + token + "&" + code + "&ts=" + ts;
+		}
+		catch ( Throwable e )
+		{
+			Utils.logException( e, LOG );
+		}
+		
+		return "";
+	}
+	
 	private void showBoxSubBoxes()
 	{
 		panelBoxes = new Panel( getContext().getString( "modalNewShipmentBox.subBoxes" ) );

@@ -2,6 +2,8 @@ package es.pryades.erp.configuration.tabs;
 
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -36,6 +38,8 @@ import es.pryades.erp.vto.controlers.CompanyControlerVto;
 public class CompaniesConfig extends PagedContent implements ModalParent
 {
 	private static final long serialVersionUID = -4112153786008059013L;
+
+	private static final Logger LOG = Logger.getLogger( CompaniesConfig.class );
 
 	private TextField editAlias;
 	private TextField editTax_id;
@@ -159,6 +163,8 @@ public class CompaniesConfig extends PagedContent implements ModalParent
 	@Override
 	public void preProcessRows( List<BaseDto> rows )
 	{
+		for ( BaseDto row : rows )
+			LOG.info( "company " + row );
 	}
 	
 	@Override

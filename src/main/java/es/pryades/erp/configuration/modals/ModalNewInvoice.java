@@ -726,7 +726,7 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 				long ts = CalendarUtils.getTodayAsLong( "UTC" );
 				
 				String pagesize = "A4";
-				String template = invoice.getQuotation().getCustomer_taxable().booleanValue() ? "national-invoice-template" : "international-invoice-template";
+				String template = invoice.getQuotation().getCustomer().getTaxable().booleanValue() ? "national-invoice-template" : "international-invoice-template";
 				String timeout = "0";
 				
 				String extra = "ts=" + ts + 
@@ -781,7 +781,7 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 				queryInvoice.setId( newInvoice.getId() );
 				Invoice invoice = (Invoice)IOCManager._InvoicesManager.getRow( getContext(), queryInvoice );
 
-				String template = newInvoice.getQuotation().getCustomer_taxable().booleanValue() ? "national-invoice-template" : "international-invoice-template";
+				String template = newInvoice.getQuotation().getCustomer().getTaxable().booleanValue() ? "national-invoice-template" : "international-invoice-template";
 				String name = newInvoice.getFormattedNumber() + "-" + invoice.getQuotation().getTitle() + ".pdf";
 				
 				PdfExportInvoice export = new PdfExportInvoice( invoice );
@@ -790,7 +790,7 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 				export.setPagesize( "A4" );
 				export.setTemplate( template );
 			
-				AppContext ctx1 = new AppContext( invoice.getQuotation().getCustomer_language() );
+				AppContext ctx1 = new AppContext( invoice.getQuotation().getCustomer().getLanguage() );
 				IOCManager._ParametersManager.loadParameters( ctx1 );
 				ctx1.setUser( getContext().getUser() );
 				ctx1.addData( "Url", getContext().getData( "Url" ) );
@@ -805,18 +805,18 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 				
 				String subject = ctx1.getString( "modalNewInvoice.emailSubject" ).replaceAll( "%name%", name );  
 				String text = ctx1.getString( "modalNewInvoice.emailText" ).
-						replaceAll( "%contact_person%", invoice.getQuotation().getCustomer_contact_person() ).
+						replaceAll( "%contact_person%", invoice.getQuotation().getContact().getName() ).
 						replaceAll( "%reference_order%", invoice.getQuotation().getReference_order() );  
 	
 				CompanyQuery query = new CompanyQuery();
 				query.setType_company( Company.TYPE_OWNER );
 				Company company = (Company)IOCManager._CompaniesManager.getRow( getContext(), query );
 	
-				String body = text + "\n\n" + getContext().getCompanyDataAndLegal( company ); 
+				String body = text + "\n\n" + getContext().getCompanyDataAndLegal( company, newInvoice.getQuotation().getUser() ); 
 				
 				final SendEmailDlg dlg = new SendEmailDlg( getContext(), getContext().getString( "modalNewInvoice.emailTitle" ), attachments );
-				dlg.setTo( invoice.getQuotation().getCustomer_email() );
-				dlg.setReply_to( company.getEmail() );
+				dlg.setTo( invoice.getQuotation().getContact().getEmail() );
+				dlg.setReply_to( invoice.getQuotation().getUser().getEmail() );
 				dlg.setSubject( subject );
 				dlg.setBody( body );
 				dlg.addCloseListener

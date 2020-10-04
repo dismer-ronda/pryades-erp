@@ -20,6 +20,23 @@
 		order by quotations_lines_deliveries.ref_quotation_delivery asc
 	</select>
 
+	<select id="selectCompanyContacts" parameterType="long" resultMap="mapCompanyContact">
+		select 
+			companies_contacts.id,
+		
+			companies_contacts.ref_company,
+			companies_contacts.name,
+			companies_contacts.email,
+			companies_contacts.phone
+
+		from companies_contacts
+		 		
+		where 
+			companies_contacts.ref_company = #{id}
+			
+		order by companies_contacts.id asc
+	</select>
+
 	<resultMap id="mapQuotationLineDelivery" type="es.pryades.erp.dto.QuotationLineDelivery">
 		<id property="id" column="id"/>
 		
@@ -28,13 +45,40 @@
 		
 		<result property="quantity" column="quantity"/>
 	</resultMap>
+	
+	<resultMap id="mapCompanyContact" type="es.pryades.erp.dto.CompanyContact">
+		<id property="id" column="id"/>
+		
+		<result property="ref_company" column="ref_company"/>
+		<result property="name" column="name"/>
+		<result property="email" column="email"/>
+		<result property="phone" column="phone"/>
+	</resultMap>
+	
+	<resultMap id="mapCompany" type="es.pryades.erp.dto.Company">
+		<id property="id" column="id"/>
+		
+		<result property="name" column="name"/>
+		<result property="alias" column="alias"/>
+		<result property="tax_id" column="tax_id"/>
+		<result property="address" column="address"/>
+		<result property="email" column="email"/>
+		<result property="phone" column="phone"/>
+		<result property="type_company" column="type_company"/>
+		<result property="taxable" column="taxable"/>
+		<result property="language" column="language"/>
+		<result property="signature" column="signature"/>
+
+		<collection property="contacts" column="id" ofType="mapCompanyContact" select="selectCompanyContacts"> </collection>
+	</resultMap>
 
 	<resultMap id="mapQuotationLine" type="es.pryades.erp.dto.QuotationLine">
 		<id property="id" column="id"/>
 		
 		<result property="ref_quotation" column="ref_quotation"/>
 		<result property="ref_provider" column="ref_provider"/>
-		
+		<result property="line_order" column="line_order"/>
+		<result property="total_invoiced" column="total_invoiced"/>
 		<result property="origin" column="origin"/>
 		<result property="reference" column="reference"/>
 		<result property="title" column="title"/>
@@ -43,9 +87,8 @@
 		<result property="real_cost" column="real_cost"/>
 		<result property="margin" column="margin"/>
 		<result property="tax_rate" column="tax_rate"/>
-		<result property="total_invoiced" column="total_invoiced"/>
 
-		<result property="provider_name" column="provider_name"/>
+		<association property="provider" javaType="es.pryades.erp.dto.Company" resultMap="mapCompany" columnPrefix="provider_" />
 		
 		<collection property="line_deliveries" column="id" ofType="mapQuotationLineDelivery" select="selectQuotationLineDeliveries"> </collection>
 	</resultMap>
@@ -80,7 +123,17 @@
 		quotations_lines.margin,
 		quotations_lines.tax_rate,
 		
-		companies.name as provider_name
+		companies.id				as provider_id,
+		companies.name				as provider_name,
+		companies.alias				as provider_alias,
+		companies.tax_id			as provider_tax_id,
+		companies.address			as provider_address,
+		companies.email				as provider_email,
+		companies.phone				as provider_phone,
+		companies.type_company		as provider_type_company,
+		companies.taxable			as provider_taxable,
+		companies.language			as provider_language,
+		companies.signature			as provider_signature
 	</sql>
 
 	<sql id="es.pryades.erp.dal.ibatis.QuotationLineMapper.joins">

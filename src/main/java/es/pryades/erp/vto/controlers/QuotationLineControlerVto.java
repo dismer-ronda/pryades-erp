@@ -52,7 +52,7 @@ public class QuotationLineControlerVto extends GenericControlerVto
 				result.setReal_cost( line.getReal_cost() ); 
 				result.setMargin( line.getMargin() );
 				result.setTotal_invoiced( line.getTotal_invoiced() );
-				result.setProvider_name( line.getProvider_name() );
+				result.setProvider_name( line.getProvider() != null ? line.getProvider().getName() : "" );
 				
 				result.setPrice( line.getPrice() ); 
 				

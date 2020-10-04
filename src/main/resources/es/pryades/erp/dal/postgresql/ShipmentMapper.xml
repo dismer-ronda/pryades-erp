@@ -116,6 +116,23 @@
 		order by shipments_boxes.id asc
 	</select>
 	
+	<select id="selectCompanyContacts" parameterType="long" resultMap="mapCompanyContact">
+		select 
+			companies_contacts.id,
+		
+			companies_contacts.ref_company,
+			companies_contacts.name,
+			companies_contacts.email,
+			companies_contacts.phone
+
+		from companies_contacts
+		 		
+		where 
+			companies_contacts.ref_company = #{id}
+			
+		order by companies_contacts.id asc
+	</select>
+
 	<resultMap id="mapQuotationLine" type="es.pryades.erp.dto.QuotationLine">
 		<id property="id" column="id"/>
 		
@@ -172,7 +189,46 @@
 		<collection property="sub_boxes" column="id" ofType="mapShipmentBox" select="selectShipmentSubBoxes"> </collection>
 		<collection property="lines" column="id" ofType="mapShipmentBoxLine" select="selectShipmentBoxLines"> </collection>
 	</resultMap>
+	
+	<resultMap id="mapCompanyContact" type="es.pryades.erp.dto.CompanyContact">
+		<id property="id" column="id"/>
+		
+		<result property="ref_company" column="ref_company"/>
+		<result property="name" column="name"/>
+		<result property="email" column="email"/>
+		<result property="phone" column="phone"/>
+	</resultMap>
+	
+	<resultMap id="mapCompany" type="es.pryades.erp.dto.Company">
+		<id property="id" column="id"/>
+		
+		<result property="name" column="name"/>
+		<result property="alias" column="alias"/>
+		<result property="tax_id" column="tax_id"/>
+		<result property="address" column="address"/>
+		<result property="email" column="email"/>
+		<result property="phone" column="phone"/>
+		<result property="type_company" column="type_company"/>
+		<result property="taxable" column="taxable"/>
+		<result property="language" column="language"/>
+		<result property="signature" column="signature"/>
 
+		<collection property="contacts" column="id" ofType="mapCompanyContact" select="selectCompanyContacts"> </collection>
+	</resultMap>
+	
+	<resultMap id="mapUser" type="es.pryades.erp.dto.User">
+		<id property="id" column="id"/>
+		
+		<result property="name" column="name"/>
+		<result property="login" column="login"/>
+		<result property="email" column="email"/>
+		<result property="pwd" column="pwd"/>
+		<result property="changed" column="changed"/>
+		<result property="retries" column="retries"/>
+		<result property="ref_profile" column="ref_profile"/>
+		<result property="status" column="status"/>
+	</resultMap>
+	
 	<resultMap id="mapShipment" type="es.pryades.erp.dto.Shipment">
 		<id property="id" column="id"/>
 		
@@ -188,28 +244,18 @@
 		<result property="tracking" column="tracking"/>
 		<result property="ref_consignee" column="ref_consignee"/>
 		<result property="ref_notify" column="ref_notify"/>
+		<result property="ref_consignee_contact" column="ref_consignee_contact"/>
+		<result property="ref_notify_contact" column="ref_notify_contact"/>
+		<result property="status" column="status"/>
+		<result property="ref_user" column="ref_user"/>
 		
-		<result property="consignee_name" column="consignee_name"/>
-		<result property="consignee_address" column="consignee_address"/>
-		<result property="consignee_tax_id" column="consignee_tax_id"/>
-		<result property="consignee_email" column="consignee_email"/>
-		<result property="consignee_phone" column="consignee_phone"/>
-		<result property="consignee_taxable" column="consignee_taxable"/>
-		<result property="consignee_language" column="consignee_language"/>
-		<result property="consignee_signature" column="consignee_signature"/>
-		<result property="consignee_company_type" column="consignee_company_type"/>
-		<result property="consignee_contact_person" column="consignee_contact_person"/>
+		<association property="consignee" javaType="es.pryades.erp.dto.Company" resultMap="mapCompany" columnPrefix="consignee_" />
+		<association property="notify" javaType="es.pryades.erp.dto.Company" resultMap="mapCompany" columnPrefix="notify_" />
 
-		<result property="notify_name" column="notify_name"/>
-		<result property="notify_address" column="notify_address"/>
-		<result property="notify_tax_id" column="notify_tax_id"/>
-		<result property="notify_email" column="notify_email"/>
-		<result property="notify_phone" column="notify_phone"/>
-		<result property="notify_taxable" column="notify_taxable"/>
-		<result property="notify_language" column="notify_language"/>
-		<result property="notify_signature" column="notify_signature"/>
-		<result property="notify_company_type" column="notify_company_type"/>
-		<result property="notify_contact_person" column="notify_contact_person"/>
+		<association property="consignee_contact" javaType="es.pryades.erp.dto.CompanyContact" resultMap="mapCompanyContact" columnPrefix="consignee_contact_" />
+		<association property="notify_contact" javaType="es.pryades.erp.dto.CompanyContact" resultMap="mapCompanyContact" columnPrefix="notify_contact_" />
+		
+		<association property="user" javaType="es.pryades.erp.dto.User" resultMap="mapUser" columnPrefix="user_" />
 
 		<collection property="boxes" column="id" ofType="mapShipmentBox" select="selectShipmentBoxes"> </collection>
 	</resultMap>
@@ -235,27 +281,58 @@
 		shipments.ref_consignee,
 		shipments.ref_notify,
 		
+		shipments.ref_consignee_contact,
+		shipments.ref_notify_contact,
+		
 		shipments.status,
 		
-		companies1.name 			as consignee_name,
-		companies1.address 			as consignee_address,
-		companies1.email 			as consignee_email,
-		companies1.phone 			as consignee_phone,
-		companies1.tax_id 			as consignee_tax_id,
-		companies1.taxable 			as consignee_taxable,
-		companies1.language 		as consignee_language,
-		companies1.signature 		as consignee_signature,
-		companies1.contact_person 	as consignee_contact_person,
+		shipments.ref_user,
 		
+		companies1.id				as consignee_id,
+		companies1.name				as consignee_name,
+		companies1.alias			as consignee_alias,
+		companies1.tax_id			as consignee_tax_id,
+		companies1.address			as consignee_address,
+		companies1.email			as consignee_email,
+		companies1.phone			as consignee_phone,
+		companies1.type_company		as consignee_type_company,
+		companies1.taxable			as consignee_taxable,
+		companies1.language			as consignee_language,
+		companies1.signature		as consignee_signature,
+		
+		companies2.id				as notify_id,
 		companies2.name 			as notify_name,
+		companies2.alias 			as notify_alias,
+		companies2.tax_id 			as notify_tax_id,
 		companies2.address 			as notify_address,
 		companies2.email 			as notify_email,
 		companies2.phone 			as notify_phone,
-		companies2.tax_id 			as notify_tax_id,
+		companies2.type_company		as notify_type_company,
 		companies2.taxable 			as notify_taxable,
 		companies2.language 		as notify_language,
-		companies2.signature 		as notify_signature,
-		companies2.contact_person 	as notify_contact_person
+		companies2.signature		as notify_signature,
+		
+		contacts1.id				as consignee_contact_id,
+		contacts1.ref_company		as consignee_contact_ref_company,
+		contacts1.name				as consignee_contact_name,
+		contacts1.email				as consignee_contact_email,
+		contacts1.phone				as consignee_contact_phone,
+		
+		contacts2.id				as notify_contact_id,
+		contacts2.ref_company		as notify_contact_ref_company,
+		contacts2.name				as notify_contact_name,
+		contacts2.email				as notify_contact_email,
+		contacts2.phone				as notify_contact_phone,
+		
+		users.id					as user_id,
+		users.name					as user_name,
+		users.login					as user_login,
+		users.email					as user_email,
+		users.pwd					as user_pwd,
+		users.changed				as user_changed,
+		users.retries				as user_retries,
+		users.ref_profile			as user_ref_profile,
+		users.status				as user_status
 	</sql>
 
 	<sql id="es.pryades.erp.dal.ibatis.ShipmentMapper.joins">
@@ -264,6 +341,15 @@
 
 		inner join companies companies2
 		on shipments.ref_notify = companies2.id
+		
+		inner join companies_contacts contacts1
+		on shipments.ref_consignee_contact = contacts1.id
+
+		inner join companies_contacts contacts2
+		on shipments.ref_notify_contact = contacts2.id
+		
+		inner join users
+		on shipments.ref_user = users.id
 		
 		<if test="ref_user != null">
 			inner join users_companies
@@ -413,6 +499,11 @@
 			ref_consignee,
 			ref_notify,
 		
+			ref_consignee_contact,
+			ref_notify_contact,
+
+			ref_user,
+
 			status
 		)
 		values
@@ -438,6 +529,11 @@
 			#{ref_consignee},
 			#{ref_notify},
 		
+			#{ref_consignee_contact},
+			#{ref_notify_contact},
+
+			#{ref_user},
+		
 			#{status}
 		)
 	</insert>
@@ -461,7 +557,13 @@
 			ref_consignee = #{ref_consignee},
 			ref_notify = #{ref_notify},
 		
+			ref_consignee_contact = #{ref_consignee_contact},
+			ref_notify_contact = #{ref_notify_contact},
+		
+			ref_user = #{ref_user},
+			
 			status = #{status}
+			
 		where id = #{id}
 	</update>
 

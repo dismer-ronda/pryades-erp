@@ -80,6 +80,7 @@ public class DalManager
 						"<mapper resource='es/pryades/erp/dal/" + engine + "/ShipmentBoxMapper.xml'/>" +
 						"<mapper resource='es/pryades/erp/dal/" + engine + "/ShipmentBoxLineMapper.xml'/>" +
 						"<mapper resource='es/pryades/erp/dal/" + engine + "/UserCompanyMapper.xml'/>" +
+						"<mapper resource='es/pryades/erp/dal/" + engine + "/CompanyContactMapper.xml'/>" +
 					"</mappers>"+
 				"</configuration>";
 				

@@ -97,7 +97,7 @@ public class QuotationResource extends ServerResource
 					    	
 							Quotation quotation = (Quotation)IOCManager._QuotationsManager.getRow( ctx, query );
 							
-							AppContext ctx1 = new AppContext( quotation.getCustomer_language() );
+							AppContext ctx1 = new AppContext( quotation.getCustomer().getLanguage() );
 							
 							IOCManager._ParametersManager.loadParameters( ctx1 );
 							ctx1.setUser( ctx.getUser() );

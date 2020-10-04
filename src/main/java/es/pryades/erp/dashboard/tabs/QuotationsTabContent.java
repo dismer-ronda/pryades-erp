@@ -416,7 +416,7 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 			long ts = CalendarUtils.getTodayAsLong( "UTC" );
 			
 			String pagesize = "A4";
-			String template = quotation.getCustomer_taxable().booleanValue() ? "national-quotation-template" : "international-quotation-template";
+			String template = quotation.getCustomer().getTaxable().booleanValue() ? "national-quotation-template" : "international-quotation-template";
 			String timeout = "60";
 			
 			String extra = "ts=" + ts + 

@@ -132,6 +132,23 @@
 		order by quotations_lines_deliveries.ref_quotation_delivery asc
 	</select>
 
+	<select id="selectCompanyContacts" parameterType="long" resultMap="mapCompanyContact">
+		select 
+			companies_contacts.id,
+		
+			companies_contacts.ref_company,
+			companies_contacts.name,
+			companies_contacts.email,
+			companies_contacts.phone
+
+		from companies_contacts
+		 		
+		where 
+			companies_contacts.ref_company = #{id}
+			
+		order by companies_contacts.id asc
+	</select>
+
 	<resultMap id="mapQuotationLineDelivery" type="es.pryades.erp.dto.QuotationLineDelivery">
 		<id property="id" column="id"/>
 		
@@ -139,6 +156,32 @@
 		<result property="ref_quotation_line" column="ref_quotation_line"/>
 		
 		<result property="quantity" column="quantity"/>
+	</resultMap>
+	
+		<resultMap id="mapCompanyContact" type="es.pryades.erp.dto.CompanyContact">
+		<id property="id" column="id"/>
+		
+		<result property="ref_company" column="ref_company"/>
+		<result property="name" column="name"/>
+		<result property="email" column="email"/>
+		<result property="phone" column="phone"/>
+	</resultMap>
+	
+	<resultMap id="mapCompany" type="es.pryades.erp.dto.Company">
+		<id property="id" column="id"/>
+		
+		<result property="name" column="name"/>
+		<result property="alias" column="alias"/>
+		<result property="tax_id" column="tax_id"/>
+		<result property="address" column="address"/>
+		<result property="email" column="email"/>
+		<result property="phone" column="phone"/>
+		<result property="type_company" column="type_company"/>
+		<result property="taxable" column="taxable"/>
+		<result property="language" column="language"/>
+		<result property="signature" column="signature"/>
+
+		<collection property="contacts" column="id" ofType="mapCompanyContact" select="selectCompanyContacts"> </collection>
 	</resultMap>
 
 	<resultMap id="mapQuotationLine" type="es.pryades.erp.dto.QuotationLine">
@@ -157,6 +200,8 @@
 		<result property="margin" column="margin"/>
 		<result property="tax_rate" column="tax_rate"/>
 		<result property="total_invoiced" column="total_invoiced"/>
+		
+		<association property="provider" javaType="es.pryades.erp.dto.Company" resultMap="mapCompany" columnPrefix="provider_" />
 		
 		<collection property="line_deliveries" column="id" ofType="mapQuotationLineDelivery" select="selectQuotationLineDeliveries"> </collection>
 	</resultMap>
@@ -185,6 +230,19 @@
 		<association property="quotation_line" javaType="es.pryades.erp.dto.QuotationLine" resultMap="mapQuotationLine" columnPrefix="quotation_line_" />
 	</resultMap>
 
+	<resultMap id="mapUser" type="es.pryades.erp.dto.User">
+		<id property="id" column="id"/>
+		
+		<result property="name" column="name"/>
+		<result property="login" column="login"/>
+		<result property="email" column="email"/>
+		<result property="pwd" column="pwd"/>
+		<result property="changed" column="changed"/>
+		<result property="retries" column="retries"/>
+		<result property="ref_profile" column="ref_profile"/>
+		<result property="status" column="status"/>
+	</resultMap>
+
 	<resultMap id="mapQuotation" type="es.pryades.erp.dto.Quotation">
 		<id property="id" column="quotation_id"/>
 		
@@ -193,6 +251,8 @@
 		<result property="quotation_date" column="quotation_date"/>
 		<result property="validity" column="validity"/>
 		<result property="ref_customer" column="ref_customer"/>
+		<result property="ref_contact" column="ref_contact"/>
+		<result property="ref_user" column="ref_user"/>
 		<result property="reference_request" column="reference_request"/>
 		<result property="reference_order" column="reference_order"/>
 		<result property="packaging" column="packaging"/>
@@ -204,15 +264,9 @@
 
 		<result property="transport_invoiced" column="transport_invoiced"/>
 
-		<result property="customer_name" column="customer_name"/>
-		<result property="customer_address" column="customer_address"/>
-		<result property="customer_tax_id" column="customer_tax_id"/>
-		<result property="customer_email" column="customer_email"/>
-		<result property="customer_phone" column="customer_phone"/>
-		<result property="customer_taxable" column="customer_taxable"/>
-		<result property="customer_language" column="customer_language"/>
-		<result property="customer_contact_person" column="customer_contact_person"/>
-		<result property="customer_signature" column="customer_signature"/>
+		<association property="customer" javaType="es.pryades.erp.dto.Company" resultMap="mapCompany" columnPrefix="customer_" />
+		<association property="contact" javaType="es.pryades.erp.dto.CompanyContact" resultMap="mapCompanyContact" columnPrefix="contact_" />
+		<association property="user" javaType="es.pryades.erp.dto.User" resultMap="mapUser" columnPrefix="user_" />
 
 		<collection property="lines" column="id" ofType="mapQuotationLine" select="selectQuotationLines"> </collection>
 		<collection property="deliveries" column="id" ofType="mapQuotationDelivery" select="selectQuotationDeliveries"> </collection>
@@ -233,25 +287,8 @@
 		<result property="ref_consignee" column="ref_consignee"/>
 		<result property="ref_notify" column="ref_notify"/>
 		
-		<result property="consignee_name" column="consignee_name"/>
-		<result property="consignee_address" column="consignee_address"/>
-		<result property="consignee_tax_id" column="consignee_tax_id"/>
-		<result property="consignee_email" column="consignee_email"/>
-		<result property="consignee_phone" column="consignee_phone"/>
-		<result property="consignee_taxable" column="consignee_taxable"/>
-		<result property="consignee_language" column="consignee_language"/>
-		<result property="consignee_signature" column="consignee_signature"/>
-		<result property="consignee_contact_person" column="consignee_contact_person"/>
-
-		<result property="notify_name" column="notify_name"/>
-		<result property="notify_address" column="notify_address"/>
-		<result property="notify_tax_id" column="notify_tax_id"/>
-		<result property="notify_email" column="notify_email"/>
-		<result property="notify_phone" column="notify_phone"/>
-		<result property="notify_taxable" column="notify_taxable"/>
-		<result property="notify_language" column="notify_language"/>
-		<result property="notify_signature" column="notify_signature"/>
-		<result property="notify_contact_person" column="notify_contact_person"/>
+		<association property="consignee" javaType="es.pryades.erp.dto.Company" resultMap="mapCompany" columnPrefix="consignee_" />
+		<association property="notify" javaType="es.pryades.erp.dto.Company" resultMap="mapCompany" columnPrefix="notify_" />
 	</resultMap>
 	
 	<resultMap id="mapInvoice" type="es.pryades.erp.dto.Invoice">
@@ -286,6 +323,8 @@
 
 		quotations.id					as quotation_id,						
 		quotations.ref_customer			as quotation_ref_customer,
+		quotations.ref_contact			as quotation_ref_contact,
+		quotations.ref_user				as quotation_ref_user,
 		quotations.quotation_date		as quotation_quotation_date,
 		quotations.validity				as quotation_validity,
 		quotations.number				as quotation_number,						
@@ -299,6 +338,33 @@
 		quotations.tax_rate				as quotation_tax_rate,
 		quotations.status				as quotation_status,
 		
+		companies.id 					as quotation_customer_id,
+		companies.name 					as quotation_customer_name,
+		companies.address 				as quotation_customer_address,
+		companies.email 				as quotation_customer_email,
+		companies.phone 				as quotation_customer_phone,
+		companies.tax_id 				as quotation_customer_tax_id,
+		companies.taxable 				as quotation_customer_taxable,
+		companies.language 				as quotation_customer_language,
+		companies.type_company 			as quotation_customer_type_company,
+		companies.signature 			as quotation_customer_signature,
+		
+		companies_contacts.id			as quotation_contact_id,
+		companies_contacts.ref_company	as quotation_contact_ref_company,
+		companies_contacts.name			as quotation_contact_name,
+		companies_contacts.email		as quotation_contact_email,
+		companies_contacts.phone		as quotation_contact_phone,
+		
+		users.id						as quotation_user_id,
+		users.name						as quotation_user_name,
+		users.login						as quotation_user_login,
+		users.email						as quotation_user_email,
+		users.pwd						as quotation_user_pwd,
+		users.changed					as quotation_user_changed,
+		users.retries					as quotation_user_retries,
+		users.ref_profile				as quotation_user_ref_profile,
+		users.status					as quotation_user_status,
+		
 		( 
 			select 
 				sum(transport_cost) 
@@ -310,55 +376,47 @@
 				invoices1.ref_quotation = quotations.id AND NOT invoices1.free_delivery
 				
 				
-		) 								as quotation_transport_invoiced,
+		) 							as quotation_transport_invoiced,
 		
-		shipments.id					as shipment_id,
+		shipments.id				as shipment_id,
 		
-		shipments.number				as shipment_number,						
-		shipments.shipment_date			as shipment_shipment_date,						
-		shipments.departure_date		as shipment_departure_date,						
-		shipments.incoterms				as shipment_incoterms,
-		shipments.description			as shipment_description,
-		shipments.departure_port		as shipment_departure_port,
-		shipments.arrival_port			as shipment_arrival_port,
-		shipments.carrier				as shipment_carrier,
-		shipments.tracking				as shipment_tracking,
-		shipments.ref_consignee			as shipment_ref_consignee,
-		shipments.ref_notify			as shipment_ref_notify,
-		shipments.status				as shipment_status,
+		shipments.number			as shipment_number,						
+		shipments.shipment_date		as shipment_shipment_date,						
+		shipments.departure_date	as shipment_departure_date,						
+		shipments.incoterms			as shipment_incoterms,
+		shipments.description		as shipment_description,
+		shipments.departure_port	as shipment_departure_port,
+		shipments.arrival_port		as shipment_arrival_port,
+		shipments.carrier			as shipment_carrier,
+		shipments.tracking			as shipment_tracking,
+		shipments.ref_consignee		as shipment_ref_consignee,
+		shipments.ref_notify		as shipment_ref_notify,
+		shipments.status			as shipment_status,
 
-		companies1.name 				as consignee_name,
-		companies1.address 				as consignee_address,
-		companies1.email 				as consignee_email,
-		companies1.phone 				as consignee_phone,
-		companies1.tax_id 				as consignee_tax_id,
-		companies1.taxable 				as consignee_taxable,
-		companies1.language 			as consignee_language,
-		companies1.signature 			as consignee_signature,
-		companies1.type_company 		as consignee_type_company,
-		companies1.contact_person		as consignee_contact_person,
+		companies1.id				as shipment_consignee_id,
+		companies1.name				as shipment_consignee_name,
+		companies1.alias			as shipment_consignee_alias,
+		companies1.tax_id			as shipment_consignee_tax_id,
+		companies1.address			as shipment_consignee_address,
+		companies1.email			as shipment_consignee_email,
+		companies1.phone			as shipment_consignee_phone,
+		companies1.type_company		as shipment_consignee_type_company,
+		companies1.taxable			as shipment_consignee_taxable,
+		companies1.language			as shipment_consignee_language,
+		companies1.signature		as shipment_consignee_signature,
 		
-		companies2.name 				as notify_name,
-		companies2.address 				as notify_address,
-		companies2.email 				as notify_email,
-		companies2.phone 				as notify_phone,
-		companies2.tax_id 				as notify_tax_id,
-		companies2.taxable 				as notify_taxable,
-		companies2.language 			as notify_language,
-		companies2.signature 			as notify_signature,
-		companies2.type_company 		as notify_type_company,
-		companies2.contact_person 		as notify_contact_person,
+		companies2.id				as shipment_notify_id,
+		companies2.name 			as shipment_notify_name,
+		companies2.alias 			as shipment_notify_alias,
+		companies2.tax_id 			as shipment_notify_tax_id,
+		companies2.address 			as shipment_notify_address,
+		companies2.email 			as shipment_notify_email,
+		companies2.phone 			as shipment_notify_phone,
+		companies2.type_company		as shipment_notify_type_company,
+		companies2.taxable 			as shipment_notify_taxable,
+		companies2.language 		as shipment_notify_language,
+		companies2.signature		as shipment_notify_signature
 
-		companies.name 					as quotation_customer_name,
-		companies.address 				as quotation_customer_address,
-		companies.email 				as quotation_customer_email,
-		companies.phone 				as quotation_customer_phone,
-		companies.tax_id 				as quotation_customer_tax_id,
-		companies.taxable 				as quotation_customer_taxable,
-		companies.language 				as quotation_customer_language,
-		companies.signature 			as quotation_customer_signature,
-		companies.type_company 			as quotation_customer_type_company,
-		companies.contact_person 		as quotation_customer_contact_person
 	</sql>
 
 	<sql id="es.pryades.erp.dal.ibatis.InvoiceMapper.joins">
@@ -368,6 +426,12 @@
 		inner join companies
 		on quotations.ref_customer = companies.id
 		
+		inner join companies_contacts
+		on quotations.ref_contact = companies_contacts.id
+
+		inner join users
+		on quotations.ref_user = users.id
+
 		left join shipments
 		on invoices.ref_shipment = shipments.id
 		
@@ -376,7 +440,7 @@
 
 		left join companies companies2
 		on shipments.ref_notify = companies2.id
-
+		
 		<if test="ref_user != null">
 			inner join users_companies
 			on users_companies.ref_company = quotations.ref_customer

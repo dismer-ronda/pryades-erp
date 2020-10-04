@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="es.pryades.erp.dal.ibatis.CompanyContactMapper">
+
+	<sql id="es.pryades.erp.dal.ibatis.CompanyContactMapper.fields">
+		companies_contacts.id,
+		companies_contacts.ref_company,
+		companies_contacts.name,
+		companies_contacts.email,
+		companies_contacts.phone
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.CompanyContactMapper.joins">
+		inner join companies
+		on companies_contacts.ref_company = companies.id
+			
+		<if test="ref_user != null">
+			inner join users_companies
+			on users_companies.ref_company = companies_contacts.id
+		</if>
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.CompanyContactMapper.where">
+		<where>
+			<if test="ref_company != null">
+				AND companies_contacts.ref_company = #{ref_company}
+			</if>
+			<if test="ref_user != null">
+				AND users_companies.ref_user = #{ref_user}
+			</if>
+			<if test="id != null">
+				AND companies_contacts.id = #{id}
+			</if>
+		</where>
+	</sql>
+	
+	<sql id="es.pryades.erp.dal.ibatis.CompanyContactMapper.orderby">
+		<choose>
+			<when test="orderby.equals( 'name' )">
+				companies_contacts.name
+			</when>
+			<when test="orderby.equals( 'email' )">
+				companies_contacts.email
+			</when>
+			<when test="orderby.equals( 'phone' )">
+				companies_contacts.phone
+			</when>
+			<otherwise>
+				companies_contacts.id
+			</otherwise>
+		</choose>
+
+		<choose>
+			<when test="order.equalsIgnoreCase( 'asc' )">
+				asc
+			</when>
+			<otherwise>
+				desc
+			</otherwise>
+		</choose>
+	</sql>
+
+	<select id="getNumberOfRows" parameterType="es.pryades.erp.dto.Query" resultType="long">
+		select 
+			count(1) 
+		from 
+			companies_contacts
+
+    	<include refid="es.pryades.erp.dal.ibatis.CompanyContactMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.CompanyContactMapper.where" />
+	</select>
+
+	<select id="getPage" parameterType="es.pryades.erp.dto.Query" resultType="es.pryades.erp.dto.CompanyContact">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.CompanyContactMapper.fields" />
+		
+		from
+			companies_contacts
+		
+   		<include refid="es.pryades.erp.dal.ibatis.CompanyContactMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.CompanyContactMapper.where" />
+
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.CompanyContactMapper.orderby" />
+
+		LIMIT #{pageSize} OFFSET (#{pageSize} * (#{pageNumber} - 1))
+	</select>
+
+	<select id="getRows" parameterType="es.pryades.erp.dto.Query" resultType="es.pryades.erp.dto.CompanyContact">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.CompanyContactMapper.fields" />
+		
+		from
+			companies_contacts
+		
+    	<include refid="es.pryades.erp.dal.ibatis.CompanyContactMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.CompanyContactMapper.where" />
+		
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.CompanyContactMapper.orderby" />
+	</select>
+
+	<select id="getRow" parameterType="es.pryades.erp.dto.Query" resultType="es.pryades.erp.dto.CompanyContact">
+		select
+			<include refid="es.pryades.erp.dal.ibatis.CompanyContactMapper.fields" />
+		
+		from
+			companies_contacts
+		
+		<include refid="es.pryades.erp.dal.ibatis.CompanyContactMapper.where" />
+	</select>
+
+	<insert id="addRow" parameterType="es.pryades.erp.dto.CompanyContact">
+
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			SELECT nextval('gendat');
+		</selectKey>
+
+		insert into companies_contacts
+		(
+			id,
+			ref_company,
+			name,
+			email,
+			phone
+		)
+		values
+		(
+			#{id},
+			#{ref_company},
+			#{name},
+			#{email},
+			#{phone}
+		)
+	</insert>
+
+	<update id="setRow" parameterType="es.pryades.erp.dto.CompanyContact">
+		update companies_contacts set
+			ref_company=#{ref_company},
+			name=#{name},
+			email=#{email},
+			phone=#{phone}
+		where id = #{id}
+	</update>
+
+	<update id="delRow" parameterType="es.pryades.erp.dto.CompanyContact">
+		delete from companies_contacts where id = #{id}
+	</update>
+
+</mapper>

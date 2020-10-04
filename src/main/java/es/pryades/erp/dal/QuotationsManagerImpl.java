@@ -65,6 +65,8 @@ public class QuotationsManagerImpl extends BaseManagerImpl implements Quotations
 			newQuotation.setPayment_terms( src.getPayment_terms() );
 			newQuotation.setTax_rate( src.getTax_rate() );
 			newQuotation.setStatus( Quotation.STATUS_CREATED);
+			newQuotation.setRef_contact( src.getRef_contact() );
+			newQuotation.setRef_user( src.getRef_user() );
 			
 			newQuotation.setDeliveries( new ArrayList<QuotationDelivery>() );
 			

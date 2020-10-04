@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.vaadin.data.Property;
+import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.ui.Alignment;
@@ -29,8 +31,11 @@ import es.pryades.erp.configuration.tabs.ShipmentsBoxesConfig;
 import es.pryades.erp.dashboard.Dashboard;
 import es.pryades.erp.dto.BaseDto;
 import es.pryades.erp.dto.Company;
+import es.pryades.erp.dto.CompanyContact;
 import es.pryades.erp.dto.Shipment;
+import es.pryades.erp.dto.UserCompany;
 import es.pryades.erp.dto.UserDefault;
+import es.pryades.erp.dto.query.CompanyContactQuery;
 import es.pryades.erp.dto.query.CompanyQuery;
 import es.pryades.erp.dto.query.ShipmentQuery;
 import es.pryades.erp.ioc.IOCManager;
@@ -49,6 +54,9 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 	private static final Logger LOG = Logger.getLogger( ModalNewShipment.class );
 
 	private List<Company> customers;
+	private List<CompanyContact> consignee_contacts;
+	private List<CompanyContact> notify_contacts;
+	private List<UserCompany> users;
 	
 	@Getter
 	protected Shipment newShipment;
@@ -58,6 +66,11 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 	
 	private ComboBox comboConsignee;
 	private ComboBox comboNotify;
+
+	private ComboBox comboConsigneeContacts;
+	private ComboBox comboNotifyContacts;
+	
+	private ComboBox comboUsers;
 	
 	private TextField editIncoterms;
 	private TextField editTitle;
@@ -119,6 +132,7 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 			newShipment.setArrival_port( arrival_port.getData_value() );
 			newShipment.setCarrier( carrier.getData_value() );
 			newShipment.setStatus( Shipment.STATUS_CREATED );
+			newShipment.setRef_user( getContext().getUser().getId() );
 		}
 
 		layout.setHeight( "-1px" );
@@ -144,17 +158,67 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 		comboConsignee.setNullSelectionAllowed( false );
 		comboConsignee.setTextInputAllowed( true );
 		comboConsignee.setImmediate( true );
+		comboConsignee.setRequired( true );
 		fillComboConsignees();
 		comboConsignee.setPropertyDataSource( bi.getItemProperty( "ref_consignee" ) );
+		comboConsignee.addValueChangeListener( new Property.ValueChangeListener() 
+		{
+			private static final long serialVersionUID = -545925109946070888L;
+
+			public void valueChange(ValueChangeEvent event) 
+		    {
+		        onSelectedConsignee();
+		    }
+		});
 
 		comboNotify = new ComboBox(getContext().getString( "modalNewShipment.comboNotify" ));
 		comboNotify.setWidth( "100%" );
 		comboNotify.setNullSelectionAllowed( false );
 		comboNotify.setTextInputAllowed( true );
 		comboNotify.setImmediate( true );
+		comboNotify.setRequired( true );
 		fillComboNotifies();
 		comboNotify.setPropertyDataSource( bi.getItemProperty( "ref_notify" ) );
+		comboNotify.addValueChangeListener( new Property.ValueChangeListener() 
+		{
+			private static final long serialVersionUID = -1531581759054257531L;
 
+			public void valueChange(ValueChangeEvent event) 
+		    {
+		        onSelectedNotify();
+		    }
+		});
+		
+		loadConsigneeContacts();
+		comboConsigneeContacts = new ComboBox(getContext().getString( "modalNewShipment.comboConsigneeContact" ));
+		comboConsigneeContacts.setWidth( "100%" );
+		comboConsigneeContacts.setNullSelectionAllowed( false );
+		comboConsigneeContacts.setTextInputAllowed( true );
+		comboConsigneeContacts.setImmediate( true );
+		comboConsigneeContacts.setRequired( true );
+		fillComboConsigneeContacts();
+		comboConsigneeContacts.setPropertyDataSource( bi.getItemProperty( "ref_consignee_contact" ) );
+
+		loadNotifyContacts();
+		comboNotifyContacts = new ComboBox(getContext().getString( "modalNewShipment.comboNotifyContact" ));
+		comboNotifyContacts.setWidth( "100%" );
+		comboNotifyContacts.setNullSelectionAllowed( false );
+		comboNotifyContacts.setTextInputAllowed( true );
+		comboNotifyContacts.setImmediate( true );
+		comboNotifyContacts.setRequired( true );
+		fillComboNotifyContacts();
+		comboNotifyContacts.setPropertyDataSource( bi.getItemProperty( "ref_notify_contact" ) );
+
+		loadUsers();
+		comboUsers = new ComboBox(getContext().getString( "modalNewShipment.comboUser" ));
+		comboUsers.setWidth( "100%" );
+		comboUsers.setNullSelectionAllowed( false );
+		comboUsers.setTextInputAllowed( true );
+		comboUsers.setImmediate( true );
+		comboUsers.setRequired( true );
+		fillComboUsers();
+		comboUsers.setPropertyDataSource( bi.getItemProperty( "ref_user" ) );
+		
 		if ( !getOperation().equals( Operation.OP_ADD ) )
 		{
 			comboStatus = new ComboBox(getContext().getString( "modalNewShipment.comboStatus" ));
@@ -177,7 +241,7 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 		editDescription = new TextArea( getContext().getString( "modalNewShipment.editDescription" ), bi.getItemProperty( "description" ) );
 		editDescription.setWidth( "100%" );
 		editDescription.setNullRepresentation( "" );
-		editDescription.setRows( 4 );
+		editDescription.setRows( 2 );
 
 		editDeparture_port = new TextField( getContext().getString( "modalNewShipment.editDeparture_port" ), bi.getItemProperty( "departure_port" ) );
 		editDeparture_port.setWidth( "100%" );
@@ -198,18 +262,25 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 		HorizontalLayout row1 = new HorizontalLayout();
 		row1.setWidth( "100%" );
 		row1.setSpacing( true );
+		row1.addComponent( comboUsers );
 		row1.addComponent( editTitle );
 		row1.addComponent( popupDateShipment );
 		row1.addComponent( popupDateDeparture );
+		if ( !getOperation().equals( Operation.OP_ADD ) )
+			row1.addComponent( comboStatus );
 		
 		HorizontalLayout row4 = new HorizontalLayout();
 		row4.setWidth( "100%" );
 		row4.setSpacing( true );
-		if ( !getOperation().equals( Operation.OP_ADD ) )
-			row1.addComponent( comboStatus );
 		row4.addComponent( comboConsignee );
-		row4.addComponent( comboNotify );
-		
+		row4.addComponent( comboConsigneeContacts );
+
+		HorizontalLayout row5 = new HorizontalLayout();
+		row5.setWidth( "100%" );
+		row5.setSpacing( true );
+		row5.addComponent( comboNotify );
+		row5.addComponent( comboNotifyContacts );
+
 		HorizontalLayout row2 = new HorizontalLayout();
 		row2.setWidth( "100%" );
 		row2.setSpacing( true );
@@ -226,6 +297,7 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 
 		componentsContainer.addComponent( row1 );
 		componentsContainer.addComponent( row4 );
+		componentsContainer.addComponent( row5 );
 		componentsContainer.addComponent( row2 );
 		componentsContainer.addComponent( row3 );
 		
@@ -255,7 +327,7 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 	{
 		panelBoxes = new Panel( getContext().getString( "modalNewShipment.Boxes" ) );
 		panelBoxes.setStyleName( "borderless light" );
-		panelBoxes.setHeight( "400px" );
+		panelBoxes.setHeight( "300px" );
 
 		configBoxes = new ShipmentsBoxesConfig( getContext(), this );
 		configBoxes.initializeComponent();
@@ -557,7 +629,7 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 				long ts = CalendarUtils.getTodayAsLong( "UTC" );
 				
 				String pagesize = "A4";
-				String template = shipment.getConsignee_taxable().booleanValue() ? "national-packing-template" : "international-packing-template";
+				String template = shipment.getConsignee().getTaxable().booleanValue() ? "national-packing-template" : "international-packing-template";
 				String timeout = "0";
 				
 				String extra = "ts=" + ts + 
@@ -594,5 +666,108 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 				Utils.logException( e, LOG );
 			}
 		}
+	}
+	@SuppressWarnings("unchecked")
+	private void loadConsigneeContacts()
+	{
+		try
+		{
+			CompanyContactQuery query = new CompanyContactQuery();
+			query.setRef_company( newShipment.getRef_consignee() );
+			
+			consignee_contacts = IOCManager._CompaniesContactsManager.getRows( getContext(), query );
+		}
+		catch ( BaseException e )
+		{
+			e.printStackTrace();
+			consignee_contacts = new ArrayList<CompanyContact>();
+		}
+	}
+	
+	private void fillComboConsigneeContacts()
+	{
+		comboConsigneeContacts.removeAllItems();
+		
+		for ( CompanyContact contact : consignee_contacts )
+		{
+			comboConsigneeContacts.addItem( contact.getId() );
+			comboConsigneeContacts.setItemCaption( contact.getId(), contact.getName() );
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void loadNotifyContacts()
+	{
+		try
+		{
+			CompanyContactQuery query = new CompanyContactQuery();
+			query.setRef_company( newShipment.getRef_notify() );
+			
+			notify_contacts = IOCManager._CompaniesContactsManager.getRows( getContext(), query );
+		}
+		catch ( BaseException e )
+		{
+			e.printStackTrace();
+			notify_contacts = new ArrayList<CompanyContact>();
+		}
+	}
+	
+	private void fillComboNotifyContacts()
+	{
+		comboNotifyContacts.removeAllItems();
+		
+		for ( CompanyContact contact : notify_contacts )
+		{
+			comboNotifyContacts.addItem( contact.getId() );
+			comboNotifyContacts.setItemCaption( contact.getId(), contact.getName() );
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void loadUsers()
+	{
+		try
+		{
+			UserCompany query = new UserCompany();
+			query.setRef_company( newShipment.getRef_consignee() );
+			
+			users = IOCManager._UsersCompaniesManager.getRows( getContext(), query );
+			
+			LOG.info( "users " + users );
+		}
+		catch ( BaseException e )
+		{
+			e.printStackTrace();
+			users = new ArrayList<UserCompany>();
+		}
+	}
+
+	private void fillComboUsers()
+	{
+		comboUsers.removeAllItems();
+		
+		for ( UserCompany user : users )
+		{
+			comboUsers.addItem( user.getRef_user() );
+			comboUsers.setItemCaption( user.getRef_user(), user.getUser_name() );
+		}
+	}
+
+	private void onSelectedConsignee()
+	{
+		newShipment.setRef_consignee_contact( null );
+		loadConsigneeContacts();
+		fillComboConsigneeContacts();
+		
+		newShipment.setRef_user( null );
+		loadUsers();
+		fillComboUsers();
+	}
+
+	private void onSelectedNotify()
+	{
+		newShipment.setRef_notify_contact( null );
+		loadNotifyContacts();
+		fillComboNotifyContacts();
 	}
 }

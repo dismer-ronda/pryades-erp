@@ -63,33 +63,97 @@ public class ShipmentBox extends BaseDto
 	
 	public String getBoxContents( AppContext ctx )
 	{
-		String rows = "";
-		for ( ShipmentBox box : sub_boxes )
+		try
 		{
-			Integer count = (Integer)ctx.getData( box.getBox_type().toString() );
-			count++;
-		
-			String type = XmlUtils.getDiv( "", 
-					XmlUtils.getDiv( "padding_left padding_right padding_top text_regular_size text_center text_bold", ctx.getString( "shipment.box.type.alias." + box.getBox_type() ) ) + 
-					XmlUtils.getDiv( "padding_left padding_right padding_bottom text_regular_size text_center text_bold", count.toString() ) );
-
-			String row = "";
-			row += XmlUtils.getTableCol( "48px", "borde",  type  );
-			row += XmlUtils.getTableCol( "", "text_regular_size borde", box.getBoxContents( ctx ) );
-
-			ctx.addData( box.getBox_type().toString(), count );
+			String rows = "";
+			for ( ShipmentBox box : sub_boxes )
+			{
+				Integer count = (Integer)ctx.getData( box.getBox_type().toString() );
+				count++;
 			
-			rows += XmlUtils.getTableRow( "", row );
+				String type = XmlUtils.getDiv( "", 
+						XmlUtils.getDiv( "padding_left padding_right padding_top text_regular_size text_center text_bold", ctx.getString( "shipment.box.type.alias." + box.getBox_type() ) ) + 
+						XmlUtils.getDiv( "padding_left padding_right padding_bottom text_regular_size text_center text_bold", count.toString() ) );
+	
+				String row = "";
+				row += XmlUtils.getTableCol( "48px", "borde",  type  );
+				row += XmlUtils.getTableCol( "", "text_regular_size borde", box.getBoxContents( ctx ) );
+	
+				ctx.addData( box.getBox_type().toString(), count );
+				
+				rows += XmlUtils.getTableRow( "", row );
+			}
+			
+			if ( lines.size() > 0 )
+			{
+				for ( ShipmentBoxLine line : lines )
+					rows += XmlUtils.getTableRow( "", line.getLineContents( ctx ) );
+			}
+	
+			String ret = XmlUtils.getTable( "100%", "border_no_spacing", rows );
+			
+			return ret;
 		}
-		
-		if ( lines.size() > 0 )
+		catch ( Throwable e )
 		{
-			for ( ShipmentBoxLine line : lines )
-				rows += XmlUtils.getTableRow( "", line.getLineContents( ctx ) );
+			e.printStackTrace();
 		}
 
-		String ret = XmlUtils.getTable( "100%", "border_no_spacing", rows );
+		return "";
+	}
 
-		return ret;
+	public String getBoxTable( AppContext ctx )
+	{
+		try
+		{
+			String headers = "";
+			
+			headers += XmlUtils.getTableCol( "", "", "" );
+			headers += XmlUtils.getTableCol( "48px", "text_regular_size text_center borde", XmlUtils.getDiv( "padding_bottom padding_top text_bold", ctx.getString( "template.shipment.packing.net" ) ) );
+			headers += XmlUtils.getTableCol( "48px", "text_regular_size text_center borde", XmlUtils.getDiv( "padding_bottom padding_top text_bold", ctx.getString( "template.shipment.packing.gross" ) ) );
+			headers += XmlUtils.getTableCol( "44px", "text_regular_size text_center borde", XmlUtils.getDiv( "padding_bottom padding_top text_bold", ctx.getString( "template.shipment.packing.quantity" ) ) );
+
+			String rows = "";
+			for ( ShipmentBox box : sub_boxes )
+			{
+				String type = XmlUtils.getDiv( "", 
+						XmlUtils.getDiv( "padding_left padding_right padding_top text_regular_size text_center text_bold", ctx.getString( "shipment.box.type.alias." + box.getBox_type() ) ) + 
+						XmlUtils.getDiv( "padding_left padding_right padding_bottom text_regular_size text_center text_bold", "" ) );
+	
+				String row = "";
+				row += XmlUtils.getTableCol( "48px", "borde",  type  );
+				row += XmlUtils.getTableCol( "", "text_regular_size borde", box.getBoxContents( ctx ) );
+	
+				rows += XmlUtils.getTableRow( "", row );
+			}
+			
+			if ( lines.size() > 0 )
+			{
+				for ( ShipmentBoxLine line : lines )
+					rows += XmlUtils.getTableRow( "", line.getLineContents( ctx ) );
+			}
+	
+			String ret = XmlUtils.getTable( "100%", "border_no_spacing", XmlUtils.getTableRow( "", headers ) ) + XmlUtils.getTable( "100%", "border_no_spacing", rows );
+	
+			return ret;
+		}
+		catch ( Throwable e )
+		{
+			e.printStackTrace();
+		}
+
+		return "";
+	}
+
+	@Override
+	public void removePrivateFields()	
+	{
+		super.removePrivateFields();
+		
+		for ( ShipmentBox box : sub_boxes )
+			box.removePrivateFields();
+		
+		for ( ShipmentBoxLine line : lines )
+			line.removePrivateFields();
 	}
 }

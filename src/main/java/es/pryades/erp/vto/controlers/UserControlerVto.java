@@ -47,8 +47,6 @@ public class UserControlerVto extends GenericControlerVto
 				result.setRef_profile( ((User) dtoObj).getRef_profile() );
 				result.setPwd( ((User) dtoObj).getPwd() );
 				result.setProfile_name( ((User) dtoObj).getProfile_name() );
-				result.setRegion_name( ((User) dtoObj).getRegion_name() );
-				result.setPlant_name( ((User) dtoObj).getPlant_name() );
 			}
 			else
 			{

@@ -174,7 +174,7 @@
 			<td width="50%" class="text_left vtop">
 				<div class="text_regular_size text_bold">$context.getString( "template.invoice.from" ):</div>
 				<div class="text_regular_size sangria">
-					$context.getCompanyDataAsHtml()
+					$context.getCompanyDataAsHtml( $invoice.getQuotation().getUser() )
 				</div>
 			</td>
 			
@@ -299,13 +299,13 @@
 
 			</td>
 
-			#if( $invoice.getQuotation().getCustomer_signature().booleanValue() )
+			#if( $invoice.getQuotation().getCustomer().getSignature().booleanValue() )
 			<td width="" class="vtop">
 				
 				<table class="" width="100%">
 					<tr>
 						<td class="text_center">
-							<img src="$context.getSignatureUrl()" width="4cm"> </img> 
+							<img src="$context.getSignatureUrl( $invoice.getQuotation().getUser() )" width="4cm"> </img> 
 						</td>
 					</tr>
 				</table>

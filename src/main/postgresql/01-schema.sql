@@ -149,13 +149,11 @@ CREATE TABLE companies
 	language varchar(16) not null,
 	signature boolean not null default false, 	
 	type_company integer not null default 1,			-- 1: provider, 2: customer, 3:transporter, 4: insurer, 5: bank 	
-  	contact_person varchar(128) not null,
 
   	constraint pk_companies primary key( id ),
 
   	constraint uk_companies_alias unique(alias),
 	constraint uk_companies_tax_id unique(tax_id)
-  	constraint uk_companies_email unique(email) not null,
 );
 create index ix_companies_alias on companies(alias);
 create index ix_companies_tax_id on companies(tax_id);
@@ -182,9 +180,14 @@ create table quotations
 	tax_rate real not null default 0,
 	status int not null default 0,
 
+	ref_contact bigint not null,
+	ref_user bigint not null,
+
   	constraint pk_quotations primary key( id ),
 
   	constraint fk_quotations_customer foreign key (ref_customer) references companies(id),
+  	constraint fk_quotations_contact foreign key (ref_contact) references companies_contacts(id),
+  	constraint fk_quotations_user foreign key (ref_user) references users(id),
   	constraint uk_quotations_number unique(number)
 );
 create index ix_quotations_reference_request on quotations(reference_request);
@@ -290,12 +293,20 @@ create table shipments
 	ref_notify bigint not null,
 
 	status int not null default 0,
+	
+	ref_consignee_contact bigint,
+	ref_notify_contact bigint,
+
+	ref_user bigint,
+
 
   	constraint pk_shipments primary key( id ),
 
   	constraint fk_shipments_consignee foreign key (ref_consignee) references companies(id),
   	constraint fk_shipments_notify foreign key (ref_notify) references companies(id),
-  	constraint fk_shipments_transporter foreign key (ref_transporter) references companies(id)
+	constraint fk_shipments_consignee_contact foreign key (ref_consignee_contact) references companies_contacts(id),
+	constraint fk_shipments_notify_contact foreign key (ref_notify_contact) references companies_contacts(id),
+	constraint fk_shipments_user foreign key (ref_user) references users(id)
 );
 
 create table invoices 
@@ -386,3 +397,16 @@ create table users_companies
   	constraint fk_users_companies_user foreign key (ref_user) references users(id) on delete cascade,
   	constraint fk_users_companies_company foreign key (ref_company) references companies(id)
 );
+
+create table companies_contacts
+(
+	id bigint not null,
+  	
+	ref_company bigint not null,
+  	name varchar(128) not null,
+  	email varchar(128),
+  	phone varchar(64),
+
+  	constraint pk_companies_contacts primary key( id )
+);
+

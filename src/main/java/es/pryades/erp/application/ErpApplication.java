@@ -1,9 +1,20 @@
 package es.pryades.erp.application;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.awt.Color;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
+
+import javax.imageio.ImageIO;
 
 import org.apache.log4j.Logger;
 
@@ -17,10 +28,20 @@ import com.vaadin.ui.Window.CloseEvent;
 
 import es.pryades.erp.common.AppContext;
 import es.pryades.erp.common.AppUtils;
+import es.pryades.erp.common.Authorization;
+import es.pryades.erp.common.BaseException;
+import es.pryades.erp.common.CalendarUtils;
 import es.pryades.erp.common.MessageDlg;
 import es.pryades.erp.common.Settings;
 import es.pryades.erp.common.Utils;
 import es.pryades.erp.ioc.IOCManager;
+
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 /**
  * The Application's "main" class
@@ -76,8 +97,8 @@ public class ErpApplication extends UI
 	    		    	
 			String user = request.getParameter( "user" );
 			String password = request.getParameter( "password" );
-			
-	    	showLoginWindow( user, password );
+
+			showLoginWindow( user, password );
 		}
 		catch ( Throwable e )
 		{
@@ -117,9 +138,9 @@ public class ErpApplication extends UI
     {
     	logged = true;
     	
-    	window = new MainWnd( ctx );
-    	
-    	setContent( window );
+		window = new MainWnd( ctx );
+
+		setContent( window );
     	ctx.addData( "MainWnd", window );
     	
     	window.buildMainLayout();
@@ -151,20 +172,4 @@ public class ErpApplication extends UI
 	{
 		showLoginWindow( null, null );
 	}
-	
-	public static void main( String[] args ) 
-	{
-		/*long when = 20190916110154L;
-		long now = 20190916100155L;
-		
-		long elapsed = Utils.getDurationInSeconds( when, now );
-		
-		LOG.info(  "\nwhen = " +  when + "\nnow = " + now + "\nelapsed = " + elapsed );
-		
-		LOG.info(  "\ntoken = " + getTokenString( "" + when + "" + 854, "ac^yNsZ=wmZBDAgy9Y*@" ) );*/
-		
-		
-		
-	}
-
 }
