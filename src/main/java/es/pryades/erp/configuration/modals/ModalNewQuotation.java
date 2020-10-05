@@ -84,6 +84,8 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 	private TextField editWarranty;
 	private TextArea editPayment_terms;
 	private TextField editTax_rate;
+	private TextField editWeight;
+	private TextField editVolume;
 	
 	private QuotationsLinesConfig configLines;
 	
@@ -99,7 +101,6 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 	private HorizontalLayout rowDeliveries;
 	private HorizontalLayout rowAttachments;
 	private Panel panelLines;
-
 	
 	/**
 	 * editReference_order
@@ -234,15 +235,30 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 		editPayment_terms = new TextArea( getContext().getString( "modalNewQuotation.editPayment_terms" ), bi.getItemProperty( "payment_terms" ) );
 		editPayment_terms.setWidth( "100%" );
 		editPayment_terms.setNullRepresentation( "" );
-		editPayment_terms.setRows( 3 );
+		editPayment_terms.setRows( 2 );
 		
-		editTax_rate= new TextField( getContext().getString( "modalNewQuotation.editTax_rate" ), bi.getItemProperty( "tax_rate" ) );
+		editTax_rate = new TextField( getContext().getString( "modalNewQuotation.editTax_rate" ), bi.getItemProperty( "tax_rate" ) );
 		editTax_rate.setWidth( "100%" );
 		editTax_rate.setNullRepresentation( "" );
+
+		editWeight = new TextField( getContext().getString( "modalNewQuotation.editWeight" ), bi.getItemProperty( "weight" ) );
+		editWeight.setWidth( "100%" );
+		editWeight.setNullRepresentation( "" );
+		editWeight.setRequired( true );
+		editWeight.setRequiredError( getContext().getString( "words.required" ) );
+		editWeight.setInvalidCommitted( true );
 		
+		editVolume = new TextField( getContext().getString( "modalNewQuotation.editVolume" ), bi.getItemProperty( "volume" ) );
+		editVolume.setWidth( "100%" );
+		editVolume.setNullRepresentation( "" );
+		editVolume.setRequired( true );
+		editVolume.setRequiredError( getContext().getString( "words.required" ) );
+		editVolume.setInvalidCommitted( true );
+
 		HorizontalLayout row1 = new HorizontalLayout();
 		row1.setWidth( "100%" );
 		row1.setSpacing( true );
+		row1.addComponent( editTitle );
 		row1.addComponent( comboUsers );
 		row1.addComponent( fromDateField );
 		row1.addComponent( comboCustomers );
@@ -251,7 +267,6 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 		{
 			row1.addComponent( comboStatus );
 		}
-		row1.addComponent( editTitle );
 
 		HorizontalLayout row2 = new HorizontalLayout();
 		row2.setWidth( "100%" );
@@ -263,6 +278,8 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 		row2.addComponent( editTax_rate );
 		row2.addComponent( editPackaging );
 		row2.addComponent( editWarranty );
+		row2.addComponent( editWeight );
+		row2.addComponent( editVolume );
 
 		HorizontalLayout row4 = new HorizontalLayout();
 		row4.setWidth( "100%" );
@@ -490,9 +507,9 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 		{
 			newQuotation.setQuotation_date( CalendarUtils.getDateAsLong( fromDateField.getValue() ) );
 			
-			LOG.info( "ref_contact " + newQuotation.getRef_contact() );
-			LOG.info( "ref_user " + newQuotation.getRef_user() );
-
+			LOG.info(  "edit volume " + editVolume.getValue() );
+			LOG.info(  "object volume " + newQuotation.getVolume() );
+			
 			IOCManager._QuotationsManager.setRow( getContext(), (Quotation) orgDto, newQuotation );
 
 			saveUserDefaults();
@@ -710,7 +727,8 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 		IOCManager._UserDefaultsManager.setUserDefault( getContext(), packaging, newQuotation.getPackaging() );
 		IOCManager._UserDefaultsManager.setUserDefault( getContext(), warranty, newQuotation.getWarranty() );
 		IOCManager._UserDefaultsManager.setUserDefault( getContext(), payment, newQuotation.getPayment_terms() );
-		IOCManager._UserDefaultsManager.setUserDefault( getContext(), tax_rate, newQuotation.getTax_rate().toString() );
+		if ( newQuotation.getTax_rate() != null )
+			IOCManager._UserDefaultsManager.setUserDefault( getContext(), tax_rate, newQuotation.getTax_rate().toString() );
 	}
 	
 	private void onDeliveryClick( Button button )
@@ -836,7 +854,8 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 				IOCManager._ParametersManager.loadParameters( ctx1 );
 				ctx1.setUser( getContext().getUser() );
 				ctx1.addData( "Url", getContext().getData( "Url" ) );
-	
+		    	ctx1.loadOwnerCompany();
+
 				export.setContext( ctx1 );
 			
 				ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -850,11 +869,7 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 						replaceAll( "%reference_request%", quotation.getReference_request() ).
 						replaceAll( "%contact_person%", quotation.getContact().getName() );  
 	
-				CompanyQuery query = new CompanyQuery();
-				query.setType_company( Company.TYPE_OWNER );
-				Company company = (Company)IOCManager._CompaniesManager.getRow( getContext(), query );
-	
-				String body = text + "\n\n" + getContext().getCompanyDataAndLegal( company, newQuotation.getUser() ); 
+				String body = text + "\n\n" + ctx1.getCompanyDataAndLegal( newQuotation.getUser() ); 
 	
 				final SendEmailDlg dlg = new SendEmailDlg( getContext(), getContext().getString( "modalNewQuotation.emailTitle" ), attachments );
 				dlg.setTo( quotation.getContact().getEmail() );

@@ -1,5 +1,7 @@
 package es.pryades.erp.dto;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -327,6 +329,119 @@ public class Shipment extends BaseDto
 		
 		for ( ShipmentBox box : boxes )
 			box.removePrivateFields();
+	}
+	
+	public boolean findBoxNumber( AppContext ctx, ShipmentBox box )
+	{
+		ctx.addData( Integer.toString( box.getBox_type() ), new Integer( 0 ) );
+		
+		for ( ShipmentBox box1 : boxes )
+		{
+			if ( box1.getBox_type().equals( box.getBox_type() ) )
+				ctx.addData( box.getBox_type().toString(), (Integer)ctx.getData( box1.getBox_type().toString() ) + 1 );
+
+			if ( box1.getId().equals( box.getId() ) )
+				return true;
+			
+			for ( ShipmentBox sub_box : box1.getSub_boxes() )
+			{
+				if ( sub_box.findBoxNumber( ctx, box ) )
+					return true;
+			}
+		}
+		
+		return false;
+	}
+
+	public void countBoxes( AppContext ctx, HashMap<Integer, Integer> totals )
+	{
+		for ( ShipmentBox box : boxes )
+			box.countBoxes( ctx, totals );
+	}
+
+	public void generateDetailedLabels( AppContext ctx, ArrayList<String> detailed, HashMap<Integer, Integer> totals, HashMap<Integer, Integer> count )
+	{
+		for ( ShipmentBox box : boxes )
+			box.generateDetailedLabels( ctx, this, detailed, totals, count );
+	}
+
+	public void generateSimpleLabels( AppContext ctx, ArrayList<String> labels, HashMap<Integer, Integer> totals, HashMap<Integer, Integer> count )
+	{
+		for ( ShipmentBox box : boxes )
+			box.generateSimpleLabels( ctx, this, labels, totals, count );
+	}
+
+	public void generateAllLabels( AppContext ctx, ArrayList<String> labels, HashMap<Integer, Integer> totals, HashMap<Integer, Integer> count )
+	{
+		for ( ShipmentBox box : boxes )
+			box.generateAllLabels( ctx, this, labels, totals, count );
+	}
+
+	public String getLabelsRows( AppContext ctx, String rows, String cols, String pagesize, String type )
+	{
+		try
+		{
+			HashMap<Integer, Integer> totals = new HashMap<Integer, Integer>();
+			
+			totals.put( ShipmentBox.TYPE_CONTAINER, 0 );
+			totals.put( ShipmentBox.TYPE_PALLET, 0 );
+			totals.put( ShipmentBox.TYPE_WOOD_BOX, 0 );
+			totals.put( ShipmentBox.TYPE_CARDBOARD_BOX, 0 );
+			totals.put( ShipmentBox.TYPE_BULK, 0 );
+			
+			HashMap<Integer, Integer> count = new HashMap<Integer, Integer>();
+			
+			count.put( ShipmentBox.TYPE_CONTAINER, 0 );
+			count.put( ShipmentBox.TYPE_PALLET, 0 );
+			count.put( ShipmentBox.TYPE_WOOD_BOX, 0 );
+			count.put( ShipmentBox.TYPE_CARDBOARD_BOX, 0 );
+			count.put( ShipmentBox.TYPE_BULK, 0 );
+			
+			ArrayList<String> labels = new ArrayList<String>();
+
+			countBoxes( ctx, totals );
+			
+			if ( Integer.toString( ShipmentBox.LABEL_DETAIL ).equals( type ) )
+				generateDetailedLabels( ctx, labels, totals, count );
+			else if ( Integer.toString( ShipmentBox.LABEL_SIMPLE ).equals( type ) )
+				generateSimpleLabels( ctx, labels, totals, count );
+			else if ( Integer.toString( ShipmentBox.LABEL_ALL ).equals( type ) )
+				generateAllLabels( ctx, labels, totals, count );
+			
+			int r = Utils.getInt( rows, 2 );
+			int c = Utils.getInt( cols, 2 );
+			
+			double pageHeight = Utils.getPageHeightInMilimeters( pagesize );
+			double colHeight = pageHeight / r;
+
+			int j = 0;
+			
+			String contents = "<tr>\n";
+			for ( String str : labels )
+			{
+				String height = " height=\"" + colHeight + "mm\"";
+				contents += "<td" + height +">" + str + "</td>\n";
+				j++;
+				
+				if ( j == c )
+				{
+					j = 0;
+					contents += "</tr>\n\n<tr>\n";
+				}
+			}
+
+			contents += "</tr>\n\n";
+			
+			LOG.info( contents );
+			
+			return contents;
+		}
+		catch ( Throwable e )
+		{
+			e.printStackTrace();
+		}
+		
+		return "";
 	}
 }
  

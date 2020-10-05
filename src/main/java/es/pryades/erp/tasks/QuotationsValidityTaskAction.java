@@ -12,11 +12,9 @@ import es.pryades.erp.common.BaseException;
 import es.pryades.erp.common.Constants;
 import es.pryades.erp.common.TaskAction;
 import es.pryades.erp.common.Utils;
-import es.pryades.erp.dto.Company;
 import es.pryades.erp.dto.Parameter;
 import es.pryades.erp.dto.Quotation;
 import es.pryades.erp.dto.Task;
-import es.pryades.erp.dto.query.CompanyQuery;
 import es.pryades.erp.dto.query.QuotationQuery;
 import es.pryades.erp.ioc.IOCManager;
 import es.pryades.erp.reports.CommonEditor;
@@ -31,7 +29,7 @@ public class QuotationsValidityTaskAction implements TaskAction, Serializable
 	{
 	}
 
-	private void notifyUser( AppContext ctx, Company owner, Quotation quotation )
+	private void notifyUser( AppContext ctx, Quotation quotation )
 	{
 		try
 		{
@@ -51,12 +49,8 @@ public class QuotationsValidityTaskAction implements TaskAction, Serializable
 
 			List<Attachment> attachments = new ArrayList<Attachment>();
 			
-			CompanyQuery query = new CompanyQuery();
-			query.setType_company( Company.TYPE_OWNER );
-			Company company = (Company)IOCManager._CompaniesManager.getRow( ctx, query );
-
 			String subject = ctx.getString( "tasks.quotation.validity.subject" ).replaceAll( "%reference_request%", quotation.getReference_request() );
-			String body = text + "\n\n" + ctx.getCompanyDataAndLegal( company, quotation.getUser() ); 
+			String body = text + "\n\n" + ctx.getCompanyDataAndLegal( quotation.getUser() ); 
 			
 			Utils.sendMail( from, quotation.getContact().getEmail(), quotation.getUser().getEmail(), subject, host, port, sender, password, body, attachments, proxyHost, proxyPort, "true".equals( ctx.getParameter( Parameter.PAR_MAIL_AUTH ) ) );
 		}
@@ -73,10 +67,6 @@ public class QuotationsValidityTaskAction implements TaskAction, Serializable
 		
 		try 
 		{
-			CompanyQuery queryCompany = new CompanyQuery();
-			queryCompany.setType_company( Company.TYPE_OWNER );
-			Company owner = (Company)IOCManager._CompaniesManager.getRow( ctx, queryCompany );
-			
 			QuotationQuery queryQuotation = new QuotationQuery();
 			queryQuotation.setStatus( Quotation.STATUS_SENT );
 			
@@ -89,7 +79,7 @@ public class QuotationsValidityTaskAction implements TaskAction, Serializable
 				{
 					LOG.info( "quotation " + quotation.getTitle() + " is expired" );
 					
-					notifyUser( ctx, owner, quotation );
+					notifyUser( ctx, quotation );
 				}
 			}
 		} 

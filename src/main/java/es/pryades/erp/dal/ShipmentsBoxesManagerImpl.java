@@ -62,6 +62,7 @@ public class ShipmentsBoxesManagerImpl extends BaseManagerImpl implements Shipme
 				
 				newBox.setBox_type( src.getBox_type() );
 				newBox.setLabel( src.getLabel() );
+				newBox.setLabel_type( src.getLabel_type() );
 				newBox.setRef_shipment( src.getRef_shipment() );
 				newBox.setRef_container( src.getRef_container() );
 				newBox.setWidth( src.getWidth() );

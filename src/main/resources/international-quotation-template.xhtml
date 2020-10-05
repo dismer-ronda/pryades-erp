@@ -355,6 +355,8 @@
 						</td>
 					</tr>
 					#end
+					
+					#if( !$quotation.getDelivery().isEmpty() )
 					<tr>
 						<td>
 							<div class="text_regular_size text_right text_bold ">$context.getString( "template.quotation.delivery.time" ):</div>
@@ -363,6 +365,9 @@
 							<div class="text_regular_size text_left">$quotation.getDelivery()</div>
 						</td>
 					</tr>
+					#end
+
+					#if( !$quotation.getValidity().isEmpty() )
 					<tr>
 						<td>
 							<div class="text_regular_size text_right text_bold">$context.getString( "template.quotation.validity" ):</div>
@@ -371,6 +376,9 @@
 							<div class="text_regular_size text_left">$quotation.getValidity() $context.getString( "template.quotation.days" )</div>
 						</td>
 					</tr>
+					#end
+
+					#if( !$quotation.getWarranty().isEmpty() )
 					<tr>
 						<td>
 							<div class="text_regular_size text_right text_bold">$context.getString( "template.quotation.warranty" ):</div>
@@ -379,6 +387,29 @@
 							<div class="text_regular_size text_left">$quotation.getWarrantyAsHtml()</div>
 						</td>
 					</tr>
+					#end
+					
+					#if( $quotation.getWeight() != 0 )
+					<tr>
+						<td>
+							<div class="text_regular_size text_right text_bold">$context.getString( "template.quotation.weight" ):</div>
+						</td>
+						<td>
+							<div class="text_regular_size text_left">$quotation.getWeightAsHtml()</div>
+						</td>
+					</tr>
+					#end
+
+					#if( $quotation.getVolume() != 0 )
+					<tr>
+						<td>
+							<div class="text_regular_size text_right text_bold">$context.getString( "template.quotation.volume" ):</div>
+						</td>
+						<td>
+							<div class="text_regular_size text_left">$quotation.getVolumeAsHtml()</div>
+						</td>
+					</tr>
+					#end
 				</table>
 
 			</td>

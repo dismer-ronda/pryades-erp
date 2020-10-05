@@ -320,6 +320,21 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 			
 			getDefaultOperationsRow().addComponentAsFirst( btnPackig );
 			getDefaultOperationsRow().setComponentAlignment( btnPackig, Alignment.MIDDLE_LEFT );
+			
+			Button btnLabels = new Button();
+			btnLabels.setCaption( getContext().getString( "shipmentsConfig.labels" ) );
+			btnLabels.addClickListener( new Button.ClickListener()
+			{
+				private static final long serialVersionUID = 1775078921597760696L;
+
+				public void buttonClick( ClickEvent event )
+				{
+					onShowLabels();
+				}
+			} );
+			
+			getDefaultOperationsRow().addComponentAsFirst( btnLabels );
+			getDefaultOperationsRow().setComponentAlignment( btnLabels, Alignment.MIDDLE_LEFT );
 		}
 	}
 
@@ -667,6 +682,65 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 			}
 		}
 	}
+
+	public void onShowLabels()
+	{
+		if ( onModify() )
+		{
+			try
+			{
+				ShipmentQuery queryShipment = new ShipmentQuery();
+				queryShipment.setId( newShipment.getId() );
+				Shipment shipment = (Shipment)IOCManager._ShipmentsManager.getRow( getContext(), queryShipment );
+			
+				long ts = CalendarUtils.getTodayAsLong( "UTC" );
+				
+				String pagesize = "A4";
+				String template = "shipment-labels-template";
+				String rows = "4";
+				String cols = "2";
+				String type = "-1";
+				String timeout = "0";
+				
+				String extra = "ts=" + ts + 
+								"&id=" + shipment.getId() + 
+								"&pagesize=" + pagesize + 
+								"&template=" + template +
+								"&rows=" + rows +
+								"&cols=" + cols +
+								"&type=" + type +
+								"&url=" + getContext().getData( "Url" ) +
+								"&timeout=" + timeout;
+				
+				String user = getContext().getUser().getLogin();
+				String password = getContext().getUser().getPwd();
+				
+				String token = "token=" + Authorization.getTokenString( "" + ts + timeout, password );
+				String code = "code=" + Authorization.encrypt( extra, password ) ;
+	
+				String url = getContext().getData( "Url" ) + "/services/labels" + "?user=" + user + "&" + token + "&" + code + "&ts=" + ts;
+				
+				String caption = getContext().getString( "template.shipment.labels" ) + " " + shipment.getFormattedNumber() ;
+	
+				ShowExternalUrlDlg dlg = new ShowExternalUrlDlg(); 
+		
+				dlg.setContext( getContext() );
+				dlg.setUrl( url );
+				dlg.setCaption( caption );
+				dlg.createComponents();
+				
+				getUI().addWindow( dlg );
+				
+				closeModalWindow( true, true );
+			}
+	
+			catch ( Throwable e )
+			{
+				Utils.logException( e, LOG );
+			}
+		}
+	}
+	
 	@SuppressWarnings("unchecked")
 	private void loadConsigneeContacts()
 	{

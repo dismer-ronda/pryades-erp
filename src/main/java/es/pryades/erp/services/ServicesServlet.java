@@ -7,6 +7,7 @@ import org.restlet.routing.Router;
 
 import es.pryades.erp.resources.AttachmentResource;
 import es.pryades.erp.resources.InvoiceResource;
+import es.pryades.erp.resources.LabelsResource;
 import es.pryades.erp.resources.LoginResource;
 import es.pryades.erp.resources.LogoResource;
 import es.pryades.erp.resources.PackingObjectResource;
@@ -42,6 +43,7 @@ public class ServicesServlet extends Application
     	router.attach( "/qr", QrResource.class );
     	router.attach( "/box", ShipmentBoxResource.class );
     	router.attach( "/packing_object", PackingObjectResource.class );
+    	router.attach( "/labels", LabelsResource.class );
     	
     	LOG.info( "started" );
 	    

@@ -94,6 +94,7 @@ public class ErpApplication extends UI
 	    	ctx.addData( "Application", this );
 	    	ctx.addData( "Theme", "VAADIN/themes/indigo/" );
 	    	ctx.addData( "Url", Utils.removeTrailing( Page.getCurrent().getLocation().toString(), "/" ) );
+	    	ctx.loadOwnerCompany();
 	    		    	
 			String user = request.getParameter( "user" );
 			String password = request.getParameter( "password" );

@@ -5,6 +5,8 @@ import es.pryades.erp.common.BaseException;
 import es.pryades.erp.common.GenericControlerVto;
 import es.pryades.erp.common.GenericVto;
 import es.pryades.erp.common.VtoControllerFactory;
+import es.pryades.erp.configuration.tabs.ShipmentsBoxesConfig;
+import es.pryades.erp.dto.Shipment;
 import es.pryades.erp.dto.ShipmentBox;
 import es.pryades.erp.vto.ShipmentBoxVto;
 
@@ -41,6 +43,12 @@ public class ShipmentBoxControlerVto extends GenericControlerVto
 				
 				result.setBox_type( getContext().getString( "shipment.box.type." + ((ShipmentBox) dtoObj).getBox_type()) );
 				result.setLabel( ((ShipmentBox) dtoObj).getLabel() );
+				
+				/*Shipment shipment = ((ShipmentsBoxesConfig)factory).getShipment();
+				if ( shipment.findBoxNumber( getContext(), ((ShipmentBox) dtoObj) ) )
+					result.setLabel( getContext().getData( ((ShipmentBox) dtoObj).getBox_type().toString() ).toString() );
+				else
+					result.setLabel( "-" );*/
 				
 				result.setLength( ((ShipmentBox) dtoObj).getLength());
 				result.setWidth( ((ShipmentBox) dtoObj).getWidth());

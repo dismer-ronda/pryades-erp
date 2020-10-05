@@ -78,6 +78,7 @@ public class TasksProcessor extends TimerTask
 		{
 			AppContext ctx = new AppContext( "en" );
 			IOCManager._ParametersManager.loadParameters( ctx );
+	    	ctx.loadOwnerCompany();
 			
 			List<Task> tasks = IOCManager._TasksManager.getRows( ctx, new TaskQuery() );
 

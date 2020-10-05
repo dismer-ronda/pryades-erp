@@ -4,8 +4,11 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.vaadin.data.Property;
+import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
@@ -43,6 +46,7 @@ public class CompaniesConfig extends PagedContent implements ModalParent
 
 	private TextField editAlias;
 	private TextField editTax_id;
+	private ComboBox comboTypes;
 
 	private Button bttnApply;
 	
@@ -98,16 +102,32 @@ public class CompaniesConfig extends PagedContent implements ModalParent
 		editTax_id.setWidth( "100%" );
 		editTax_id.setNullRepresentation( "" );
 		
+		comboTypes = new ComboBox(getContext().getString( "companiesConfig.comboTypes" ));
+		comboTypes.setWidth( "100%" );
+		comboTypes.setNullSelectionAllowed( true );
+		comboTypes.setTextInputAllowed( false );
+		comboTypes.setImmediate( true );
+		comboTypes.setRequiredError( getContext().getString( "words.required" ) );
+		fillComboTypes();
+		comboTypes.addValueChangeListener( new Property.ValueChangeListener() 
+		{
+			private static final long serialVersionUID = 1879348808118163417L;
+
+			public void valueChange(ValueChangeEvent event) 
+		    {
+				refreshVisibleContent( true );
+		    }
+		});
+		
 		bttnApply = new Button( getContext().getString( "words.search" ) );
 		bttnApply.setDescription( getContext().getString( "words.search" ) );
-		//bttnApply.setStyleName( "borderless" );
-		//bttnApply.setIcon( new ThemeResource( "images/accept.png" ) );
 		addButtonApplyFilterClickListener();
 
 		HorizontalLayout rowQuery = new HorizontalLayout();
 		rowQuery.setSpacing( true );
 		rowQuery.addComponent( editAlias );
 		rowQuery.addComponent( editTax_id );
+		rowQuery.addComponent( comboTypes );
 		rowQuery.addComponent( bttnApply );
 		rowQuery.setComponentAlignment( bttnApply, Alignment.BOTTOM_LEFT );
 		
@@ -124,7 +144,10 @@ public class CompaniesConfig extends PagedContent implements ModalParent
 		
 		if ( !editTax_id.getValue().isEmpty() )
 			query.setTax_id( editTax_id.getValue() );
-		
+
+		if ( comboTypes.getValue() != null )
+			query.setType_company( (Integer)comboTypes.getValue() );
+
 		//query.setRef_user( getContext().getUser().getId() );
 		
 		return query;
@@ -195,6 +218,15 @@ public class CompaniesConfig extends PagedContent implements ModalParent
 				refreshVisibleContent( true );
 			}
 		} );
+	}
+
+	private void fillComboTypes()
+	{
+		for ( int i = Company.TYPE_PROVIDER; i <= Company.TYPE_BANK; i++ )
+		{
+			comboTypes.addItem( i );
+			comboTypes.setItemCaption( i, getContext().getString( "company.type." + i ) );
+		}	
 	}
 }
 

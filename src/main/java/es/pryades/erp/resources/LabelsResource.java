@@ -5,7 +5,6 @@ import java.io.OutputStream;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
-import org.restlet.data.Disposition;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.OutputRepresentation;
@@ -18,18 +17,18 @@ import org.restlet.resource.ServerResource;
 import es.pryades.erp.common.AppContext;
 import es.pryades.erp.common.Authorization;
 import es.pryades.erp.common.Utils;
-import es.pryades.erp.dto.Quotation;
-import es.pryades.erp.dto.query.QuotationQuery;
+import es.pryades.erp.dto.Shipment;
+import es.pryades.erp.dto.query.ShipmentQuery;
 import es.pryades.erp.ioc.IOCManager;
-import es.pryades.erp.reports.PdfExportQuotation;
+import es.pryades.erp.reports.PdfExportLabels;
 import es.pryades.erp.services.Return;
 import es.pryades.erp.services.ReturnFactory;
 
-public class QuotationResource extends ServerResource 
+public class LabelsResource extends ServerResource 
 {
-	private static final Logger LOG = Logger.getLogger( QuotationResource.class );
+	private static final Logger LOG = Logger.getLogger( LabelsResource.class );
 
-	public QuotationResource() 
+	public LabelsResource() 
 	{
 		super();
 	}
@@ -79,8 +78,10 @@ public class QuotationResource extends ServerResource
 	        final String pagesize = params.get( "pagesize" );
 	        final String template = params.get( "template" );
 	        final String id = params.get( "id" );
-	        final String name = params.get( "name" );
 	        final String url = params.get( "url" );
+	        final String rows = params.get( "rows" );
+	        final String cols = params.get( "cols" );
+	        final String type = params.get( "type" );
 	        long timeout = Utils.getLong( params.get( "timeout" ), 0 );
 	        
 			if ( Authorization.isValidRequest( token, ts+timeout, ts, password, timeout ) ) 
@@ -92,38 +93,33 @@ public class QuotationResource extends ServerResource
 					{
 						try
 						{
-					    	QuotationQuery query = new QuotationQuery();
+					    	ShipmentQuery query = new ShipmentQuery();
 					    	query.setId( Long.parseLong( id ) );
 					    	
-							Quotation quotation = (Quotation)IOCManager._QuotationsManager.getRow( ctx, query );
-							
-							AppContext ctx1 = new AppContext( quotation.getCustomer().getLanguage() );
+					    	Shipment shipment = (Shipment)IOCManager._ShipmentsManager.getRow( ctx, query );
+					    	
+							AppContext ctx1 = new AppContext( "en" );
 							
 							IOCManager._ParametersManager.loadParameters( ctx1 );
 							ctx1.setUser( ctx.getUser() );
 							ctx1.addData( "Url", url );
 					    	ctx1.loadOwnerCompany();
+
+							PdfExportLabels export = new PdfExportLabels( shipment, rows, cols, type );
 							
-							PdfExportQuotation export = new PdfExportQuotation( quotation );
-							
-							export.setOrientation( quotation.getDeliveries().size() > 1 ? "landscape" : "portrait" );
+							export.setOrientation( "portrait" );
 							export.setPagesize( pagesize );
 							export.setTemplate( template );
 							export.setContext( ctx1 );
 						
 							export.doExport( arg0 );
-
 						}
 						catch ( Throwable e )
 						{
 							Utils.logException( e, LOG );
 						}
 					}
-				};
-
-				Disposition disp = new Disposition( Disposition.TYPE_INLINE );
-				disp.setFilename( name );
-				rep.setDisposition( disp );
+				};				
 			}
 			else
 			{

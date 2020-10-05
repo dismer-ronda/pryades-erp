@@ -29,6 +29,6 @@ public class CompaniesManagerImpl extends BaseManagerImpl implements CompaniesMa
 	@Override
 	public boolean setEmptyToNull()
 	{
-		return false;
+		return true;
 	}
 }

@@ -104,6 +104,7 @@ public class InvoiceResource extends ServerResource
 							IOCManager._ParametersManager.loadParameters( ctx1 );
 							ctx1.setUser( ctx.getUser() );
 							ctx1.addData( "Url", url );
+					    	ctx1.loadOwnerCompany();
 
 							PdfExportInvoice export = new PdfExportInvoice( quotation );
 							

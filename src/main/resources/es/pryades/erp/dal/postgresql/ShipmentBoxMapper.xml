@@ -9,6 +9,7 @@
 		
 			shipments_boxes.box_type,
 			shipments_boxes.label,
+			shipments_boxes.label_type,
 			
 			shipments_boxes.ref_shipment,
 			shipments_boxes.ref_container,
@@ -141,6 +142,7 @@
 		<result property="ref_shipment" column="ref_shipment"/>
 		<result property="ref_container" column="ref_container"/>
 		<result property="label" column="label"/>
+		<result property="label_type" column="label_type"/>
 		<result property="box_type" column="box_type"/>
 		<result property="width" column="width"/>
 		<result property="height" column="height"/>
@@ -155,6 +157,7 @@
 		
 		shipments_boxes.box_type,
 		shipments_boxes.label,
+		shipments_boxes.label_type,
 
 		shipments_boxes.ref_shipment,
 		shipments_boxes.ref_container,
@@ -257,6 +260,7 @@
 			ref_container,
 
 			label,
+			label_type,
 			box_type,
 	
 			width,						
@@ -271,6 +275,7 @@
 			#{ref_container},
 
 			#{label},
+			#{label_type},
 			#{box_type},
 	
 			#{width},						
@@ -284,6 +289,7 @@
 			ref_shipment=#{ref_shipment},
 			ref_container=#{ref_container},
 			label=#{label},
+			label_type=#{label_type},
 			box_type=#{box_type},
 			width=#{width},						
 			length=#{length},						

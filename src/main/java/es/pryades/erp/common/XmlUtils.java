@@ -32,4 +32,9 @@ public class XmlUtils
 		return "<div id=\"block_container\">" + contents + "</div>";
 	}
 
+	public static String getBlockDivWithClass( String clazz, String contents )
+	{
+		return "<div class=\"" + clazz + "\" id=\"block_container\">" + contents + "</div>";
+	}
+
 }

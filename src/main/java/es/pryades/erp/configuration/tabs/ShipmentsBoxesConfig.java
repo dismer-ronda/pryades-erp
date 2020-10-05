@@ -18,6 +18,7 @@ import es.pryades.erp.configuration.modals.ModalNewShipmentBox;
 import es.pryades.erp.dal.BaseManager;
 import es.pryades.erp.dto.BaseDto;
 import es.pryades.erp.dto.Query;
+import es.pryades.erp.dto.Shipment;
 import es.pryades.erp.dto.ShipmentBox;
 import es.pryades.erp.ioc.IOCManager;
 import es.pryades.erp.vto.ShipmentBoxVto;
@@ -157,6 +158,14 @@ public class ShipmentsBoxesConfig extends PagedContent implements ModalParent
 	@Override
 	public void onFieldEvent( Component component, String column )
 	{
+	}
+	
+	public Shipment getShipment()
+	{
+		if ( parentShipment != null )
+			return parentShipment.getNewShipment();
+		
+		return parentBox.getShipment();
 	}
 }
 

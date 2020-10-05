@@ -67,6 +67,8 @@ public class QuotationsManagerImpl extends BaseManagerImpl implements Quotations
 			newQuotation.setStatus( Quotation.STATUS_CREATED);
 			newQuotation.setRef_contact( src.getRef_contact() );
 			newQuotation.setRef_user( src.getRef_user() );
+			newQuotation.setWeight( src.getWeight() );
+			newQuotation.setVolume( src.getVolume() );
 			
 			newQuotation.setDeliveries( new ArrayList<QuotationDelivery>() );
 			

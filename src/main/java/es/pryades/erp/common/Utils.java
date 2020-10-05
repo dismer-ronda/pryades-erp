@@ -2989,4 +2989,27 @@ public class Utils
 
 		return source;
 	}
+
+	public static double getPageHeightInMilimeters( String pagesize )
+	{
+		if ( pagesize.contentEquals( "A0" ) )
+			return 1189;
+		if ( pagesize.contentEquals( "A1" ) )
+			return 841;
+		if ( pagesize.contentEquals( "A2" ) )
+			return 594;
+		if ( pagesize.contentEquals( "A3" ) )
+			return 420;
+		if ( pagesize.contentEquals( "A4" ) )
+			return 297;
+		if ( pagesize.contentEquals( "A5" ) )
+			return 210;
+		if ( pagesize.contentEquals( "Letter" ) )
+			return 279;
+		if ( pagesize.contentEquals( "Legal" ) )
+			return 356;
+		
+		return 0;
+	}
+
 }

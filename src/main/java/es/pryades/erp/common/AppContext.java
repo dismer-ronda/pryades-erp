@@ -38,6 +38,7 @@ public class AppContext extends Object implements Serializable
 	private HashMap<String,Object> extra;
 	private long start;
 	private String language;
+	private Company owner;
 	
 	public AppContext( String language )
 	{
@@ -237,21 +238,24 @@ public class AppContext extends Object implements Serializable
 		}
 	}
 
+	public void loadOwnerCompany() throws Throwable
+	{
+		CompanyQuery query = new CompanyQuery();
+		query.setType_company( Company.TYPE_OWNER );
+		
+		owner = (Company)IOCManager._CompaniesManager.getRow( this, query );
+	}
+
 	public String getCompanyData( User user )
 	{
 		try
 		{
-			CompanyQuery query = new CompanyQuery();
-			query.setType_company( Company.TYPE_OWNER );
-			
-			Company company = (Company)IOCManager._CompaniesManager.getRow( this, query );
-			
 			String data = user.getName() + "\n" + 
-					company.getName() + "\n" +
-					getString( "template.common.tax_id" ) + ": " + company.getTax_id() + "\n" + 
-					company.getAddress() + "\n" +
-					getString( "template.common.phone" ) + ": " + company.getPhone() + "\n" + 
-					getString( "template.common.email" ) + ": " + company.getEmail();
+					owner.getName() + "\n" +
+					getString( "template.common.tax_id" ) + ": " + owner.getTax_id() + "\n" + 
+					owner.getAddress() + "\n" +
+					getString( "template.common.phone" ) + ": " + owner.getPhone() + "\n" + 
+					getString( "template.common.email" ) + ": " + owner.getEmail();
 
 			return data;
 		}
@@ -262,21 +266,21 @@ public class AppContext extends Object implements Serializable
 		}
 	}
 
-	public String getCompanyDataAndLegal( Company company, User user )
+	public String getCompanyDataAndLegal( User user )
 	{
 		try
 		{
 			String legal = getString( "template.common.email.legal" ).
-					replaceAll( "%owner_name%", company.getName() ).
-					replaceAll( "%owner_address%", company.getAddress().replaceAll( "\n", ", " ) ).
+					replaceAll( "%owner_name%", owner.getName() ).
+					replaceAll( "%owner_address%", owner.getAddress().replaceAll( "\n", ", " ) ).
 					replaceAll( "%owner_email%", user.getEmail() );
 
 			String data = user.getName() + "\n" + 
-					company.getName() + "\n" +
-					getString( "template.common.tax_id" ) + ": " + company.getTax_id() + "\n" + 
-					company.getAddress() + "\n" +
-					getString( "template.common.phone" ) + ": " + company.getPhone() + "\n" + 
-					getString( "template.common.email" ) + ": " + company.getEmail() + "\n\n" +
+					owner.getName() + "\n" +
+					getString( "template.common.tax_id" ) + ": " + owner.getTax_id() + "\n" + 
+					owner.getAddress() + "\n" +
+					getString( "template.common.phone" ) + ": " + owner.getPhone() + "\n" + 
+					getString( "template.common.email" ) + ": " + owner.getEmail() + "\n\n" +
 					legal;
 
 			return data;

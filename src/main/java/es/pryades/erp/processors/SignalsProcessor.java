@@ -129,6 +129,7 @@ public class SignalsProcessor extends Thread
 	    	{
 				AppContext ctx = new AppContext( "en" );
 				IOCManager._ParametersManager.loadParameters( ctx );
+		    	ctx.loadOwnerCompany();
 				
 				if ( object instanceof Task )
 					IOCManager._TasksManager.doTask( ctx, (Task)object, true );

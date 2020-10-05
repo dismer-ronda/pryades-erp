@@ -37,13 +37,11 @@ import es.pryades.erp.common.ModalWindowsCRUD;
 import es.pryades.erp.common.Utils;
 import es.pryades.erp.dashboard.Dashboard;
 import es.pryades.erp.dto.BaseDto;
-import es.pryades.erp.dto.Company;
 import es.pryades.erp.dto.Invoice;
 import es.pryades.erp.dto.InvoiceLine;
 import es.pryades.erp.dto.Quotation;
 import es.pryades.erp.dto.QuotationLine;
 import es.pryades.erp.dto.Shipment;
-import es.pryades.erp.dto.query.CompanyQuery;
 import es.pryades.erp.dto.query.InvoiceQuery;
 import es.pryades.erp.dto.query.QuotationQuery;
 import es.pryades.erp.dto.query.ShipmentQuery;
@@ -794,7 +792,8 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 				IOCManager._ParametersManager.loadParameters( ctx1 );
 				ctx1.setUser( getContext().getUser() );
 				ctx1.addData( "Url", getContext().getData( "Url" ) );
-	
+		    	ctx1.loadOwnerCompany();
+
 				export.setContext( ctx1 );
 	
 				ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -808,11 +807,7 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 						replaceAll( "%contact_person%", invoice.getQuotation().getContact().getName() ).
 						replaceAll( "%reference_order%", invoice.getQuotation().getReference_order() );  
 	
-				CompanyQuery query = new CompanyQuery();
-				query.setType_company( Company.TYPE_OWNER );
-				Company company = (Company)IOCManager._CompaniesManager.getRow( getContext(), query );
-	
-				String body = text + "\n\n" + getContext().getCompanyDataAndLegal( company, newInvoice.getQuotation().getUser() ); 
+				String body = text + "\n\n" + ctx1.getCompanyDataAndLegal( newInvoice.getQuotation().getUser() ); 
 				
 				final SendEmailDlg dlg = new SendEmailDlg( getContext(), getContext().getString( "modalNewInvoice.emailTitle" ), attachments );
 				dlg.setTo( invoice.getQuotation().getContact().getEmail() );

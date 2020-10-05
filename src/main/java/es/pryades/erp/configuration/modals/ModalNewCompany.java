@@ -114,7 +114,7 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 		comboLanguage.setRequiredError( getContext().getString( "words.required" ) );
 		fillComboLanguage();
 		comboLanguage.setPropertyDataSource( bi.getItemProperty( "language" ) );
-
+		
 		if ( newCompany.getType_company() > Company.TYPE_OWNER )
 		{
 			comboTypes = new ComboBox(getContext().getString( "modalNewCompany.comboTypes" ));
@@ -133,12 +133,14 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 		editAlias.setNullRepresentation( "" );
 		editAlias.setRequired( true );
 		editAlias.setRequiredError( getContext().getString( "words.required" ) );
+		editAlias.setInvalidCommitted( true );
 		
 		editName = new TextField( getContext().getString( "modalNewCompany.editName" ), bi.getItemProperty( "name" ) );
 		editName.setWidth( "100%" );
 		editName.setNullRepresentation( "" );
 		editName.setRequired( true );
 		editName.setRequiredError( getContext().getString( "words.required" ) );
+		editName.setInvalidCommitted( true );
 		
 		editTax_id = new TextField( getContext().getString( "modalNewCompany.editTax_id" ), bi.getItemProperty( "tax_id" ) );
 		editTax_id.setWidth( "100%" );
@@ -151,8 +153,6 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 		editEmail = new TextField( getContext().getString( "modalNewCompany.editEmail" ), bi.getItemProperty( "email" ) );
 		editEmail.setWidth( "100%" );
 		editEmail.setNullRepresentation( "" );
-		editEmail.setRequired( true );
-		editEmail.setRequiredError( getContext().getString( "words.required" ) );
 		
 		editPhone = new TextField( getContext().getString( "modalNewCompany.editPhone" ), bi.getItemProperty( "phone" ) );
 		editPhone.setWidth( "100%" );
@@ -429,8 +429,6 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 			TextField editEmail = new TextField( getContext().getString( "modalNewCompany.editEmail" ) );
 			editEmail.setWidth( "100%" );
 			editEmail.setNullRepresentation( "" );
-			editEmail.setRequired( true );
-			editEmail.setRequiredError( getContext().getString( "words.required" ) );
 			editEmail.setValue( contact.getEmail() );
 			
 			TextField editPhone = new TextField( getContext().getString( "modalNewCompany.editPhone" ) );
@@ -483,8 +481,6 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 		TextField editEmail = new TextField( getContext().getString( "modalNewCompany.editEmail" ) );
 		editEmail.setWidth( "100%" );
 		editEmail.setNullRepresentation( "" );
-		editEmail.setRequired( true );
-		editEmail.setRequiredError( getContext().getString( "words.required" ) );
 		
 		TextField editPhone = new TextField( getContext().getString( "modalNewCompany.editPhone" ) );
 		editPhone.setWidth( "100%" );

@@ -251,8 +251,6 @@
 		<result property="quotation_date" column="quotation_date"/>
 		<result property="validity" column="validity"/>
 		<result property="ref_customer" column="ref_customer"/>
-		<result property="ref_contact" column="ref_contact"/>
-		<result property="ref_user" column="ref_user"/>
 		<result property="reference_request" column="reference_request"/>
 		<result property="reference_order" column="reference_order"/>
 		<result property="packaging" column="packaging"/>
@@ -261,6 +259,10 @@
 		<result property="payment_terms" column="payment_terms"/>
 		<result property="tax_rate" column="tax_rate"/>
 		<result property="status" column="status"/>
+		<result property="ref_contact" column="ref_contact"/>
+		<result property="ref_user" column="ref_user"/>
+		<result property="weight" column="weight"/>
+		<result property="volume" column="volume"/>
 
 		<result property="transport_invoiced" column="transport_invoiced"/>
 
@@ -337,6 +339,8 @@
 		quotations.payment_terms		as quotation_payment_terms,
 		quotations.tax_rate				as quotation_tax_rate,
 		quotations.status				as quotation_status,
+		quotations.weight				as quotation_weight,
+		quotations.volume				as quotation_volume,
 		
 		companies.id 					as quotation_customer_id,
 		companies.name 					as quotation_customer_name,

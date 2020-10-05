@@ -152,8 +152,7 @@ CREATE TABLE companies
 
   	constraint pk_companies primary key( id ),
 
-  	constraint uk_companies_alias unique(alias),
-	constraint uk_companies_tax_id unique(tax_id)
+  	constraint uk_companies_alias unique(alias)
 );
 create index ix_companies_alias on companies(alias);
 create index ix_companies_tax_id on companies(tax_id);
@@ -179,6 +178,9 @@ create table quotations
 	payment_terms text not null,
 	tax_rate real not null default 0,
 	status int not null default 0,
+	
+	weight real not null default 0,
+	volume  real not null default 0,
 
 	ref_contact bigint not null,
 	ref_user bigint not null,
@@ -299,7 +301,6 @@ create table shipments
 
 	ref_user bigint,
 
-
   	constraint pk_shipments primary key( id ),
 
   	constraint fk_shipments_consignee foreign key (ref_consignee) references companies(id),
@@ -356,6 +357,7 @@ create table shipments_boxes
 
 	box_type int not null,
 	label varchar(32) not null,
+	label_type int not null default 0,
 	
 	width real not null,						
 	length real not null,						
@@ -407,6 +409,19 @@ create table companies_contacts
   	email varchar(128),
   	phone varchar(64),
 
-  	constraint pk_companies_contacts primary key( id )
+  	constraint pk_companies_contacts primary key( id ),
+  	constraint fk_companies_contacts_company foreign key (ref_company) references companies(id) on delete cascade
 );
 
+create table banks
+(
+	id bigint not null,
+  	
+	ref_bank bigint not null,
+  	name varchar(128) not null,
+  	account varchar(128),
+  	balance real not null default 0,
+
+  	constraint pk_banks primary key( id ),
+  	constraint fk_banks_bank foreign key (ref_bank) references companies(id)
+);

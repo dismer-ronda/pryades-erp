@@ -1,17 +1,9 @@
 package es.pryades.erp.reports;
 
-import java.util.List;
-
-import lombok.Getter;
-import lombok.Setter;
-
 import org.apache.velocity.VelocityContext;
 
 import es.pryades.erp.common.BaseException;
-import es.pryades.erp.common.CalendarUtils;
 import es.pryades.erp.dto.Quotation;
-import es.pryades.erp.ioc.IOCManager;
-
 import org.apache.log4j.Logger;
 
 /**

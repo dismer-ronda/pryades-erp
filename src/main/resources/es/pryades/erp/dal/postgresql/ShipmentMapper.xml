@@ -75,6 +75,7 @@
 			shipments_boxes.id,
 		
 			shipments_boxes.label,
+			shipments_boxes.label_type,
 			shipments_boxes.box_type,
 
 			shipments_boxes.ref_shipment,
@@ -98,6 +99,7 @@
 			shipments_boxes.id,
 		
 			shipments_boxes.label,
+			shipments_boxes.label_type,
 			shipments_boxes.box_type,
 			
 			shipments_boxes.ref_shipment,
@@ -182,6 +184,7 @@
 		<result property="ref_container" column="ref_container"/>
 		<result property="box_type" column="box_type"/>
 		<result property="label" column="label"/>
+		<result property="label_type" column="label_type"/>
 		<result property="width" column="width"/>
 		<result property="height" column="height"/>
 		<result property="length" column="length"/>

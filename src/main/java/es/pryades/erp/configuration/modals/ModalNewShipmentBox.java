@@ -3,13 +3,11 @@ package es.pryades.erp.configuration.modals;
 import org.apache.log4j.Logger;
 
 import com.vaadin.data.util.BeanItem;
-import com.vaadin.server.ExternalResource;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Image;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
@@ -55,7 +53,8 @@ public class ModalNewShipmentBox extends ModalWindowsCRUD implements ModalParent
 	private TextField editWidth;
 	private TextField editHeight;
 	private TextField editLabel;
-	private Image imageQR;
+	private ComboBox comboLabelTypes;
+	//private Image imageQR;
 	
 	private Panel panelBoxes;
 	private ShipmentsBoxesConfig configBoxes;
@@ -108,6 +107,7 @@ public class ModalNewShipmentBox extends ModalWindowsCRUD implements ModalParent
 			newShipmentBox.setLength( Utils.getDouble( length.getData_value(), 0 ) );
 			newShipmentBox.setWidth( Utils.getDouble( width.getData_value(), 0 ) );
 			newShipmentBox.setHeight( Utils.getDouble( height.getData_value(), 0 ) );
+			newShipmentBox.setLabel_type( ShipmentBox.LABEL_NONE );
 		}
 
 		layout.setHeight( "-1px" );
@@ -125,6 +125,14 @@ public class ModalNewShipmentBox extends ModalWindowsCRUD implements ModalParent
 			comboTypes.setPropertyDataSource( bi.getItemProperty( "box_type" ) );
 		}
 		
+		comboLabelTypes = new ComboBox(getContext().getString( "modalNewShipmentBox.comboLabelType" ));
+		comboLabelTypes.setWidth( "100%" );
+		comboLabelTypes.setNullSelectionAllowed( false );
+		comboLabelTypes.setTextInputAllowed( false );
+		comboLabelTypes.setImmediate( true );
+		fillComboLabelTypes();
+		comboLabelTypes.setPropertyDataSource( bi.getItemProperty( "label_type" ) );
+
 		editLength = new TextField( getContext().getString( "modalNewShipmentBox.editLength" ), bi.getItemProperty( "length" ) );
 		editLength.setWidth( "100%" );
 		editLength.setNullRepresentation( "" );
@@ -147,6 +155,7 @@ public class ModalNewShipmentBox extends ModalWindowsCRUD implements ModalParent
 		row1.addComponent( editLabel );
 		if ( getOperation().equals( Operation.OP_ADD ) )
 			row1.addComponent( comboTypes );
+		row1.addComponent( comboLabelTypes );
 		row1.addComponent( editLength );
 		row1.addComponent( editWidth );
 		row1.addComponent( editHeight );
@@ -185,10 +194,10 @@ public class ModalNewShipmentBox extends ModalWindowsCRUD implements ModalParent
 				getDefaultOperationsRow().setComponentAlignment( btnDuplicate, Alignment.MIDDLE_LEFT );
 			}
 			
-			imageQR = new Image();
+			/*imageQR = new Image();
 			imageQR.setSource( new ExternalResource( getQRUrl() ) );
 			
-			componentsContainer.addComponent( imageQR );
+			componentsContainer.addComponent( imageQR );*/
 		}
 	}
 
@@ -484,6 +493,18 @@ public class ModalNewShipmentBox extends ModalWindowsCRUD implements ModalParent
 				comboTypes.setItemCaption( i, getContext().getString( "shipment.box.type." + i ) );
 			}
 		}
+	}
+
+	private void fillComboLabelTypes()
+	{
+		comboLabelTypes.addItem( ShipmentBox.LABEL_NONE );
+		comboLabelTypes.setItemCaption( ShipmentBox.LABEL_NONE, getContext().getString( "shipment.label.type." + ShipmentBox.LABEL_NONE ) );
+
+		comboLabelTypes.addItem( ShipmentBox.LABEL_DETAIL );
+		comboLabelTypes.setItemCaption( ShipmentBox.LABEL_DETAIL, getContext().getString( "shipment.label.type." + ShipmentBox.LABEL_DETAIL ) );
+
+		comboLabelTypes.addItem( ShipmentBox.LABEL_SIMPLE );
+		comboLabelTypes.setItemCaption( ShipmentBox.LABEL_SIMPLE, getContext().getString( "shipment.label.type." + ShipmentBox.LABEL_SIMPLE ) );
 	}
 
 	@Override

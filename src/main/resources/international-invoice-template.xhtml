@@ -306,6 +306,8 @@
 						</td>
 					</tr>
 					#end
+
+					#if( !$invoice.getQuotation().getWarranty().isEmpty() )
 					<tr>
 						<td>
 							<div class="text_regular_size text_right text_bold">$context.getString( "template.invoice.warranty" ):</div>
@@ -314,6 +316,8 @@
 							<div class="text_regular_size text_left">$invoice.getQuotation().getWarrantyAsHtml()</div>
 						</td>
 					</tr>
+					#end
+
 				</table>
 
 			</td>

@@ -54,6 +54,8 @@ public class Quotation extends BaseDto
 	private String payment_terms;
 	private Double tax_rate;
 	private Integer status;
+	private Double weight;
+	private Double volume;
 	
 	private Double transport_invoiced;
 
@@ -326,4 +328,15 @@ public class Quotation extends BaseDto
 	{
 		return Utils.getDurationInSeconds( getQuotation_date(), CalendarUtils.getTodayAsLong() ) / (60 * 60 * 24) > getValidity();
 	}
+
+	public String getWeightAsHtml()
+	{
+		return "" + Utils.roundDouble( weight, 2 ) + " kg";
+	}
+	
+	public String getVolumeAsHtml()
+	{
+		return "" + Utils.roundDouble( volume, 2 ) + " m3";
+	}
+	
 }

@@ -1,7 +1,6 @@
 package es.pryades.erp.dal;
 
 import es.pryades.erp.common.AppContext;
-import es.pryades.erp.common.BaseException;
 import es.pryades.erp.dto.Quotation;
 
 /**
