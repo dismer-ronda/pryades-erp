@@ -1,6 +1,7 @@
 package es.pryades.erp.dashboard.tabs;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -37,6 +38,7 @@ import es.pryades.erp.dto.BaseDto;
 import es.pryades.erp.dto.Company;
 import es.pryades.erp.dto.Query;
 import es.pryades.erp.dto.Quotation;
+import es.pryades.erp.dto.UserDefault;
 import es.pryades.erp.dto.query.CompanyQuery;
 import es.pryades.erp.dto.query.QuotationQuery;
 import es.pryades.erp.ioc.IOCManager;
@@ -71,12 +73,21 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 
 	private List<Company> customers;
 
+	private UserDefault default_from;
+	private UserDefault default_to;
+	private UserDefault default_customer;
+	private UserDefault default_status;
+	private UserDefault default_reference_request;
+	private UserDefault default_reference_order;
+
 	public QuotationsTabContent( AppContext ctx )
 	{
 		super( ctx );
 		
 		setOrderby( "quotation_date" );
 		setOrder( "desc" );
+
+		loadUserDefaults();
 	}
 
 	@Override
@@ -183,13 +194,13 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 		fromDateField = new PopupDateField( getContext().getString( "words.from" ) );
 		fromDateField.setResolution( Resolution.DAY );
 		fromDateField.setDateFormat( "dd-MM-yyyy" );
-		fromDateField.setValue( null );
+		fromDateField.setValue( getDefaultDate( default_from.getData_value() ) );
 		fromDateField.setWidth( "160px" );
 		
 		toDateField = new PopupDateField( getContext().getString( "words.to" ) );
 		toDateField.setResolution( Resolution.DAY );
 		toDateField.setDateFormat( "dd-MM-yyyy" );
-		toDateField.setValue( null );
+		toDateField.setValue( getDefaultDate( default_to.getData_value() ) );
 		toDateField.setWidth( "160px" );
 		
 		comboCustomers = new ComboBox(getContext().getString( "modalNewQuotation.comboCustomer" ));
@@ -198,6 +209,7 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 		comboCustomers.setTextInputAllowed( true );
 		comboCustomers.setImmediate( true );
 		fillComboCustomers();
+		comboCustomers.setValue( getDefaultCustomer() );
 		comboCustomers.addValueChangeListener( new Property.ValueChangeListener() 
 		{
 			private static final long serialVersionUID = -4102135581833365187L;
@@ -214,6 +226,7 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 		comboStatus.setTextInputAllowed( false );
 		comboStatus.setImmediate( true );
 		fillComboStatus();
+		comboStatus.setValue( getDefaultStatus() );
 		comboStatus.addValueChangeListener( new Property.ValueChangeListener() 
 		{
 			private static final long serialVersionUID = 6697358072742454601L;
@@ -227,15 +240,15 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 		editReference_request = new TextField( getContext().getString( "modalNewQuotation.editReference_request" ) );
 		editReference_request.setWidth( "100%" );
 		editReference_request.setNullRepresentation( "" );
-		
+		editReference_request.setValue( default_reference_request.getData_value() );
+
 		editReference_order = new TextField( getContext().getString( "modalNewQuotation.editReference_order" ) );
 		editReference_order.setWidth( "100%" );
 		editReference_order.setNullRepresentation( "" );
+		editReference_order.setValue( default_reference_order.getData_value() );
 		
 		bttnApply = new Button( getContext().getString( "words.search" ) );
 		bttnApply.setDescription( getContext().getString( "words.search" ) );
-		//bttnApply.setStyleName( "borderless" );
-		//bttnApply.setIcon( new ThemeResource( "images/accept.png" ) );
 		addButtonApplyFilterClickListener();
 
 		HorizontalLayout rowQuery = new HorizontalLayout();
@@ -274,6 +287,8 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 		
 		query.setRef_user( getContext().getUser().getId() );
 			
+		saveUserDefaults();
+		
 		return query;
 	}
 
@@ -456,6 +471,65 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 	{
 		loadCustomers();
 		fillComboCustomers();
+	}
+
+	private void loadUserDefaults()
+	{
+		default_from = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.QUOTATIONS_FROM );
+		default_to = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.QUOTATIONS_TO );
+		default_customer = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.QUOTATIONS_CUSTOMER );
+		default_status = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.QUOTATIONS_STATUS );
+		default_reference_request = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.QUOTATIONS_REFERENCE_REQUEST );
+		default_reference_order = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.QUOTATIONS_REFERENCE_ORDER );
+	}
+
+	private void saveUserDefaults()
+	{
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_from, fromDateField.getValue() != null ? Long.toString( CalendarUtils.getDateAsLong( fromDateField.getValue() ) ) : null );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_to, toDateField.getValue() != null ? Long.toString( CalendarUtils.getDateAsLong( toDateField.getValue() ) ) : null );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_customer, comboCustomers.getValue() != null ? comboCustomers.getValue().toString() : null );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_status, comboStatus.getValue() != null ? comboStatus.getValue().toString() : null );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_reference_request, editReference_request.getValue() );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_reference_order, editReference_order.getValue() );
+	}
+	
+	private Date getDefaultDate( String date )
+	{
+		try
+		{
+			return CalendarUtils.getServerCalendarFromDateLong( Long.parseLong( date ) ).getTime();
+		}
+		catch ( Throwable e )
+		{
+		}
+		
+		return null;
+	}
+	
+	private Long getDefaultCustomer() 
+	{
+		try
+		{
+			return Long.parseLong( default_customer.getData_value() );
+		}
+		catch ( Throwable e )
+		{
+		}
+		
+		return null;
+	}
+
+	private Integer getDefaultStatus() 
+	{
+		try
+		{
+			return Integer.parseInt( default_status.getData_value() );
+		}
+		catch ( Throwable e )
+		{
+		}
+		
+		return null;
 	}
 }
 

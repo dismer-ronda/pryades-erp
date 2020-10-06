@@ -59,6 +59,24 @@ public class UserDefault extends BaseDto
 	public static final String LABELS_TYPE = "labels.type";
 	public static final String LABELS_FONTSIZE = "labels.fontsize";
 
+	public static final String QUOTATIONS_FROM = "quotations.from";
+	public static final String QUOTATIONS_TO = "quotations.to";
+	public static final String QUOTATIONS_CUSTOMER = "quotations.customer";
+	public static final String QUOTATIONS_STATUS = "quotations.status";
+	public static final String QUOTATIONS_REFERENCE_REQUEST = "quotations.reference.request";
+	public static final String QUOTATIONS_REFERENCE_ORDER = "quotations.reference.order";
+
+	public static final String INVOICES_FROM = "invoices.from";
+	public static final String INVOICES_TO = "invoices.to";
+	public static final String INVOICES_CUSTOMER = "invoices.customer";
+	public static final String INVOICES_REFERENCE_REQUEST = "invoices.reference.request";
+	public static final String INVOICES_REFERENCE_ORDER = "invoices.reference.order";
+
+	public static final String SHIPMENTS_FROM = "shipments.from";
+	public static final String SHIPMENTS_TO = "shipments.to";
+	public static final String SHIPMENTS_CUSTOMER = "shipments.customer";
+	public static final String SHIPMENTS_STATUS = "shipments.status";
+
 	private String data_key;
 	private String data_value;
 	
