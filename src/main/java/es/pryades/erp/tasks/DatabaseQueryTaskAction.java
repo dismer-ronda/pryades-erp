@@ -62,7 +62,7 @@ public class DatabaseQueryTaskAction implements TaskAction, Serializable
 			if ( bos != null )
 				attachments.add(  new Attachment( Utils.getUUID() + "." + format, "application/" + format, bos.toByteArray() ) );
 
-			Utils.sendMail( from, to, from, ctx.getString( "tasks.database.query.message.subject" ), host, port, sender, password, text + "\n" + body, attachments, proxyHost, proxyPort, "true".equals( ctx.getParameter( Parameter.PAR_MAIL_AUTH ) ) );
+			Utils.sendMail( from, to, "", from, ctx.getString( "tasks.database.query.message.subject" ), host, port, sender, password, text + "\n" + body, attachments, proxyHost, proxyPort, "true".equals( ctx.getParameter( Parameter.PAR_MAIL_AUTH ) ) );
 		}
 		catch ( Throwable e )
 		{

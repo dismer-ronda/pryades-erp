@@ -205,8 +205,6 @@ public class ModalNewShipmentBox extends ModalWindowsCRUD implements ModalParent
 	{
 		String boxUrl = Utils.getUrlEncoded( getShipmentBoxUrl() );
 
-		LOG.info( "boxUrl = " + boxUrl  );
-
 		try
 		{
 			long ts = CalendarUtils.getTodayAsLong( "UTC" );
@@ -215,8 +213,6 @@ public class ModalNewShipmentBox extends ModalWindowsCRUD implements ModalParent
 			String extra = "ts=" + ts + 
 					"&text=" + boxUrl + 
 					"&timeout=" + timeout;
-			
-			LOG.info( "extra=" + extra);
 			
 			String user = getContext().getUser().getLogin();
 			String password = getContext().getUser().getPwd();

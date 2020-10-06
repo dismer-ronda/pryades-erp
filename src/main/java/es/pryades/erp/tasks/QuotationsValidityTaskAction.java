@@ -52,7 +52,7 @@ public class QuotationsValidityTaskAction implements TaskAction, Serializable
 			String subject = ctx.getString( "tasks.quotation.validity.subject" ).replaceAll( "%reference_request%", quotation.getReference_request() );
 			String body = text + "\n\n" + ctx.getCompanyDataAndLegal( quotation.getUser() ); 
 			
-			Utils.sendMail( from, quotation.getContact().getEmail(), quotation.getUser().getEmail(), subject, host, port, sender, password, body, attachments, proxyHost, proxyPort, "true".equals( ctx.getParameter( Parameter.PAR_MAIL_AUTH ) ) );
+			Utils.sendMail( from, quotation.getContact().getEmail(), "", quotation.getUser().getEmail(), subject, host, port, sender, password, body, attachments, proxyHost, proxyPort, "true".equals( ctx.getParameter( Parameter.PAR_MAIL_AUTH ) ) );
 		}
 		catch ( Throwable e )
 		{

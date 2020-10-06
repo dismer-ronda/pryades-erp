@@ -295,7 +295,7 @@ public class UsersManagerImpl extends BaseManagerImpl implements UsersManager
 				String proxyHost = ctx.getParameter( Parameter.PAR_SOCKS5_PROXY_HOST );
 				String proxyPort = ctx.getParameter( Parameter.PAR_SOCKS5_PROXY_PORT );
 
-				Utils.sendMail( from, usuario.getEmail(), from, subject, host, port, sender, password, text, null, proxyHost, proxyPort, "true".equals( ctx.getParameter( Parameter.PAR_MAIL_AUTH ) ) );
+				Utils.sendMail( from, usuario.getEmail(), "", from, subject, host, port, sender, password, text, null, proxyHost, proxyPort, "true".equals( ctx.getParameter( Parameter.PAR_MAIL_AUTH ) ) );
 			}
 
 			if (finish)

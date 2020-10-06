@@ -48,7 +48,7 @@ public class DatabaseUpdateTaskAction implements TaskAction, Serializable
 			String proxyHost = ctx.getParameter( Parameter.PAR_SOCKS5_PROXY_HOST );
 			String proxyPort = ctx.getParameter( Parameter.PAR_SOCKS5_PROXY_PORT );
 			
-			Utils.sendMail( from, to, from, ctx.getString( "tasks.database.update.message.subject" ), host, port, sender, password, text + "\n" + body, null, proxyHost, proxyPort, "true".equals( ctx.getParameter( Parameter.PAR_MAIL_AUTH ) ) );
+			Utils.sendMail( from, to, "", from, ctx.getString( "tasks.database.update.message.subject" ), host, port, sender, password, text + "\n" + body, null, proxyHost, proxyPort, "true".equals( ctx.getParameter( Parameter.PAR_MAIL_AUTH ) ) );
 		}
 		catch ( Throwable e )
 		{

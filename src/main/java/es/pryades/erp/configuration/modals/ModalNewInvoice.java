@@ -152,13 +152,16 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 		}
 
 		loadShipments();
-		comboShipments = new ComboBox(getContext().getString( "modalNewInvoice.comboShipment" ));
-		comboShipments.setWidth( "100%" );
-		comboShipments.setNullSelectionAllowed( true );
-		comboShipments.setTextInputAllowed( true );
-		comboShipments.setImmediate( true );
-		comboShipments.setPropertyDataSource( bi.getItemProperty( "ref_shipment" ) );
-		fillComboShipments();
+		if ( shipments.size() > 0 )
+		{
+			comboShipments = new ComboBox(getContext().getString( "modalNewInvoice.comboShipment" ));
+			comboShipments.setWidth( "100%" );
+			comboShipments.setNullSelectionAllowed( true );
+			comboShipments.setTextInputAllowed( true );
+			comboShipments.setImmediate( true );
+			comboShipments.setPropertyDataSource( bi.getItemProperty( "ref_shipment" ) );
+			fillComboShipments();
+		}
 
 		editTransport_cost = new TextField( getContext().getString( "modalNewInvoice.editTransport_cost" ), bi.getItemProperty( "transport_cost" ) );
 		editTransport_cost.setWidth( "100%" );
@@ -185,7 +188,8 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 		HorizontalLayout row2 = new HorizontalLayout();
 		row2.setWidth( "100%" );
 		row2.setSpacing( true );
-		row2.addComponent( comboShipments );
+		if ( shipments.size() > 0)
+			row2.addComponent( comboShipments );
 		row2.addComponent( editTransport_cost );
 		row2.addComponent( checkFree_delivery );
 		row2.setComponentAlignment( checkFree_delivery, Alignment.BOTTOM_LEFT );
@@ -272,15 +276,15 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 		
 		for ( QuotationLine line: newInvoice.getQuotation().getLines() )
 		{
+			Integer count = newInvoice.getLineQuantity( line );
+			Integer packed = newInvoice.getLinePacked( line );
+			
 			TextField editLine = new TextField();
 			editLine.setNullRepresentation( "" );
 			editLine.setData( line );
 			editLine.setWidth( "96px" );
 			
-			Integer count = newInvoice.getLineQuantity( line );
-			Integer packed = newInvoice.getLinePacked( line );
-			
-			if ( packed != 0 )
+			if ( packed != 0 && shipments.size() > 0 )
 				comboShipments.setReadOnly( true );
 
 			// Item number
@@ -293,7 +297,7 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 
 			// Iten input
 			editLine.setValue( count != 0 ? count.toString() : line.getMaxQuantity().toString() );
-			editLine.addStyleName( count != 0 ? "" : "invoice_line" );
+			editLine.addStyleName( (count != 0  || line.getMaxQuantity() == 0) ? "" : "invoice_line" );
 			grid.addComponent( editLine );
 			editsLines.add( editLine );
 			
@@ -301,6 +305,7 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 			CheckBox checkLine = new CheckBox();
 			checkLine.setData( line );
 			checkLine.setValue( count != 0 );
+			checkLine.setReadOnly( count == 0 && line.getMaxQuantity() == 0 );
 			grid.addComponent( checkLine );
 			grid.setComponentAlignment( checkLine, Alignment.MIDDLE_CENTER );
 			checksLines.add( checkLine );
@@ -312,7 +317,6 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 				grid.addComponent( labelPacked );
 				grid.setComponentAlignment( labelPacked, Alignment.MIDDLE_CENTER );
 			}
-			
 		}
 
 		panelLines.setContent( grid );
@@ -622,8 +626,6 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 		try
 		{
 			ShipmentQuery query = new ShipmentQuery();
-			query.setStatus( Shipment.STATUS_CREATED );
-			
 			shipments = IOCManager._ShipmentsManager.getRows( getContext(), query );
 		}
 		catch ( BaseException e )
@@ -809,8 +811,9 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 	
 				String body = text + "\n\n" + ctx1.getCompanyDataAndLegal( newInvoice.getQuotation().getUser() ); 
 				
-				final SendEmailDlg dlg = new SendEmailDlg( getContext(), getContext().getString( "modalNewInvoice.emailTitle" ), attachments );
+				final SendEmailDlg dlg = new SendEmailDlg( getContext(), getContext().getString( "modalNewInvoice.emailTitle" ), attachments, invoice.getQuotation().getCustomer().getContacts() );
 				dlg.setTo( invoice.getQuotation().getContact().getEmail() );
+				dlg.setCopy( "" );
 				dlg.setReply_to( invoice.getQuotation().getUser().getEmail() );
 				dlg.setSubject( subject );
 				dlg.setBody( body );

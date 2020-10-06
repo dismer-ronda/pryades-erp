@@ -94,8 +94,6 @@ public class ShipmentBoxResource extends ServerResource
 					    	
 					    	ShipmentBox box = (ShipmentBox)IOCManager._ShipmentsBoxesManager.getRow( ctx, query );
 					    	
-					    	LOG.info( "box " + box );
-					    	
 							AppContext ctx1 = new AppContext( "en" );
 							
 							IOCManager._ParametersManager.loadParameters( ctx1 );

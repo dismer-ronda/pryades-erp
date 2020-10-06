@@ -1,5 +1,7 @@
 package es.pryades.erp.vto;
 
+import com.vaadin.ui.Label;
+
 import es.pryades.erp.common.GenericVto;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -25,7 +27,7 @@ public class QuotationLineVto extends GenericVto
 	private Double margin;
 	private Double price;
 	private Double real_cost;
-	private Integer total_invoiced;
+	private Label total_invoiced;
 
 	private Integer quantity;
 

@@ -183,14 +183,14 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 		fromDateField = new PopupDateField( getContext().getString( "words.from" ) );
 		fromDateField.setResolution( Resolution.DAY );
 		fromDateField.setDateFormat( "dd-MM-yyyy" );
-		fromDateField.setWidth( "100px" );
 		fromDateField.setValue( null );
+		fromDateField.setWidth( "160px" );
 		
 		toDateField = new PopupDateField( getContext().getString( "words.to" ) );
 		toDateField.setResolution( Resolution.DAY );
 		toDateField.setDateFormat( "dd-MM-yyyy" );
-		toDateField.setWidth( "100px" );
 		toDateField.setValue( null );
+		toDateField.setWidth( "160px" );
 		
 		comboCustomers = new ComboBox(getContext().getString( "modalNewQuotation.comboCustomer" ));
 		comboCustomers.setWidth( "100%" );

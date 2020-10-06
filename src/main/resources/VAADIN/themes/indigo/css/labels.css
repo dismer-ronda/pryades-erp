@@ -143,6 +143,11 @@
 	color: blue;
 }
 
+.v-label-red {
+	color: red;
+	font-weight: bold;
+}
+
 .tooltip {
     position: relative;
     display: inline-block;

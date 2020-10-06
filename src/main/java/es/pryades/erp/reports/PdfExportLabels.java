@@ -22,13 +22,15 @@ public class PdfExportLabels extends PdfExport
 	private String rows;
 	private String cols;
 	private String type;
+	private String fontsize;
 	
-	public PdfExportLabels( Shipment quotation, String rows, String cols, String type )
+	public PdfExportLabels( Shipment quotation, String rows, String cols, String type, String fontsize )
 	{
 		this.shipment = quotation;
 		this.rows = rows;
 		this.cols = cols;
 		this.type = type;
+		this.fontsize = fontsize;
 	}
 
 	public VelocityContext createVelocityContext() throws BaseException
@@ -40,6 +42,7 @@ public class PdfExportLabels extends PdfExport
 		vcontext.put( "rows", rows );
 		vcontext.put( "cols", cols );
 		vcontext.put( "type", type );
+		vcontext.put( "fontsize", fontsize );
 		
 		return vcontext;
 	}

@@ -427,7 +427,7 @@ public class Utils
 		return (new RandPass()).getPass( length );
 	}
 
-	public static void sendMail( String from, String to, String reply_to, String subject, String host, String port, String user, String password, String text, List<Attachment> attachments, String proxyHost, String proxyPort, boolean auth ) throws BaseException
+	public static void sendMail( String from, String to, String copy, String reply_to, String subject, String host, String port, String user, String password, String text, List<Attachment> attachments, String proxyHost, String proxyPort, boolean auth ) throws BaseException
 	{
 		try
 		{
@@ -468,7 +468,13 @@ public class Utils
 			if ( recipients != null )
 			{
 				for ( String recipient : recipients )
-					message.addRecipient( Message.RecipientType.TO, new InternetAddress( recipient ) );
+					if ( !recipient.isEmpty() )
+						message.addRecipient( Message.RecipientType.TO, new InternetAddress( recipient ) );
+
+				String copies[] = copy.split( "," );
+				for ( String recipient : copies )
+					if ( !recipient.isEmpty() )
+						message.addRecipient( Message.RecipientType.CC, new InternetAddress( recipient ) );
 
 				// Set the "Subject" header field.
 				message.setSubject( subject );

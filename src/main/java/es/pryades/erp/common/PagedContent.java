@@ -641,7 +641,7 @@ public abstract class PagedContent extends VerticalLayout implements Property.Va
 					
 					try
 					{
-						Utils.sendMail( from, to, from, subject, host, port, sender, password, text, attachments, proxyHost, proxyPort, "true".equals( getContext().getParameter( Parameter.PAR_MAIL_AUTH ) ) );
+						Utils.sendMail( from, to, "", from, subject, host, port, sender, password, text, attachments, proxyHost, proxyPort, "true".equals( getContext().getParameter( Parameter.PAR_MAIL_AUTH ) ) );
 					}
 					catch ( Throwable e )
 					{

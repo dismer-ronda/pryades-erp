@@ -1,5 +1,7 @@
 package es.pryades.erp.vto.controlers;
 
+import com.vaadin.ui.Label;
+
 import es.pryades.erp.common.AppContext;
 import es.pryades.erp.common.BaseException;
 import es.pryades.erp.common.GenericControlerVto;
@@ -51,7 +53,13 @@ public class QuotationLineControlerVto extends GenericControlerVto
 				result.setCost( line.getCost() ); 
 				result.setReal_cost( line.getReal_cost() ); 
 				result.setMargin( line.getMargin() );
-				result.setTotal_invoiced( line.getTotal_invoiced() );
+				
+				Integer totalInvoiced = line.getTotal_invoiced() != null ? line.getTotal_invoiced() : 0;
+				Label labelInvoiced = new Label();
+				labelInvoiced.setValue( totalInvoiced.toString() );
+				labelInvoiced.setStyleName( (totalInvoiced < line.getTotalQuantity()) ? "red" : "green" );
+				
+				result.setTotal_invoiced( labelInvoiced );
 				result.setProvider_name( line.getProvider() != null ? line.getProvider().getName() : "" );
 				
 				result.setPrice( line.getPrice() ); 

@@ -13,7 +13,6 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
@@ -24,6 +23,7 @@ import com.vaadin.ui.Window;
 import es.pryades.erp.common.AppContext;
 import es.pryades.erp.common.Attachment;
 import es.pryades.erp.common.Utils;
+import es.pryades.erp.dto.CompanyContact;
 import es.pryades.erp.dto.Parameter;
 import lombok.Getter;
 import lombok.Setter;
@@ -40,7 +40,6 @@ public class SendEmailDlg extends Window
 	private TextField editCopy;
 	private TextField editSubject;
 	private TextArea editBody;
-	private Label labelAttachments;
 	private List<CheckBox> checksLines;
 
 	@Getter
@@ -60,15 +59,18 @@ public class SendEmailDlg extends Window
 	private List<Attachment> attachments;
 	@Getter @Setter
 	private boolean success;
+	@Getter @Setter
+	private List<CompanyContact> contacts;
 
 	protected BeanItem<SendEmailDlg> bi;
 
-	public SendEmailDlg( AppContext ctx, String title, List<Attachment> attachments )
+	public SendEmailDlg( AppContext ctx, String title, List<Attachment> attachments, List<CompanyContact> contacts )
 	{
 		super( title );
 		
 		this.context = ctx;
 		this.attachments = attachments;
+		this.contacts = contacts;
 		
 		setContent( layout = new VerticalLayout() );
 		
@@ -154,6 +156,17 @@ public class SendEmailDlg extends Window
             }
         });
 		
+		Button button3 = new Button( getContext().getString( "SendEmailDlg.bttnAddCopy" ) );
+		button3.addClickListener(new Button.ClickListener() 
+		{
+			private static final long serialVersionUID = 4889063884208297162L;
+
+			public void buttonClick(ClickEvent event) 
+            {
+				addCopy();
+            }
+        });
+
 		HorizontalLayout row0 = new HorizontalLayout();
 		row0.setWidth( "100%" );
 		row0.setSpacing( true );
@@ -163,6 +176,9 @@ public class SendEmailDlg extends Window
 		row1.setWidth( "100%" );
 		row1.setSpacing( true );
 		row1.addComponent( editCopy );
+		row1.addComponent( button3 );
+		row1.setComponentAlignment( button3, Alignment.BOTTOM_LEFT );
+		row1.setExpandRatio( editCopy, 1.0f );
 		
 		HorizontalLayout row2 = new HorizontalLayout();
 		row2.setWidth( "100%" );
@@ -208,7 +224,9 @@ public class SendEmailDlg extends Window
 					atts.add( (Attachment)check.getData() );
 			}
 	
-			Utils.sendMail( email, to, reply_to, subject, host, port, user, pass, body, atts, "", "", "true".equals( auth ) );
+			LOG.info(  "copy " + copy );
+			
+			Utils.sendMail( email, to, copy, reply_to, subject, host, port, user, pass, body, atts, "", "", "true".equals( auth ) );
 			
 			Utils.showNotification( getContext(), getContext().getString( "SendEmailDlg.emailSent" ), Notification.Type.TRAY_NOTIFICATION );
 			
@@ -222,5 +240,56 @@ public class SendEmailDlg extends Window
 
 			Utils.showNotification( getContext(), getContext().getString( "SendEmailDlg.emailError" ), Notification.Type.ERROR_MESSAGE );
 		}
+	}
+
+	public void addCopy()
+	{
+		final SelectContactsDlg dlg = new SelectContactsDlg( getContext(), getContext().getString( "SelectContactsDlg.title" ), contacts, to + "," + editCopy.getValue() );
+		dlg.addCloseListener
+		( 
+			new Window.CloseListener() 
+			{
+				private static final long serialVersionUID = 6523826089364328379L;
+
+				@Override
+			    public void windowClose( CloseEvent e ) 
+			    {
+					if ( dlg.isAccepted() )
+						addCopy( dlg.getSelected_contacts() );
+			    }
+			}
+		);
+		getUI().addWindow( dlg );
+	}
+	
+	private boolean isAlreadyIncluded( String current, String email )
+	{
+		String parts[] = current.split( "," );
+		
+		for ( String part : parts )
+		{
+			if ( part.trim().equalsIgnoreCase( email ) )
+				return true;
+		}
+		
+		return false;
+	}
+	
+	private void addCopy( List<CompanyContact> constacts )
+	{
+		String temp = editCopy.getValue();
+		
+		for ( CompanyContact contact : constacts )
+		{
+			if ( !contact.getEmail().isEmpty() && !contact.getEmail().equals( to ) && !isAlreadyIncluded( temp, contact.getEmail() ) )
+			{
+				if ( !temp.isEmpty() )
+					temp += ", ";
+			
+				temp += contact.getEmail();
+			}
+		}
+
+		editCopy.setValue( temp );
 	}
 }

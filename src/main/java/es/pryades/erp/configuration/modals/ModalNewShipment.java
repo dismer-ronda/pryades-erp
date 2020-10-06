@@ -18,7 +18,9 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.PopupDateField;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.Window;
 
+import es.pryades.erp.application.SelectLabelsConfigurationDlg;
 import es.pryades.erp.application.ShowExternalUrlDlg;
 import es.pryades.erp.common.AppContext;
 import es.pryades.erp.common.Authorization;
@@ -307,7 +309,7 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 			componentsContainer.addComponent( panelBoxes );
 			
 			Button btnPackig = new Button();
-			btnPackig.setCaption( getContext().getString( "shipmentsConfig.packing" ) );
+			btnPackig.setCaption( getContext().getString( "modalNewShipment.packing" ) );
 			btnPackig.addClickListener( new Button.ClickListener()
 			{
 				private static final long serialVersionUID = 3880706020996532024L;
@@ -322,14 +324,14 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 			getDefaultOperationsRow().setComponentAlignment( btnPackig, Alignment.MIDDLE_LEFT );
 			
 			Button btnLabels = new Button();
-			btnLabels.setCaption( getContext().getString( "shipmentsConfig.labels" ) );
+			btnLabels.setCaption( getContext().getString( "modalNewShipment.labels" ) );
 			btnLabels.addClickListener( new Button.ClickListener()
 			{
 				private static final long serialVersionUID = 1775078921597760696L;
 
 				public void buttonClick( ClickEvent event )
 				{
-					onShowLabels();
+					onGenerateLabels();
 				}
 			} );
 			
@@ -683,7 +685,7 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 		}
 	}
 
-	public void onShowLabels()
+	public void onShowLabels( String pagesize, String format, Integer type, String fontsize )
 	{
 		if ( onModify() )
 		{
@@ -695,20 +697,19 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 			
 				long ts = CalendarUtils.getTodayAsLong( "UTC" );
 				
-				String pagesize = "A4";
 				String template = "shipment-labels-template";
-				String rows = "4";
-				String cols = "2";
-				String type = "-1";
 				String timeout = "0";
+				
+				String parts[] = format.split( "x" );
 				
 				String extra = "ts=" + ts + 
 								"&id=" + shipment.getId() + 
 								"&pagesize=" + pagesize + 
 								"&template=" + template +
-								"&rows=" + rows +
-								"&cols=" + cols +
+								"&rows=" + parts[0] +
+								"&cols=" + parts[1] +
 								"&type=" + type +
+								"&fontsize=" + fontsize +
 								"&url=" + getContext().getData( "Url" ) +
 								"&timeout=" + timeout;
 				
@@ -806,8 +807,6 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 			query.setRef_company( newShipment.getRef_consignee() );
 			
 			users = IOCManager._UsersCompaniesManager.getRows( getContext(), query );
-			
-			LOG.info( "users " + users );
 		}
 		catch ( BaseException e )
 		{
@@ -843,5 +842,25 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 		newShipment.setRef_notify_contact( null );
 		loadNotifyContacts();
 		fillComboNotifyContacts();
+	}
+
+	public void onGenerateLabels()
+	{
+		final SelectLabelsConfigurationDlg dlg = new SelectLabelsConfigurationDlg( getContext(), getContext().getString( "SelectLabelsConfigurationDlg.title" ) );
+		dlg.addCloseListener
+		( 
+			new Window.CloseListener() 
+			{
+				private static final long serialVersionUID = 4073054301575358546L;
+
+				@Override
+			    public void windowClose( CloseEvent e ) 
+			    {
+					if ( dlg.isOk() )
+						onShowLabels( dlg.getPagesize(), dlg.getFormat(), dlg.getLabel_type(), dlg.getFontsize() );
+			    }
+			}
+		);
+		getUI().addWindow( dlg );
 	}
 }

@@ -79,7 +79,6 @@ public class QrResource extends ServerResource
 			if ( code != null )
 			{
 				code = Authorization.decrypt( code, password );
-		        LOG.info( "code = " + code );
 			
 				params.clear();
 		        Utils.getParameters( code, params );
@@ -88,10 +87,6 @@ public class QrResource extends ServerResource
 	        String ts = params.get( "ts" );
 	        long timeout = Utils.getLong( params.get( "timeout" ), 0 );
 	        final String text = params.get( "text" );
-	        
-	        LOG.info( "ts = " + ts);
-	        LOG.info( "timeout = " + timeout );
-	        LOG.info( "text = " + Utils.getUrlDecoded( text ) );
 	        
 			if ( Authorization.isValidRequest( token, ts+timeout, ts, password, timeout ) ) 
 			{

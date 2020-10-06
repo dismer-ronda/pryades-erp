@@ -54,6 +54,11 @@ public class UserDefault extends BaseDto
 	public static final String SHIPMENT_BOX_WIDTH = "shipment.box.width";
 	public static final String SHIPMENT_BOX_HEIGHT = "shipment.box.height";
 
+	public static final String LABELS_PAGESIZE = "labels.pagesize";
+	public static final String LABELS_FORMAT = "labels.format";
+	public static final String LABELS_TYPE = "labels.type";
+	public static final String LABELS_FONTSIZE = "labels.fontsize";
+
 	private String data_key;
 	private String data_value;
 	

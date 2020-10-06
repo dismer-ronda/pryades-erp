@@ -507,9 +507,6 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 		{
 			newQuotation.setQuotation_date( CalendarUtils.getDateAsLong( fromDateField.getValue() ) );
 			
-			LOG.info(  "edit volume " + editVolume.getValue() );
-			LOG.info(  "object volume " + newQuotation.getVolume() );
-			
 			IOCManager._QuotationsManager.setRow( getContext(), (Quotation) orgDto, newQuotation );
 
 			saveUserDefaults();
@@ -609,8 +606,6 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 			//query.setRef_user( getContext().getUser().getId() );
 			
 			contacts = IOCManager._CompaniesContactsManager.getRows( getContext(), query );
-			
-			LOG.info( "contacts " + contacts );
 		}
 		catch ( BaseException e )
 		{
@@ -639,8 +634,6 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 			query.setRef_company( newQuotation.getRef_customer() );
 			
 			users = IOCManager._UsersCompaniesManager.getRows( getContext(), query );
-			
-			LOG.info( "users " + users );
 		}
 		catch ( BaseException e )
 		{
@@ -871,8 +864,9 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 	
 				String body = text + "\n\n" + ctx1.getCompanyDataAndLegal( newQuotation.getUser() ); 
 	
-				final SendEmailDlg dlg = new SendEmailDlg( getContext(), getContext().getString( "modalNewQuotation.emailTitle" ), attachments );
+				final SendEmailDlg dlg = new SendEmailDlg( getContext(), getContext().getString( "modalNewQuotation.emailTitle" ), attachments, quotation.getCustomer().getContacts() );
 				dlg.setTo( quotation.getContact().getEmail() );
+				dlg.setCopy( "" );
 				dlg.setReply_to( quotation.getUser().getEmail() );
 				dlg.setSubject( subject );
 				dlg.setBody( body );

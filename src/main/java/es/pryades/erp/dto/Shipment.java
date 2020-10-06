@@ -432,7 +432,7 @@ public class Shipment extends BaseDto
 
 			contents += "</tr>\n\n";
 			
-			LOG.info( contents );
+			//LOG.info( contents );
 			
 			return contents;
 		}

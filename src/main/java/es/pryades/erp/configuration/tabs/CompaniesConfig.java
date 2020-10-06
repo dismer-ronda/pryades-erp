@@ -186,8 +186,6 @@ public class CompaniesConfig extends PagedContent implements ModalParent
 	@Override
 	public void preProcessRows( List<BaseDto> rows )
 	{
-		for ( BaseDto row : rows )
-			LOG.info( "company " + row );
 	}
 	
 	@Override
