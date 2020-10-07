@@ -80,7 +80,7 @@ public abstract class ModalWindowsCRUD extends Window
 		center();
 
 		setWidth( "700px" );
-		setHeight( "-1px" );
+		//setHeight( "-1px" );
 
 		setModal( true );
 		setResizable( false );

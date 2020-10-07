@@ -36,6 +36,7 @@ public class Invoice extends BaseDto
 	private Double transport_cost;
 	private Boolean free_delivery; 	
 	private String payment_terms;
+	private Double collected;
 
 	private Quotation quotation;
 	private Shipment shipment;
@@ -102,6 +103,16 @@ public class Invoice extends BaseDto
 		return Utils.getFormattedCurrency( getGrandTotalInvoice() );
 	}
 
+	public double getGrandTotalTaxes()
+	{
+		return getTotalTaxes() + getTotalTransportTaxes();
+	}
+	
+	public String getGrandTotalTaxesAsString()
+	{
+		return Utils.getFormattedCurrency( getTotalTaxes() + getTotalTransportTaxes() );
+	}
+	
 	public double getGrandTotalInvoiceAfterTaxes()
 	{
 		return getTotalPrice() + getTransport_cost() + getTotalTaxes() + getTotalTransportTaxes();

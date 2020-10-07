@@ -1,5 +1,7 @@
 package es.pryades.erp.vto;
 
+import com.vaadin.ui.Label;
+
 import es.pryades.erp.common.GenericVto;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,8 +26,12 @@ public class InvoiceVto extends GenericVto
 	
 	private String customer_name;
 
+	private String month;
+	private Label collected;
+	
 	private Double total_price;
 	private Double total_invoice;
+	private Double total_taxes;
 	
 	public InvoiceVto()
 	{

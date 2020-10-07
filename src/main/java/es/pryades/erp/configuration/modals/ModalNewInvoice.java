@@ -74,6 +74,7 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 	private TextField editTransport_cost;
 	private CheckBox checkFree_delivery;
 	private TextArea editPayment_terms;
+	private TextField editMonth;
 
 	private List<TextField> editsLines;
 	private List<CheckBox> checksLines;
@@ -113,6 +114,7 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 
 			newInvoice.setTransport_cost( 0.0 );
 			newInvoice.setFree_delivery( Boolean.FALSE );
+			newInvoice.setCollected( 0.0 );
 		}
 
 		layout.setHeight( "-1px" );
@@ -176,14 +178,22 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 		editPayment_terms.setNullRepresentation( "" );
 		editPayment_terms.setRows( 3 );
 		
+		editMonth = new TextField( getContext().getString( "modalNewInvoice.editMonth" ), bi.getItemProperty( "month" ) );
+		editMonth.setWidth( "100%" );
+		editMonth.setNullRepresentation( "" );
+		editMonth.setRequired( true );
+		editMonth.setRequiredError( getContext().getString( "words.required" ) );
+		editMonth.setInvalidCommitted( true );
+		
 		HorizontalLayout row1 = new HorizontalLayout();
 		row1.setWidth( "100%" );
 		row1.setSpacing( true );
 		if ( getOperation().equals( Operation.OP_ADD ) )
 			row1.addComponent( comboQuotations );
-
 		row1.addComponent( fromDateField );
+		row1.addComponent( editMonth );
 		row1.addComponent( editTitle );
+		//row1.setExpandRatio( editTitle, 1.0f );
 		
 		HorizontalLayout row2 = new HorizontalLayout();
 		row2.setWidth( "100%" );

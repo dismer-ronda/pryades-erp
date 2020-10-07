@@ -326,6 +326,8 @@ create table invoices
 	transport_cost real not null,
 
 	free_delivery boolean not null, 	
+	month int not null default 1, 	
+	collected real not null default 0,
 
   	constraint pk_invoices primary key( id ),
 

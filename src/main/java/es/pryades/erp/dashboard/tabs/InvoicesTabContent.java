@@ -20,7 +20,9 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.PopupDateField;
 import com.vaadin.ui.TextField;
 
+import es.pryades.erp.application.ShowExternalUrlDlg;
 import es.pryades.erp.common.AppContext;
+import es.pryades.erp.common.Authorization;
 import es.pryades.erp.common.BaseException;
 import es.pryades.erp.common.BaseTable;
 import es.pryades.erp.common.CalendarUtils;
@@ -31,6 +33,7 @@ import es.pryades.erp.common.PagedContent;
 import es.pryades.erp.common.Utils;
 import es.pryades.erp.configuration.modals.ModalNewInvoice;
 import es.pryades.erp.dal.BaseManager;
+import es.pryades.erp.dashboard.Dashboard;
 import es.pryades.erp.dto.BaseDto;
 import es.pryades.erp.dto.Company;
 import es.pryades.erp.dto.Invoice;
@@ -98,7 +101,7 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 	@Override
 	public String[] getVisibleCols()
 	{
-		return new String[]{ "invoice_date", "number", "title", "customer_name", "reference_order", "total_price", "total_invoice" };
+		return new String[]{ "invoice_date", "number", "title", "customer_name", "reference_order", "total_price", "total_taxes", "total_invoice", "collected" };
 	}
 
 	public String[] getSortableCols()
@@ -114,8 +117,22 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 
 	public List<Component> getCustomOperations()
 	{
-		List<Component> ops = new ArrayList<Component>();
+		List<Component> ops = super.getCustomOperations();
 		
+		Button bttnPdf = new Button();
+		bttnPdf.setCaption( getContext().getString( "invoicesConfig.pdf" ) );
+		bttnPdf.addClickListener( new Button.ClickListener()
+		{
+			private static final long serialVersionUID = -819877665197234072L;
+
+			public void buttonClick( ClickEvent event )
+			{
+				onShowPdf();
+			}
+		} );
+
+		ops.add( bttnPdf );
+
 		HorizontalLayout rowTotals = new HorizontalLayout();
 		rowTotals.setWidth( "100%" );
 		rowTotals.setSpacing( true );
@@ -368,6 +385,52 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 		}
 		
 		return null;
+	}
+	
+	private void onShowPdf()
+	{
+		try
+		{
+			long ts = CalendarUtils.getTodayAsLong( "UTC" );
+			
+			String pagesize = "A4";
+			String template = "list-invoices-template";
+			String timeout = "0";
+			
+			InvoiceQuery query = (InvoiceQuery)getQueryObject();
+			
+			String extra = "ts=" + ts + 
+					"&query=" + Utils.getUrlEncoded( Utils.toJson( query ) ) + 
+					"&pagesize=" + pagesize + 
+					"&language=" + getContext().getLanguage() +
+					"&template=" + template +
+					"&name=" + getContext().getString( "invoicesConfig.invoices" ) + "-" + query.getPeriodToString() +
+					"&url=" + getContext().getData( "Url" ) +
+					"&timeout=" + timeout;
+			
+			String user = getContext().getUser().getLogin();
+			String password = getContext().getUser().getPwd();
+			
+			String token = "token=" + Authorization.getTokenString( "" + ts + timeout, password );
+			String code = "code=" + Authorization.encrypt( extra, password ) ;
+
+			String url = getContext().getData( "Url" ) + "/services/invoices" + "?user=" + user + "&" + token + "&" + code + "&ts=" + ts;
+			
+			String caption = getContext().getString( "invoicesConfig.list" );
+
+			ShowExternalUrlDlg dlg = new ShowExternalUrlDlg(); 
+	
+			dlg.setContext( getContext() );
+			dlg.setUrl( url );
+			dlg.setCaption( caption );
+			dlg.createComponents();
+			
+			getUI().addWindow( dlg );
+		}
+		catch ( Throwable e )
+		{
+			Utils.logException( e, LOG );
+		}
 	}
 }
 

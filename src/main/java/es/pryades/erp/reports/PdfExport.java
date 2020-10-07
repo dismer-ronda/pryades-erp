@@ -41,6 +41,7 @@ public class PdfExport extends ExportBase
 		vcontext.put( "orientation", orientation ); 
 		vcontext.put( "title", "Report title" );
 		vcontext.put( "context", getContext() );
+		vcontext.put( "report", this );
 				
 		return vcontext;
 	}

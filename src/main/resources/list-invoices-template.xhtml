@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+   
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+	<title>$context.getString( "template.invoice" ) </title>
+		
+	<meta name="author" content="pryades" />
+
+		<style type="text/css">
+		
+			* {
+				font-family: "Arial", Helvetica; 
+				font-size: 12px;
+			}
+
+			*.titulo1 {
+				font-size: 48px;
+				text-align: center;
+				font-weight: bold;
+			}
+			
+			*.titulo2 {
+				font-size: 14px;
+				text-align: center;
+				font-weight: bold;
+			}
+
+			*.text_header_size {
+				font-size: 16px;
+			}
+
+			*.text_regular_size {
+				font-size: 14px;
+			}
+
+			*.text_left {
+				text-align: left;
+			}
+
+			*.text_center {
+				text-align: center;
+			}
+
+			*.text_right {
+				text-align: right;
+			}
+			
+			*.text_bold {
+				font-weight: bold;
+			}
+
+			*.text_red {
+				color: red;
+			}
+			
+			*.vtop {
+				vertical-align: top;
+			}
+
+			*.hcenter {
+				horizontal-align: center;
+			}
+			
+			*.vcenter {
+				vertical-align: center;
+			}
+
+			*.vbottom {
+				vertical-align: bottom;
+			}
+
+			*.indent {
+				padding-left: 8px;
+				padding-right: 8px;
+			}
+
+			*.padding_left {
+				padding-left: 6px;
+			}
+			
+			*.padding_right {
+				padding-right: 6px;
+			}
+
+			*.padding_bottom {
+				padding-bottom: 5px;
+			}
+
+			*.padding_top {
+				padding-top: 5px;
+			}
+
+			*.padding_all {
+				padding-right: 6px;
+				padding-left: 6px;
+				padding-bottom: 6px;
+				padding-top: 6px;
+			}
+
+			*.padding_h {
+				padding-right: 6px;
+				padding-left: 6px;
+			}
+			
+			*.padding_v {
+				padding-bottom: 6px;
+				padding-top: 6px;
+			}
+				
+			*.borde {
+				border: 0.5px solid black;
+				border-spacing: 0px;
+				border-collapse: collapse;
+				padding: 0px;
+			}
+
+			*.border_no_spacing
+			{
+				border-spacing: 0px;
+				padding: 0px;
+				border-collapse: collapse;
+			}
+
+			*.block {
+				display: inline-block;
+			}
+			
+			#block_container > div {
+   				display: inline-block;
+			}
+
+			@page {
+				size: $pagesize landscape;
+				 
+				@top-left {
+				}
+
+				@top-right {
+				}
+				
+				@bottom-left {
+				}
+				
+				@bottom-right {
+					content: "Página " counter(page) " de " counter(pages);
+					font-size: 12px;
+					vertical-align: middle;
+					padding-bottom: 6px;
+				}
+
+				@bottom-center {
+				}
+				 
+				margin-top: 1cm;
+				margin-bottom: 1.5cm;
+				margin-left: 1cm;
+				margin-right: 1cm;
+			}
+		</style>
+		
+</head>
+
+<body>
+	
+	<table width="100%">
+		<tr>
+			<td class="text_left">
+				<img src="$context.getLogoUrl()" width="256px"> </img> 
+			</td>
+			<td>
+				<div class="text_right titulo1">$context.getString( "template.list.invoices" )</div>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			</td>
+			<td class="text_right">
+				<div id="block_container">
+					<div class="text_regular_size padding_all text_bold">$context.getString( "template.list.invoices.query" ): </div>
+					<div class="text_regular_size padding_all">$query.getPeriodToString()</div>
+				</div>
+			</td>
+		</tr>
+	</table>
+
+
+	<table class="border_no_spacing text_regular_size text_center" width="100%">
+		<tr>
+			<th width="48px" class="borde">
+				<div class="text_regular_size padding_all">$context.getString( "template.list.invoices.date" )</div>
+			</th>
+			<th class="borde">
+				<div class="text_regular_size padding_all">$context.getString( "template.list.invoices.number" )</div>
+			</th>
+			<th class="borde">
+				<div class="text_regular_size padding_all">$context.getString( "template.list.invoices.title" )</div>
+			</th>
+			<th class="borde">
+				<div class="text_regular_size padding_all">$context.getString( "template.list.invoices.customer" )</div>
+			</th>
+			<th class="borde">
+				<div class="text_regular_size padding_all">$context.getString( "template.list.invoices.tax_id" )</div>
+			</th>
+			<th width="96px" class="borde">
+				<div class="text_regular_size padding_all">$context.getString( "template.list.invoices.total" )</div>
+			</th>
+			<th width="96px" class="borde">
+				<div class="text_regular_size padding_all">$context.getString( "template.list.invoices.taxes" )</div>
+			</th>
+			<th width="96px" class="borde">
+				<div class="text_regular_size padding_all">$context.getString( "template.list.invoices.grand.total" )</div>
+			</th>
+		</tr>
+
+		#foreach( $invoice in $invoices )
+			<tr>
+				<td class="borde text_left vcenter">
+					<div class="text_regular_size padding_all"> $invoice.getFormattedDate() </div>
+				</td>
+				<td class="borde padding_all text_left vcenter">
+					<div class="text_regular_size padding_all"> $invoice.getFormattedNumber() </div>
+				</td>
+				<td class="borde padding_all text_left vcenter">
+					<div class="text_regular_size padding_all"> $invoice.getTitle() </div>
+				</td>
+				<td class="borde padding_all text_left vcenter">
+					<div class="text_regular_size padding_all"> $invoice.getQuotation().getCustomer().getName() </div>
+				</td>
+				<td class="borde padding_all text_left vcenter">
+					<div class="text_regular_size padding_all"> $invoice.getQuotation().getCustomer().getTax_id() </div>
+				</td>
+				<td class="borde padding_all text_right vcenter">
+					<div class="text_regular_size padding_all"> $invoice.getGrandTotalInvoiceAsString() €</div>
+				</td>
+				<td class="borde padding_all text_right vcenter">
+					<div class="text_regular_size padding_all"> $invoice.getGrandTotalTaxesAsString() €</div>
+				</td>
+				<td class="borde padding_all text_right vcenter">
+					<div class="text_regular_size padding_all"> $invoice.getGrandTotalInvoiceAfterTaxesAsString() €</div>
+				</td>
+			</tr>
+		#end
+		
+		<tr>
+			<td class="">
+			</td>
+			<td class="">
+			</td>
+			<td class="">
+			</td>
+			<td class="">
+			</td>
+			<td class="text_right vcenter">
+				<div class="text_regular_size padding_all text_bold"> $context.getString( "template.list.invoices.totals" ):</div>
+			</td>
+			<td class="text_right vcenter">
+				<div class="text_regular_size padding_all text_bold"> $report.getGrandTotalAsString() €</div>
+			</td>
+			<td class="text_right vcenter">
+				<div class="text_regular_size padding_all text_bold"> $report.getGrandTotalTaxesAsString() €</div>
+			</td>
+			<td class="text_right vcenter">
+				<div class="text_regular_size padding_all text_bold"> $report.getGrandTotalAfterTaxesAsString() €</div>
+			</td>
+		</tr>
+	
+	</table>
+	
+</body>
+
+</html>

@@ -1,5 +1,6 @@
 package es.pryades.erp.dto.query;
 
+import es.pryades.erp.common.CalendarUtils;
 import es.pryades.erp.dto.Invoice;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,4 +25,19 @@ public class InvoiceQuery extends Invoice
 
 	private Long ref_customer;
 	private Long ref_user;
+	
+	public String getPeriodToString()
+	{
+		String ret = "";
+		
+		if ( getFrom_date() != null )
+			ret += CalendarUtils.getFormatedDate( getFrom_date(), "yyyy-MM-dd" );
+		
+		ret += "  ...  ";
+		
+		if ( getTo_date() != null )
+			ret += CalendarUtils.getFormatedDate( getTo_date(), "yyyy-MM-dd" );
+		
+		return ret;
+	}
 }

@@ -304,6 +304,7 @@
 		<result property="transport_cost" column="transport_cost"/>
 		<result property="free_delivery" column="free_delivery"/>
 		<result property="payment_terms" column="payment_terms"/>
+		<result property="collected" column="collected"/>
 		
 		<association property="quotation" javaType="es.pryades.erp.dto.Quotation" resultMap="mapQuotation" columnPrefix="quotation_" />
 		<association property="shipment" javaType="es.pryades.erp.dto.Shipment" resultMap="mapShipment" columnPrefix="shipment_" />
@@ -322,6 +323,7 @@
 		invoices.transport_cost,						
 		invoices.free_delivery,						
 		invoices.payment_terms,						
+		invoices.collected,						
 
 		quotations.id					as quotation_id,						
 		quotations.ref_customer			as quotation_ref_customer,
@@ -580,7 +582,8 @@
 		
 			transport_cost,						
 			free_delivery,						
-			payment_terms						
+			payment_terms,
+			collected						
 		)
 		values
 		(
@@ -595,7 +598,8 @@
 			
 			#{transport_cost},						
 			#{free_delivery},						
-			#{payment_terms}						
+			#{payment_terms},						
+			#{collected}						
 		)
 	</insert>
 
@@ -607,7 +611,8 @@
 			ref_shipment = #{ref_shipment},
 			transport_cost=#{transport_cost},						
 			payment_terms=#{payment_terms},						
-			free_delivery=#{free_delivery}						
+			free_delivery=#{free_delivery},						
+			collected=#{collected}						
 		where id = #{id}
 	</update>
 

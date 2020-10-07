@@ -1,5 +1,7 @@
 package es.pryades.erp.vto.controlers;
 
+import com.vaadin.ui.Label;
+
 import es.pryades.erp.common.AppContext;
 import es.pryades.erp.common.BaseException;
 import es.pryades.erp.common.CalendarUtils;
@@ -49,8 +51,15 @@ public class InvoiceControlerVto extends GenericControlerVto
 				result.setReference_order( ((Invoice) dtoObj).getQuotation().getReference_order() ); 
 				result.setCustomer_name( ((Invoice) dtoObj).getQuotation().getCustomer().getName() ); 
 
-				result.setTotal_price( Utils.roundDouble( ((Invoice) dtoObj).getTotalPrice(), 2 ) );
-				result.setTotal_invoice( Utils.roundDouble( ((Invoice) dtoObj).getGrandTotalInvoice(), 2 ) );
+				result.setTotal_price( Utils.roundDouble( ((Invoice) dtoObj).getTotalPrice() + ((Invoice) dtoObj).getTransport_cost(), 2 ) );
+				result.setTotal_invoice( Utils.roundDouble( ((Invoice) dtoObj).getGrandTotalInvoiceAfterTaxes(), 2 ) );
+				result.setTotal_taxes( Utils.roundDouble( ((Invoice) dtoObj).getTotalTaxes(), 2 ) );
+
+				Double collected = ((Invoice) dtoObj).getCollected();
+				Label labelCollected = new Label();
+				labelCollected.setValue( Double.toString( Utils.roundDouble( collected,  2 ) ) );
+				labelCollected.setStyleName( (collected < ((Invoice) dtoObj).getTotalPrice()) ? "red" : "green" );
+				result.setCollected( labelCollected );
 			}
 			else
 			{
