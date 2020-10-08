@@ -89,7 +89,7 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 	 * @param objOperacion
 	 * @param parentWindow
 	 */
-	public ModalNewInvoice( AppContext context, Operation modalOperation, Invoice orgParameter, ModalParent parentWindow )
+	public ModalNewInvoice( AppContext context, OperationCRUD modalOperation, Invoice orgParameter, ModalParent parentWindow )
 	{
 		super( context, parentWindow, modalOperation, orgParameter );
 
@@ -131,7 +131,7 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 		editTitle.setWidth( "100%" );
 		editTitle.setNullRepresentation( "" );
 		
-		if ( getOperation().equals( Operation.OP_ADD ) )
+		if ( getOperation().equals( OperationCRUD.OP_ADD ) )
 		{
 			loadQuotations();
 			
@@ -188,7 +188,7 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 		HorizontalLayout row1 = new HorizontalLayout();
 		row1.setWidth( "100%" );
 		row1.setSpacing( true );
-		if ( getOperation().equals( Operation.OP_ADD ) )
+		if ( getOperation().equals( OperationCRUD.OP_ADD ) )
 			row1.addComponent( comboQuotations );
 		row1.addComponent( fromDateField );
 		row1.addComponent( editMonth );
@@ -213,7 +213,7 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 		componentsContainer.addComponent( row2 );
 		componentsContainer.addComponent( row4 );
 		
-		if ( !getOperation().equals( Operation.OP_ADD ) )
+		if ( !getOperation().equals( OperationCRUD.OP_ADD ) )
 		{
 			showQuotationLinesGrid();
 			componentsContainer.addComponent( panelLines );
@@ -602,7 +602,7 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 	@Override
 	protected void doEditAfterNew()
 	{
-		new ModalNewInvoice( getContext(), Operation.OP_MODIFY, (Invoice)newInvoice, getModalParent() ).showModalWindow();
+		new ModalNewInvoice( getContext(), OperationCRUD.OP_MODIFY, (Invoice)newInvoice, getModalParent() ).showModalWindow();
 	}
 
 	private void loadUserDefaults()

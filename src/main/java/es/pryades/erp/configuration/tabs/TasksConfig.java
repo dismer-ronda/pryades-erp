@@ -18,7 +18,7 @@ import es.pryades.erp.common.BaseTable;
 import es.pryades.erp.common.Constants;
 import es.pryades.erp.common.GenericControlerVto;
 import es.pryades.erp.common.ModalParent;
-import es.pryades.erp.common.ModalWindowsCRUD.Operation;
+import es.pryades.erp.common.ModalWindowsCRUD.OperationCRUD;
 import es.pryades.erp.common.PagedContent;
 import es.pryades.erp.common.PagedTable;
 import es.pryades.erp.common.TaskAction;
@@ -123,13 +123,13 @@ public class TasksConfig extends PagedContent implements ModalParent
 	@Override
 	public void onOperationNew()
 	{
-		new ModalNewTask( getContext(), Operation.OP_ADD, null, TasksConfig.this ).showModalWindow();
+		new ModalNewTask( getContext(), OperationCRUD.OP_ADD, null, TasksConfig.this ).showModalWindow();
 	}
 
 	@Override
 	public void onOperationModify( BaseDto dto )
 	{
-		new ModalNewTask( getContext(), Operation.OP_MODIFY, (Task)dto, TasksConfig.this ).showModalWindow();
+		new ModalNewTask( getContext(), OperationCRUD.OP_MODIFY, (Task)dto, TasksConfig.this ).showModalWindow();
 	}
 
 	@Override

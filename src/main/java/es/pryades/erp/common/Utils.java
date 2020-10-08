@@ -1233,6 +1233,8 @@ public class Utils
 		}
 		catch ( Throwable e )
 		{
+			LOG.error( "field not found " + name  );
+			
 			if ( e instanceof BaseException )
 				throw (BaseException)e;
 

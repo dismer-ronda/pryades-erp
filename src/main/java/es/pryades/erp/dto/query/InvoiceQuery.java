@@ -31,12 +31,12 @@ public class InvoiceQuery extends Invoice
 		String ret = "";
 		
 		if ( getFrom_date() != null )
-			ret += CalendarUtils.getFormatedDate( getFrom_date(), "yyyy-MM-dd" );
+			ret += CalendarUtils.getFormatedDate( getFrom_date(), "dd-MM-yyyy" );
 		
 		ret += "  ...  ";
 		
 		if ( getTo_date() != null )
-			ret += CalendarUtils.getFormatedDate( getTo_date(), "yyyy-MM-dd" );
+			ret += CalendarUtils.getFormatedDate( getTo_date(), "dd-MM-yyyy" );
 		
 		return ret;
 	}

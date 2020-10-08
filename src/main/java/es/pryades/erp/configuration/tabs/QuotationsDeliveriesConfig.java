@@ -10,7 +10,7 @@ import es.pryades.erp.common.BaseTable;
 import es.pryades.erp.common.GenericControlerVto;
 import es.pryades.erp.common.ModalParent;
 import es.pryades.erp.common.PagedContent;
-import es.pryades.erp.common.ModalWindowsCRUD.Operation;
+import es.pryades.erp.common.ModalWindowsCRUD.OperationCRUD;
 import es.pryades.erp.configuration.modals.ModalNewQuotation;
 import es.pryades.erp.configuration.modals.ModalNewQuotationDelivery;
 import es.pryades.erp.dal.BaseManager;
@@ -89,13 +89,13 @@ public class QuotationsDeliveriesConfig extends PagedContent implements ModalPar
 	@Override
 	public void onOperationNew()
 	{
-		new ModalNewQuotationDelivery( getContext(), Operation.OP_ADD, null, parent ).showModalWindow();
+		new ModalNewQuotationDelivery( getContext(), OperationCRUD.OP_ADD, null, parent ).showModalWindow();
 	}
 
 	@Override
 	public void onOperationModify( BaseDto dto )
 	{
-		new ModalNewQuotationDelivery( getContext(), Operation.OP_MODIFY, (QuotationDelivery)dto, parent ).showModalWindow();
+		new ModalNewQuotationDelivery( getContext(), OperationCRUD.OP_MODIFY, (QuotationDelivery)dto, parent ).showModalWindow();
 	}
 
 	@Override

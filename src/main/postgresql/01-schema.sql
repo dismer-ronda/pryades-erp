@@ -4,6 +4,7 @@ CREATE SEQUENCE gencfg START 1000;
 CREATE SEQUENCE seq_quotations 	START 2020001;
 CREATE SEQUENCE seq_invoices 	START 2020001;
 CREATE SEQUENCE seq_shipments 	START 2020001;
+CREATE SEQUENCE seq_purchases 	START 202000001;
 
 -- user profiles
 create table profiles (
@@ -326,7 +327,6 @@ create table invoices
 	transport_cost real not null,
 
 	free_delivery boolean not null, 	
-	month int not null default 1, 	
 	collected real not null default 0,
 
   	constraint pk_invoices primary key( id ),
@@ -427,3 +427,18 @@ create table banks
   	constraint pk_banks primary key( id ),
   	constraint fk_banks_bank foreign key (ref_bank) references companies(id)
 );
+
+create table operations
+(
+	id bigint not null,
+
+	status int not null,						
+	title varchar(128) not null,
+
+	ref_quotation bigint,
+
+  	constraint pk_operations primary key( id ),
+  	constraint fk_operations_quotation foreign key (ref_quotation) references quotations(id)
+);
+alter table operations OWNER TO pryades;
+

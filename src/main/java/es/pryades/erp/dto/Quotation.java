@@ -95,6 +95,20 @@ public class Quotation extends BaseDto
 		return Utils.getFormattedCurrency( getTotalPrice() );
 	}
 
+	public double getTotalInvoiced()
+	{
+		double total = 0;
+		for ( QuotationLine line : getLines() )
+			total += line.getTotal_invoiced() != null ? line.getTotal_invoiced() * line.getPrice(): 0;
+		 
+		return Utils.roundDouble( total, 2 );
+	}
+
+	public String getTotalInvoicedAsString()
+	{
+		return Utils.getFormattedCurrency( getTotalInvoiced() );
+	}
+
 	public double getTotalCost()
 	{
 		double total_cost = 0;

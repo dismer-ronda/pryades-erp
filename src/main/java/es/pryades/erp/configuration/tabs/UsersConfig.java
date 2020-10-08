@@ -13,7 +13,7 @@ import es.pryades.erp.common.BaseException;
 import es.pryades.erp.common.BaseTable;
 import es.pryades.erp.common.GenericControlerVto;
 import es.pryades.erp.common.ModalParent;
-import es.pryades.erp.common.ModalWindowsCRUD.Operation;
+import es.pryades.erp.common.ModalWindowsCRUD.OperationCRUD;
 import es.pryades.erp.common.PagedContent;
 import es.pryades.erp.common.PagedTable;
 import es.pryades.erp.configuration.modals.ModalNewUser;
@@ -101,13 +101,13 @@ public class UsersConfig extends PagedContent implements ModalParent
 	@Override
 	public void onOperationNew()
 	{
-		new ModalNewUser( getContext(), Operation.OP_ADD, null, UsersConfig.this ).showModalWindow();
+		new ModalNewUser( getContext(), OperationCRUD.OP_ADD, null, UsersConfig.this ).showModalWindow();
 	}
 
 	@Override
 	public void onOperationModify( BaseDto dto )
 	{
-		new ModalNewUser( getContext(), Operation.OP_MODIFY, (User)dto, UsersConfig.this ).showModalWindow();
+		new ModalNewUser( getContext(), OperationCRUD.OP_MODIFY, (User)dto, UsersConfig.this ).showModalWindow();
 	}
 
 	@Override

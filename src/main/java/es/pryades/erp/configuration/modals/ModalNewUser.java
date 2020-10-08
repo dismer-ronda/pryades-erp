@@ -79,7 +79,7 @@ public class ModalNewUser extends ModalWindowsCRUD implements Receiver, Succeede
 	 * @param objOperacion
 	 * @param parentWindow
 	 */
-	public ModalNewUser( AppContext context, Operation modalOperation, User orgUser, ModalParent parentWindow )
+	public ModalNewUser( AppContext context, OperationCRUD modalOperation, User orgUser, ModalParent parentWindow )
 	{
 		super( context, parentWindow, modalOperation, orgUser );
 		setWidth( "750px" );

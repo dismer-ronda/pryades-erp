@@ -40,7 +40,7 @@ public class ModalNewParameter extends ModalWindowsCRUD
 	 * @param objOperacion
 	 * @param parentWindow
 	 */
-	public ModalNewParameter( AppContext context, Operation modalOperation, Parameter orgParameter, ModalParent parentWindow )
+	public ModalNewParameter( AppContext context, OperationCRUD modalOperation, Parameter orgParameter, ModalParent parentWindow )
 	{
 		super( context, parentWindow, modalOperation, orgParameter );
 	}

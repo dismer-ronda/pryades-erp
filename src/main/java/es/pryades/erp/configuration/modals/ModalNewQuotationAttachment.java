@@ -60,7 +60,7 @@ public class ModalNewQuotationAttachment extends ModalWindowsCRUD implements Rec
 	 * @param objOperacion
 	 * @param parentWindow
 	 */
-	public ModalNewQuotationAttachment( AppContext context, Operation modalOperation, QuotationAttachment orgParameter, ModalParent parentWindow )
+	public ModalNewQuotationAttachment( AppContext context, OperationCRUD modalOperation, QuotationAttachment orgParameter, ModalParent parentWindow )
 	{
 		super( context, parentWindow, modalOperation, orgParameter );
 	}
@@ -115,7 +115,7 @@ public class ModalNewQuotationAttachment extends ModalWindowsCRUD implements Rec
 		
 		getCustomOperationsRow().addComponent( upload );
 		
-		if ( operation.equals( Operation.OP_MODIFY ) )
+		if ( operation.equals( OperationCRUD.OP_MODIFY ) )
 		{
 			Button bttnView = new Button( getContext().getString( getWindowResourceKey() + ".operation.view" ) );
 			bttnView.addClickListener( new Button.ClickListener()

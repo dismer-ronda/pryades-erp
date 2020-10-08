@@ -90,6 +90,7 @@ public class ErpApplication extends UI
     	try
 		{
 	    	ctx = new AppContext( getLanguage().getLanguage() );
+			IOCManager._ParametersManager.loadParameters( ctx );
 	    	
 	    	ctx.addData( "Application", this );
 	    	ctx.addData( "Theme", "VAADIN/themes/indigo/" );
@@ -103,6 +104,7 @@ public class ErpApplication extends UI
 		}
 		catch ( Throwable e )
 		{
+			e.printStackTrace();
 			Utils.logException( e, LOG );
 		}
     }

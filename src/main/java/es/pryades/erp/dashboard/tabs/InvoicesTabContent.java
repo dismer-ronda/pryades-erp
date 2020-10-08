@@ -28,7 +28,7 @@ import es.pryades.erp.common.BaseTable;
 import es.pryades.erp.common.CalendarUtils;
 import es.pryades.erp.common.GenericControlerVto;
 import es.pryades.erp.common.ModalParent;
-import es.pryades.erp.common.ModalWindowsCRUD.Operation;
+import es.pryades.erp.common.ModalWindowsCRUD.OperationCRUD;
 import es.pryades.erp.common.PagedContent;
 import es.pryades.erp.common.Utils;
 import es.pryades.erp.configuration.modals.ModalNewInvoice;
@@ -101,12 +101,12 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 	@Override
 	public String[] getVisibleCols()
 	{
-		return new String[]{ "invoice_date", "number", "title", "customer_name", "reference_order", "total_price", "total_taxes", "total_invoice", "collected" };
+		return new String[]{ "invoice_date", "number", "title", "customer_name", "quotation_number", "reference_order", "total_price", "total_taxes", "total_invoice", "collected" };
 	}
 
 	public String[] getSortableCols()
 	{
-		return new String[]{ "invoice_date", "number", "title", "customer_name", "reference_order" };
+		return new String[]{ "invoice_date", "number", "title", "customer_name", "quotation_number", "reference_order" };
 	}
 	
 	@Override
@@ -117,7 +117,7 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 
 	public List<Component> getCustomOperations()
 	{
-		List<Component> ops = super.getCustomOperations();
+		List<Component> ops = new ArrayList<Component>();
 		
 		Button bttnPdf = new Button();
 		bttnPdf.setCaption( getContext().getString( "invoicesConfig.pdf" ) );
@@ -237,13 +237,13 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 	@Override
 	public void onOperationNew()
 	{
-		new ModalNewInvoice( getContext(), Operation.OP_ADD, null, InvoicesTabContent.this ).showModalWindow();
+		new ModalNewInvoice( getContext(), OperationCRUD.OP_ADD, null, InvoicesTabContent.this ).showModalWindow();
 	}
 
 	@Override
 	public void onOperationModify( BaseDto dto )
 	{
-		new ModalNewInvoice( getContext(), Operation.OP_MODIFY, (Invoice)dto, InvoicesTabContent.this ).showModalWindow();
+		new ModalNewInvoice( getContext(), OperationCRUD.OP_MODIFY, (Invoice)dto, InvoicesTabContent.this ).showModalWindow();
 	}
 
 	@Override

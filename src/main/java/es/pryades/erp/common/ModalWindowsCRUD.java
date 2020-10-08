@@ -39,18 +39,18 @@ public abstract class ModalWindowsCRUD extends Window
 
 	@Getter protected ModalParent modalParent;
 
-	@Getter protected Operation operation;
+	@Getter protected OperationCRUD operation;
 
 	protected VerticalLayout layout;
 
 	protected BaseDto orgDto;
 	protected BeanItem<BaseDto> bi;
 
-	public static enum Operation
+	public static enum OperationCRUD
 	{
 		OP_ADD("add"), OP_MODIFY("modify"), OP_DELETE("delete"), OP_VIEW("view");
 
-		Operation( String op )
+		OperationCRUD( String op )
 		{
 			opName = op;
 		}
@@ -66,7 +66,7 @@ public abstract class ModalWindowsCRUD extends Window
 	/**
      * 
      */
-	public ModalWindowsCRUD( AppContext context, ModalParent modalParent, Operation modalOperation, BaseDto orgDto )
+	public ModalWindowsCRUD( AppContext context, ModalParent modalParent, OperationCRUD modalOperation, BaseDto orgDto )
 	{
 		super();
 
@@ -106,7 +106,7 @@ public abstract class ModalWindowsCRUD extends Window
 
 		bttnCancelarListener();
 
-		if ( !modalOperation.equals( Operation.OP_DELETE ) )
+		if ( !modalOperation.equals( OperationCRUD.OP_DELETE ) )
 			defaultFocus();
 
 		setCaption( getContext().getString( getWindowResourceKey() + ".wndCaption." + modalOperation.getOpName() ) );
@@ -135,9 +135,9 @@ public abstract class ModalWindowsCRUD extends Window
 		defaultOperationsRow = new HorizontalLayout();
 		defaultOperationsRow.setSpacing( true );
 
-		if ( !operation.equals( Operation.OP_VIEW ) )
+		if ( !operation.equals( OperationCRUD.OP_VIEW ) )
 		{
-			if ( operation.equals( Operation.OP_MODIFY ) && hasDelete() )
+			if ( operation.equals( OperationCRUD.OP_MODIFY ) && hasDelete() )
 			{
 				Button bttnDelete = new Button( getContext().getString( getWindowResourceKey() + ".operation.delete" ) );
 				bttnDelete.addStyleName( "Red" );

@@ -101,7 +101,7 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 	 * @param objOperacion
 	 * @param parentWindow
 	 */
-	public ModalNewShipment( AppContext context, Operation modalOperation, Shipment orgParameter, ModalParent parentWindow )
+	public ModalNewShipment( AppContext context, OperationCRUD modalOperation, Shipment orgParameter, ModalParent parentWindow )
 	{
 		super( context, parentWindow, modalOperation, orgParameter );
 
@@ -221,7 +221,7 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 		fillComboUsers();
 		comboUsers.setPropertyDataSource( bi.getItemProperty( "ref_user" ) );
 		
-		if ( !getOperation().equals( Operation.OP_ADD ) )
+		if ( !getOperation().equals( OperationCRUD.OP_ADD ) )
 		{
 			comboStatus = new ComboBox(getContext().getString( "modalNewShipment.comboStatus" ));
 			comboStatus.setWidth( "100%" );
@@ -268,7 +268,7 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 		row1.addComponent( editTitle );
 		row1.addComponent( popupDateShipment );
 		row1.addComponent( popupDateDeparture );
-		if ( !getOperation().equals( Operation.OP_ADD ) )
+		if ( !getOperation().equals( OperationCRUD.OP_ADD ) )
 			row1.addComponent( comboStatus );
 		
 		HorizontalLayout row4 = new HorizontalLayout();
@@ -303,7 +303,7 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 		componentsContainer.addComponent( row2 );
 		componentsContainer.addComponent( row3 );
 		
-		if ( !getOperation().equals( Operation.OP_ADD ) )
+		if ( !getOperation().equals( OperationCRUD.OP_ADD ) )
 		{
 			showShipmentBoxes();
 			componentsContainer.addComponent( panelBoxes );
@@ -592,7 +592,7 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 	@Override
 	protected void doEditAfterNew()
 	{
-		new ModalNewShipment( getContext(), Operation.OP_MODIFY, (Shipment)newShipment, getModalParent() ).showModalWindow();
+		new ModalNewShipment( getContext(), OperationCRUD.OP_MODIFY, (Shipment)newShipment, getModalParent() ).showModalWindow();
 	}
 
 	private void loadUserDefaults()

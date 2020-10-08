@@ -79,7 +79,7 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 	 * @param objOperacion
 	 * @param parentWindow
 	 */
-	public ModalNewCompany( AppContext context, Operation modalOperation, Company orgParameter, ModalParent parentWindow )
+	public ModalNewCompany( AppContext context, OperationCRUD modalOperation, Company orgParameter, ModalParent parentWindow )
 	{
 		super( context, parentWindow, modalOperation, orgParameter );
 	}
@@ -212,7 +212,7 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 		componentsContainer.addComponent( row4 );
 		componentsContainer.addComponent( row5 );
 		
-		if ( !getOperation().equals( Operation.OP_ADD ) )
+		if ( !getOperation().equals( OperationCRUD.OP_ADD ) )
 		{
 			panelContacts = new Panel( getContext().getString( "modalNewCompany.contacts" ) );
 			panelContacts.setStyleName( "borderless light" );

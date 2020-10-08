@@ -62,7 +62,7 @@ public class ModalNewQuotationDelivery extends ModalWindowsCRUD
 	 * @param objOperacion
 	 * @param parentWindow
 	 */
-	public ModalNewQuotationDelivery( AppContext context, Operation modalOperation, QuotationDelivery orgParameter, ModalParent parentWindow )
+	public ModalNewQuotationDelivery( AppContext context, OperationCRUD modalOperation, QuotationDelivery orgParameter, ModalParent parentWindow )
 	{
 		super( context, parentWindow, modalOperation, orgParameter );
 	}

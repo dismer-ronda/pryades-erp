@@ -69,7 +69,7 @@ public class ModalNewTask extends ModalWindowsCRUD implements ModalParent
 	 * @param objOperacion
 	 * @param parentWindow
 	 */
-	public ModalNewTask( AppContext context, Operation modalOperation, Task orgDto, ModalParent parentWindow )
+	public ModalNewTask( AppContext context, OperationCRUD modalOperation, Task orgDto, ModalParent parentWindow )
 	{
 		super( context, parentWindow, modalOperation, orgDto );
 		
@@ -263,7 +263,7 @@ public class ModalNewTask extends ModalWindowsCRUD implements ModalParent
 		componentsContainer.addComponent( row4 );
 		componentsContainer.addComponent( row7 );
 		
-		if ( !getOperation().equals( Operation.OP_ADD ) )
+		if ( !getOperation().equals( OperationCRUD.OP_ADD ) )
 		{
 			if ( getContext().hasRight( "configuration.tasks.dispatch" ) )
 			{

@@ -23,7 +23,7 @@ import es.pryades.erp.common.BaseTable;
 import es.pryades.erp.common.CalendarUtils;
 import es.pryades.erp.common.GenericControlerVto;
 import es.pryades.erp.common.ModalParent;
-import es.pryades.erp.common.ModalWindowsCRUD.Operation;
+import es.pryades.erp.common.ModalWindowsCRUD.OperationCRUD;
 import es.pryades.erp.common.PagedContent;
 import es.pryades.erp.configuration.modals.ModalNewShipment;
 import es.pryades.erp.dal.BaseManager;
@@ -194,13 +194,13 @@ public class ShipmentsTabContent extends PagedContent implements ModalParent
 	@Override
 	public void onOperationNew()
 	{
-		new ModalNewShipment( getContext(), Operation.OP_ADD, null, ShipmentsTabContent.this ).showModalWindow();
+		new ModalNewShipment( getContext(), OperationCRUD.OP_ADD, null, ShipmentsTabContent.this ).showModalWindow();
 	}
 
 	@Override
 	public void onOperationModify( BaseDto dto )
 	{
-		new ModalNewShipment( getContext(), Operation.OP_MODIFY, (Shipment)dto, ShipmentsTabContent.this ).showModalWindow();
+		new ModalNewShipment( getContext(), OperationCRUD.OP_MODIFY, (Shipment)dto, ShipmentsTabContent.this ).showModalWindow();
 	}
 
 	@Override

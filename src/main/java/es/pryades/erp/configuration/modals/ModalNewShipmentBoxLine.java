@@ -51,7 +51,7 @@ public class ModalNewShipmentBoxLine extends ModalWindowsCRUD implements ModalPa
 	
 	private List<Invoice> invoices;
 
-	public ModalNewShipmentBoxLine( AppContext context, Operation modalOperation, ShipmentBoxLine orgParameter, ModalParent parentWindow )
+	public ModalNewShipmentBoxLine( AppContext context, OperationCRUD modalOperation, ShipmentBoxLine orgParameter, ModalParent parentWindow )
 	{
 		super( context, parentWindow, modalOperation, orgParameter );
 		

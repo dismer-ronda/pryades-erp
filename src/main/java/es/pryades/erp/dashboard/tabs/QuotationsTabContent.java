@@ -29,7 +29,7 @@ import es.pryades.erp.common.BaseTable;
 import es.pryades.erp.common.CalendarUtils;
 import es.pryades.erp.common.GenericControlerVto;
 import es.pryades.erp.common.ModalParent;
-import es.pryades.erp.common.ModalWindowsCRUD.Operation;
+import es.pryades.erp.common.ModalWindowsCRUD.OperationCRUD;
 import es.pryades.erp.common.PagedContent;
 import es.pryades.erp.common.Utils;
 import es.pryades.erp.configuration.modals.ModalNewQuotation;
@@ -295,13 +295,13 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 	@Override
 	public void onOperationNew()
 	{
-		new ModalNewQuotation( getContext(), Operation.OP_ADD, null, QuotationsTabContent.this ).showModalWindow();
+		new ModalNewQuotation( getContext(), OperationCRUD.OP_ADD, null, QuotationsTabContent.this ).showModalWindow();
 	}
 
 	@Override
 	public void onOperationModify( BaseDto dto )
 	{
-		new ModalNewQuotation( getContext(), Operation.OP_MODIFY, (Quotation)dto, QuotationsTabContent.this ).showModalWindow();
+		new ModalNewQuotation( getContext(), OperationCRUD.OP_MODIFY, (Quotation)dto, QuotationsTabContent.this ).showModalWindow();
 	}
 
 	@Override

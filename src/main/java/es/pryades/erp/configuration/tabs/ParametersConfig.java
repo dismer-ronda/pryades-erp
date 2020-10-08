@@ -11,7 +11,7 @@ import es.pryades.erp.common.GenericControlerVto;
 import es.pryades.erp.common.ModalParent;
 import es.pryades.erp.common.PagedContent;
 import es.pryades.erp.common.PagedTable;
-import es.pryades.erp.common.ModalWindowsCRUD.Operation;
+import es.pryades.erp.common.ModalWindowsCRUD.OperationCRUD;
 import es.pryades.erp.configuration.modals.ModalNewParameter;
 import es.pryades.erp.dal.BaseManager;
 import es.pryades.erp.dto.BaseDto;
@@ -72,7 +72,7 @@ public class ParametersConfig extends PagedContent implements ModalParent
 	@Override
 	public void onOperationModify( BaseDto dto )
 	{
-		new ModalNewParameter( getContext(), Operation.OP_MODIFY, (Parameter)dto, ParametersConfig.this ).showModalWindow();
+		new ModalNewParameter( getContext(), OperationCRUD.OP_MODIFY, (Parameter)dto, ParametersConfig.this ).showModalWindow();
 	}
 
 	@Override

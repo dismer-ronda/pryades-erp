@@ -96,6 +96,15 @@ insert into profiles_rights (ref_profile, ref_right) values (0, 37);
 insert into rights (id, code, description) values (38, 'configuration.tasks.dispatch','Dispatch task');
 insert into profiles_rights (ref_profile, ref_right) values (0, 38);
 
+insert into rights (id, code) values (39, 'configuration.operations');
+insert into rights (id, code) values (40, 'configuration.operations.add');
+insert into rights (id, code) values (41, 'configuration.operations.modify');
+insert into rights (id, code) values (42, 'configuration.operations.delete');
+insert into profiles_rights (ref_profile, ref_right) values (0, 39);
+insert into profiles_rights (ref_profile, ref_right) values (0, 40);
+insert into profiles_rights (ref_profile, ref_right) values (0, 41);
+insert into profiles_rights (ref_profile, ref_right) values (0, 42);
+
 ---------------------------------------------    
 -- users 
 ---------------------------------------------

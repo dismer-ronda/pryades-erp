@@ -55,7 +55,7 @@ public class ModalNewProfile extends ModalWindowsCRUD
 	 * @param objOperacion
 	 * @param parentWindow
 	 */
-	public ModalNewProfile( AppContext context, Operation modalOperation, Profile orgProfile, ModalParent parentWindow )
+	public ModalNewProfile( AppContext context, OperationCRUD modalOperation, Profile orgProfile, ModalParent parentWindow )
 	{
 		super( context, parentWindow, modalOperation, orgProfile );
 	}

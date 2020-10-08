@@ -52,7 +52,7 @@ public class QuotationControlerVto extends GenericControlerVto
 				
 				result.setReference_request( ((Quotation) dtoObj).getReference_request() ); 
 				result.setReference_order( ((Quotation) dtoObj).getReference_order() ); 
-				result.setCustomer_name( ((Quotation) dtoObj).getCustomer().getName() ); 
+				result.setCustomer_name( ((Quotation) dtoObj).getCustomer().getAlias() ); 
 				
 				List<QuotationDelivery> deliveries = ((Quotation) dtoObj).getDeliveries();
 				String text = "";

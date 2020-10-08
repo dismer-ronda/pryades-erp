@@ -110,7 +110,7 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 	 * @param objOperacion
 	 * @param parentWindow
 	 */
-	public ModalNewQuotation( AppContext context, Operation modalOperation, Quotation orgParameter, ModalParent parentWindow )
+	public ModalNewQuotation( AppContext context, OperationCRUD modalOperation, Quotation orgParameter, ModalParent parentWindow )
 	{
 		super( context, parentWindow, modalOperation, orgParameter );
 
@@ -193,7 +193,7 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 		fillComboUsers();
 		comboUsers.setPropertyDataSource( bi.getItemProperty( "ref_user" ) );
 
-		if ( !getOperation().equals( Operation.OP_ADD ) )
+		if ( !getOperation().equals( OperationCRUD.OP_ADD ) )
 		{
 			comboStatus = new ComboBox(getContext().getString( "modalNewQuotation.comboStatus" ));
 			comboStatus.setWidth( "100%" );
@@ -263,7 +263,7 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 		row1.addComponent( fromDateField );
 		row1.addComponent( comboCustomers );
 		row1.addComponent( comboContacts );
-		if ( !getOperation().equals( Operation.OP_ADD ) )
+		if ( !getOperation().equals( OperationCRUD.OP_ADD ) )
 		{
 			row1.addComponent( comboStatus );
 		}
@@ -290,7 +290,7 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 		componentsContainer.addComponent( row2 );
 		componentsContainer.addComponent( row4 );
 		
-		if ( !getOperation().equals( Operation.OP_ADD ) )
+		if ( !getOperation().equals( OperationCRUD.OP_ADD ) )
 		{
 			rowCombined = new HorizontalLayout();
 			rowCombined.setSpacing( true );
@@ -698,7 +698,7 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 	@Override
 	protected void doEditAfterNew()
 	{
-		new ModalNewQuotation( getContext(), Operation.OP_MODIFY, (Quotation)newQuotation, getModalParent() ).showModalWindow();
+		new ModalNewQuotation( getContext(), OperationCRUD.OP_MODIFY, (Quotation)newQuotation, getModalParent() ).showModalWindow();
 	}
 
 	private void loadUserDefaults()
@@ -726,22 +726,22 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 	
 	private void onDeliveryClick( Button button )
 	{
-		new ModalNewQuotationDelivery( getContext(), Operation.OP_MODIFY, (QuotationDelivery)button.getData(), this ).showModalWindow();
+		new ModalNewQuotationDelivery( getContext(), OperationCRUD.OP_MODIFY, (QuotationDelivery)button.getData(), this ).showModalWindow();
 	}
 	
 	private void onDeliveryAddClick()
 	{
-		new ModalNewQuotationDelivery( getContext(), Operation.OP_ADD, null, this ).showModalWindow();
+		new ModalNewQuotationDelivery( getContext(), OperationCRUD.OP_ADD, null, this ).showModalWindow();
 	}
 
 	private void onAttachmentClick( Button button )
 	{
-		new ModalNewQuotationAttachment( getContext(), Operation.OP_MODIFY, (QuotationAttachment)button.getData(), this ).showModalWindow();
+		new ModalNewQuotationAttachment( getContext(), OperationCRUD.OP_MODIFY, (QuotationAttachment)button.getData(), this ).showModalWindow();
 	}
 	
 	private void onAttachmentAddClick()
 	{
-		new ModalNewQuotationAttachment( getContext(), Operation.OP_ADD, null, this ).showModalWindow();
+		new ModalNewQuotationAttachment( getContext(), OperationCRUD.OP_ADD, null, this ).showModalWindow();
 	}
 
 	public void onShowPdf()

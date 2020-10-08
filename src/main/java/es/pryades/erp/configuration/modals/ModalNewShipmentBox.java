@@ -67,7 +67,7 @@ public class ModalNewShipmentBox extends ModalWindowsCRUD implements ModalParent
 	private UserDefault width;
 	private UserDefault height;
 	
-	public ModalNewShipmentBox( AppContext context, Operation modalOperation, ShipmentBox orgParameter, ModalParent parentWindow )
+	public ModalNewShipmentBox( AppContext context, OperationCRUD modalOperation, ShipmentBox orgParameter, ModalParent parentWindow )
 	{
 		super( context, parentWindow, modalOperation, orgParameter );
 
@@ -114,7 +114,7 @@ public class ModalNewShipmentBox extends ModalWindowsCRUD implements ModalParent
 		
 		bi = new BeanItem<BaseDto>( newShipmentBox );
 
-		if ( getOperation().equals( Operation.OP_ADD ) )
+		if ( getOperation().equals( OperationCRUD.OP_ADD ) )
 		{
 			comboTypes = new ComboBox(getContext().getString( "modalNewShipmentBox.comboType" ));
 			comboTypes.setWidth( "100%" );
@@ -153,7 +153,7 @@ public class ModalNewShipmentBox extends ModalWindowsCRUD implements ModalParent
 		row1.setWidth( "100%" );
 		row1.setSpacing( true );
 		row1.addComponent( editLabel );
-		if ( getOperation().equals( Operation.OP_ADD ) )
+		if ( getOperation().equals( OperationCRUD.OP_ADD ) )
 			row1.addComponent( comboTypes );
 		row1.addComponent( comboLabelTypes );
 		row1.addComponent( editLength );
@@ -162,7 +162,7 @@ public class ModalNewShipmentBox extends ModalWindowsCRUD implements ModalParent
 		
 		componentsContainer.addComponent( row1 );
 		
-		if ( !getOperation().equals( Operation.OP_ADD ) )
+		if ( !getOperation().equals( OperationCRUD.OP_ADD ) )
 		{
 			if ( newShipmentBox.getBox_type() < ShipmentBox.TYPE_CARDBOARD_BOX )
 			{
@@ -524,7 +524,7 @@ public class ModalNewShipmentBox extends ModalWindowsCRUD implements ModalParent
 	@Override
 	protected void doEditAfterNew()
 	{
-		new ModalNewShipmentBox( getContext(), Operation.OP_MODIFY, (ShipmentBox)newShipmentBox, getModalParent() ).showModalWindow();
+		new ModalNewShipmentBox( getContext(), OperationCRUD.OP_MODIFY, (ShipmentBox)newShipmentBox, getModalParent() ).showModalWindow();
 	}
 
 	private void loadUserDefaults()

@@ -73,7 +73,7 @@ public class ModalNewQuotationLine extends ModalWindowsCRUD implements ModalPare
 	 * @param objOperacion
 	 * @param parentWindow
 	 */
-	public ModalNewQuotationLine( AppContext context, Operation modalOperation, QuotationLine orgParameter, ModalParent parentWindow )
+	public ModalNewQuotationLine( AppContext context, OperationCRUD modalOperation, QuotationLine orgParameter, ModalParent parentWindow )
 	{
 		super( context, parentWindow, modalOperation, orgParameter );
 		
@@ -397,7 +397,7 @@ public class ModalNewQuotationLine extends ModalWindowsCRUD implements ModalPare
 	
 	private void onAddProvider()
 	{
-		new ModalNewCompany( getContext(), Operation.OP_ADD, null, ModalNewQuotationLine.this ).showModalWindow();
+		new ModalNewCompany( getContext(), OperationCRUD.OP_ADD, null, ModalNewQuotationLine.this ).showModalWindow();
 	}
 
 	@Override

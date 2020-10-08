@@ -25,6 +25,7 @@ public class InvoiceVto extends GenericVto
 	private String reference_order;
 	
 	private String customer_name;
+	private String quotation_number;
 
 	private String month;
 	private Label collected;

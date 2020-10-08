@@ -77,6 +77,10 @@ public class UserDefault extends BaseDto
 	public static final String SHIPMENTS_CUSTOMER = "shipments.customer";
 	public static final String SHIPMENTS_STATUS = "shipments.status";
 
+	public static final String OPERATIONS_QUOTATION = "operations.quotation";
+	public static final String OPERATIONS_STATUS = "operations.status";
+	public static final String OPERATIONS_TITLE = "operations.title";
+
 	private String data_key;
 	private String data_value;
 	

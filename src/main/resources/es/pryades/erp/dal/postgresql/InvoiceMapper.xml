@@ -346,6 +346,7 @@
 		
 		companies.id 					as quotation_customer_id,
 		companies.name 					as quotation_customer_name,
+		companies.alias					as quotation_customer_alias,
 		companies.address 				as quotation_customer_address,
 		companies.email 				as quotation_customer_email,
 		companies.phone 				as quotation_customer_phone,
@@ -492,6 +493,9 @@
 			</when>
 			<when test="orderby.equals( 'customer_name' )">
 				companies.name
+			</when>
+			<when test="orderby.equals( 'quotation_number' )">
+				quotations.number
 			</when>
 			<when test="orderby.equals( 'reference_order' )">
 				quotations.reference_order

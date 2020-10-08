@@ -44,7 +44,7 @@ public class ShipmentControlerVto extends GenericControlerVto
 				result.setNumber(((Shipment) dtoObj).getFormattedNumber());
 				result.setDeparture_date( CalendarUtils.getDateFromLongAsString( ((Shipment) dtoObj).getDeparture_date(), "dd-MM-yyyy" ) );
 				result.setIncoterms( ((Shipment) dtoObj).getIncoterms() ); 
-				result.setConsignee_name( ((Shipment) dtoObj).getConsignee().getName() ); 
+				result.setConsignee_name( ((Shipment) dtoObj).getConsignee().getAlias() ); 
 				result.setStatus( getContext().getString( "shipment.status." + ((Shipment) dtoObj).getStatus()) );
 				result.setCarrier( ((Shipment) dtoObj).getCarrier() );
 				result.setTracking( ((Shipment) dtoObj).getTracking() );

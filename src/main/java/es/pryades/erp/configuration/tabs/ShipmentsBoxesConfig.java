@@ -11,7 +11,7 @@ import es.pryades.erp.common.BaseException;
 import es.pryades.erp.common.BaseTable;
 import es.pryades.erp.common.GenericControlerVto;
 import es.pryades.erp.common.ModalParent;
-import es.pryades.erp.common.ModalWindowsCRUD.Operation;
+import es.pryades.erp.common.ModalWindowsCRUD.OperationCRUD;
 import es.pryades.erp.common.PagedContent;
 import es.pryades.erp.configuration.modals.ModalNewShipment;
 import es.pryades.erp.configuration.modals.ModalNewShipmentBox;
@@ -110,7 +110,7 @@ public class ShipmentsBoxesConfig extends PagedContent implements ModalParent
 	{
 		ModalParent parent = parentShipment != null ? parentShipment : parentBox;
 		
-		new ModalNewShipmentBox( getContext(), Operation.OP_ADD, null, parent ).showModalWindow();
+		new ModalNewShipmentBox( getContext(), OperationCRUD.OP_ADD, null, parent ).showModalWindow();
 	}
 
 	@Override
@@ -118,7 +118,7 @@ public class ShipmentsBoxesConfig extends PagedContent implements ModalParent
 	{
 		ModalParent parent = parentShipment != null ? parentShipment : parentBox;
 		
-		new ModalNewShipmentBox( getContext(), Operation.OP_MODIFY, (ShipmentBox)dto, parent ).showModalWindow();
+		new ModalNewShipmentBox( getContext(), OperationCRUD.OP_MODIFY, (ShipmentBox)dto, parent ).showModalWindow();
 	}
 
 	@Override

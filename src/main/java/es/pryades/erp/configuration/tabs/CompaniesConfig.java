@@ -19,7 +19,7 @@ import es.pryades.erp.common.BaseException;
 import es.pryades.erp.common.BaseTable;
 import es.pryades.erp.common.GenericControlerVto;
 import es.pryades.erp.common.ModalParent;
-import es.pryades.erp.common.ModalWindowsCRUD.Operation;
+import es.pryades.erp.common.ModalWindowsCRUD.OperationCRUD;
 import es.pryades.erp.common.PagedContent;
 import es.pryades.erp.common.PagedTable;
 import es.pryades.erp.configuration.modals.ModalNewCompany;
@@ -156,13 +156,13 @@ public class CompaniesConfig extends PagedContent implements ModalParent
 	@Override
 	public void onOperationNew()
 	{
-		new ModalNewCompany( getContext(), Operation.OP_ADD, null, CompaniesConfig.this ).showModalWindow();
+		new ModalNewCompany( getContext(), OperationCRUD.OP_ADD, null, CompaniesConfig.this ).showModalWindow();
 	}
 
 	@Override
 	public void onOperationModify( BaseDto dto )
 	{
-		new ModalNewCompany( getContext(), Operation.OP_MODIFY, (Company)dto, CompaniesConfig.this ).showModalWindow();
+		new ModalNewCompany( getContext(), OperationCRUD.OP_MODIFY, (Company)dto, CompaniesConfig.this ).showModalWindow();
 	}
 
 	@Override

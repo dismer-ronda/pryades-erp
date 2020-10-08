@@ -49,7 +49,8 @@ public class InvoiceControlerVto extends GenericControlerVto
 				
 				result.setReference_request( ((Invoice) dtoObj).getQuotation().getReference_request() ); 
 				result.setReference_order( ((Invoice) dtoObj).getQuotation().getReference_order() ); 
-				result.setCustomer_name( ((Invoice) dtoObj).getQuotation().getCustomer().getName() ); 
+				result.setCustomer_name( ((Invoice) dtoObj).getQuotation().getCustomer().getAlias() ); 
+				result.setQuotation_number( ((Invoice) dtoObj).getQuotation().getFormattedNumber() ); 
 
 				result.setTotal_price( Utils.roundDouble( ((Invoice) dtoObj).getTotalPrice() + ((Invoice) dtoObj).getTransport_cost(), 2 ) );
 				result.setTotal_invoice( Utils.roundDouble( ((Invoice) dtoObj).getGrandTotalInvoiceAfterTaxes(), 2 ) );

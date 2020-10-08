@@ -17,6 +17,7 @@ import es.pryades.erp.dashboard.tabs.DashboardTab;
 import es.pryades.erp.dashboard.tabs.InvoicesTab;
 import es.pryades.erp.dashboard.tabs.InvoicesTabContent;
 import es.pryades.erp.dashboard.tabs.LogTab;
+import es.pryades.erp.dashboard.tabs.OperationsTab;
 import es.pryades.erp.dashboard.tabs.QuotationsTab;
 import es.pryades.erp.dashboard.tabs.QuotationsTabContent;
 import es.pryades.erp.dashboard.tabs.ShipmentsTab;
@@ -48,6 +49,7 @@ public class Dashboard extends VerticalLayout implements SelectedTabChangeListen
 	private QuotationsTab quotationsTab;
 	private InvoicesTab invoicesTab;
 	private ShipmentsTab shipmentsTab;
+	private OperationsTab operationsTab;
 
 	public Dashboard( AppContext context ) 
 	{
@@ -155,6 +157,15 @@ public class Dashboard extends VerticalLayout implements SelectedTabChangeListen
 		tabs.add( shipmentsTab );
 	}
 
+	private void createOperationsTab()
+	{
+		operationsTab = new OperationsTab( context );
+		
+		operationsTab.initComponents();
+	
+		tabs.add( operationsTab );
+	}
+
 	private void createTabs()
 	{
 		/* && Utils.getEnviroment( "LOGFILE" ) != null*/
@@ -167,6 +178,9 @@ public class Dashboard extends VerticalLayout implements SelectedTabChangeListen
 		
 		if ( getContext().hasRight( "configuration.shipments" ) )
 			createShipmentsTab();
+		
+		if ( getContext().hasRight( "configuration.operations" ) )
+			createOperationsTab();
 		
 		if ( getContext().hasRight( "main.log" )  )
 			createLogTab();
