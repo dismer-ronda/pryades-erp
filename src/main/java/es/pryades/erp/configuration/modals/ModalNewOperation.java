@@ -81,7 +81,7 @@ public class ModalNewOperation extends ModalWindowsCRUD implements ModalParent
 
 			if ( Utils.getLong( quotation.getData_value(), 0 ) != 0)
 				newOperation.setRef_quotation( Utils.getLong( quotation.getData_value(), 0 ) );
-			newOperation.setStatus( Operation.STATUS_ACCEPTED );
+			newOperation.setStatus( Operation.STATUS_EXCECUTION );
 		}
 
 		layout.setHeight( "-1px" );
@@ -98,7 +98,7 @@ public class ModalNewOperation extends ModalWindowsCRUD implements ModalParent
 			comboQuotation.setTextInputAllowed( true );
 			comboQuotation.setImmediate( true );
 			comboQuotation.setRequired( false );
-			fillComboCustomers();
+			fillComboQuotations();
 			comboQuotation.setPropertyDataSource( bi.getItemProperty( "ref_quotation" ) );
 			comboQuotation.addValueChangeListener( new Property.ValueChangeListener() 
 			{
@@ -240,7 +240,7 @@ public class ModalNewOperation extends ModalWindowsCRUD implements ModalParent
 		}
 	}
 	
-	private void fillComboCustomers()
+	private void fillComboQuotations()
 	{
 		comboQuotation.removeAllItems();
 		for ( Quotation quotation : quotations )
@@ -252,14 +252,8 @@ public class ModalNewOperation extends ModalWindowsCRUD implements ModalParent
 
 	private void fillComboStatus()
 	{
-		comboStatus.addItem( Operation.STATUS_ACCEPTED );
-		comboStatus.setItemCaption( Operation.STATUS_ACCEPTED, getContext().getString( "operation.status." + Operation.STATUS_ACCEPTED ) );
-
 		comboStatus.addItem( Operation.STATUS_EXCECUTION );
 		comboStatus.setItemCaption( Operation.STATUS_EXCECUTION, getContext().getString( "operation.status." + Operation.STATUS_EXCECUTION ) );
-		
-		comboStatus.addItem( Operation.STATUS_DELIVERED );
-		comboStatus.setItemCaption( Operation.STATUS_DELIVERED, getContext().getString( "operation.status." + Operation.STATUS_DELIVERED ) );
 		
 		comboStatus.addItem( Operation.STATUS_FINISHED );
 		comboStatus.setItemCaption( Operation.STATUS_FINISHED, getContext().getString( "operation.status." + Operation.STATUS_FINISHED ) );

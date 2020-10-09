@@ -438,6 +438,7 @@ create table operations
 	ref_quotation bigint,
 
   	constraint pk_operations primary key( id ),
+  	constraint uk_operations_quotation unique(ref_quotation),
   	constraint fk_operations_quotation foreign key (ref_quotation) references quotations(id)
 );
 alter table operations OWNER TO pryades;

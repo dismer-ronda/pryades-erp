@@ -362,6 +362,9 @@
 			<if test="ref_user != null">
 				AND users_companies.ref_user = #{ref_user}    
 	        </if>
+			<if test="ref_seller != null">
+				AND quotations.ref_user = #{ref_seller}    
+	        </if>
 		</where>
 	</sql>
 	

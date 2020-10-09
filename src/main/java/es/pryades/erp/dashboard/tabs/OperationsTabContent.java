@@ -410,14 +410,8 @@ public class OperationsTabContent extends PagedContent implements ModalParent
 
 	private void fillComboStatus()
 	{
-		comboStatus.addItem( Operation.STATUS_ACCEPTED );
-		comboStatus.setItemCaption( Operation.STATUS_ACCEPTED, getContext().getString( "operation.status." + Operation.STATUS_ACCEPTED ) );
-
 		comboStatus.addItem( Operation.STATUS_EXCECUTION );
 		comboStatus.setItemCaption( Operation.STATUS_EXCECUTION, getContext().getString( "operation.status." + Operation.STATUS_EXCECUTION ) );
-		
-		comboStatus.addItem( Operation.STATUS_DELIVERED );
-		comboStatus.setItemCaption( Operation.STATUS_DELIVERED, getContext().getString( "operation.status." + Operation.STATUS_DELIVERED ) );
 		
 		comboStatus.addItem( Operation.STATUS_FINISHED );
 		comboStatus.setItemCaption( Operation.STATUS_FINISHED, getContext().getString( "operation.status." + Operation.STATUS_FINISHED ) );

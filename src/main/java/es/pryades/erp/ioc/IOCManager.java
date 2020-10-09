@@ -16,6 +16,7 @@ import es.pryades.erp.dal.OperationsManager;
 import es.pryades.erp.dal.ParametersManager;
 import es.pryades.erp.dal.ProfilesManager;
 import es.pryades.erp.dal.ProfilesRightsManager;
+import es.pryades.erp.dal.PurchasesManager;
 import es.pryades.erp.dal.QuotationsAttachmentsManager;
 import es.pryades.erp.dal.QuotationsDeliveriesManager;
 import es.pryades.erp.dal.QuotationsLinesDeliveriesManager;
@@ -69,6 +70,7 @@ public class IOCManager  implements Serializable
 	public static UsersCompaniesManager _UsersCompaniesManager;
 	public static CompaniesContactsManager _CompaniesContactsManager;
 	public static OperationsManager _OperationsManager;
+	public static PurchasesManager _PurchasesManager;
 
 	public IOCManager() 
 	{
@@ -126,6 +128,7 @@ public class IOCManager  implements Serializable
 		_UsersCompaniesManager = (UsersCompaniesManager)getInstanceOf( UsersCompaniesManager.class );
 		_CompaniesContactsManager = (CompaniesContactsManager)getInstanceOf( CompaniesContactsManager.class );
 		_OperationsManager = (OperationsManager)getInstanceOf( OperationsManager.class );
+		_PurchasesManager = (PurchasesManager)getInstanceOf( PurchasesManager.class );
 	}
 	
 	/**

@@ -280,7 +280,7 @@ public class ShipmentsTabContent extends PagedContent implements ModalParent
 		for ( Company company : customers )
 		{
 			comboCustomers.addItem( company.getId() );
-			comboCustomers.setItemCaption( company.getId(), company.getName() );
+			comboCustomers.setItemCaption( company.getId(), company.getAlias() );
 		}
 	}
 

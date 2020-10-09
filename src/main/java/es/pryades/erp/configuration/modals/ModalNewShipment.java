@@ -547,7 +547,7 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 		for ( Company company : customers )
 		{
 			comboConsignee.addItem( company.getId() );
-			comboConsignee.setItemCaption( company.getId(), company.getName() );
+			comboConsignee.setItemCaption( company.getId(), company.getAlias() );
 		}
 	}
 
@@ -556,7 +556,7 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 		for ( Company company : customers )
 		{
 			comboNotify.addItem( company.getId() );
-			comboNotify.setItemCaption( company.getId(), company.getName() );
+			comboNotify.setItemCaption( company.getId(), company.getAlias() );
 		}
 	}
 

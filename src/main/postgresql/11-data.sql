@@ -105,6 +105,15 @@ insert into profiles_rights (ref_profile, ref_right) values (0, 40);
 insert into profiles_rights (ref_profile, ref_right) values (0, 41);
 insert into profiles_rights (ref_profile, ref_right) values (0, 42);
 
+insert into rights (id, code) values (43, 'configuration.purchases');
+insert into rights (id, code) values (44, 'configuration.purchases.add');
+insert into rights (id, code) values (45, 'configuration.purchases.modify');
+insert into rights (id, code) values (46, 'configuration.purchases.delete');
+insert into profiles_rights (ref_profile, ref_right) values (0, 43);
+insert into profiles_rights (ref_profile, ref_right) values (0, 44);
+insert into profiles_rights (ref_profile, ref_right) values (0, 45);
+insert into profiles_rights (ref_profile, ref_right) values (0, 46);
+
 ---------------------------------------------    
 -- users 
 ---------------------------------------------

@@ -19,11 +19,9 @@ public class Operation extends BaseDto
 
 	static final Logger LOG = Logger.getLogger( Operation.class );
 
-	public static final int STATUS_ACCEPTED			= 1;
-	public static final int STATUS_EXCECUTION 		= 2;
-	public static final int STATUS_DELIVERED		= 3;
-	public static final int STATUS_FINISHED			= 4;
-	public static final int STATUS_CLOSED			= 5;
+	public static final int STATUS_EXCECUTION 		= 1;
+	public static final int STATUS_FINISHED			= 2;
+	public static final int STATUS_CLOSED			= 3;
 
   	private Integer status;
   	private String title;

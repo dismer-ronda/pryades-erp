@@ -43,5 +43,6 @@ public class StandaloneModule
 		binder.bind( UsersCompaniesManager.class, UsersCompaniesManagerImpl.class);
 		binder.bind( CompaniesContactsManager.class, CompaniesContactsManagerImpl.class);
 		binder.bind( OperationsManager.class, OperationsManagerImpl.class);
+		binder.bind( PurchasesManager.class, PurchasesManagerImpl.class);
 	}
 }

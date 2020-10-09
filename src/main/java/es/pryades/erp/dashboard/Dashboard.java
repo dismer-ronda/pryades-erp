@@ -18,6 +18,9 @@ import es.pryades.erp.dashboard.tabs.InvoicesTab;
 import es.pryades.erp.dashboard.tabs.InvoicesTabContent;
 import es.pryades.erp.dashboard.tabs.LogTab;
 import es.pryades.erp.dashboard.tabs.OperationsTab;
+import es.pryades.erp.dashboard.tabs.OperationsTabContent;
+import es.pryades.erp.dashboard.tabs.PurchasesTab;
+import es.pryades.erp.dashboard.tabs.PurchasesTabContent;
 import es.pryades.erp.dashboard.tabs.QuotationsTab;
 import es.pryades.erp.dashboard.tabs.QuotationsTabContent;
 import es.pryades.erp.dashboard.tabs.ShipmentsTab;
@@ -50,6 +53,7 @@ public class Dashboard extends VerticalLayout implements SelectedTabChangeListen
 	private InvoicesTab invoicesTab;
 	private ShipmentsTab shipmentsTab;
 	private OperationsTab operationsTab;
+	private PurchasesTab purchasesTab;
 
 	public Dashboard( AppContext context ) 
 	{
@@ -166,6 +170,15 @@ public class Dashboard extends VerticalLayout implements SelectedTabChangeListen
 		tabs.add( operationsTab );
 	}
 
+	private void createPurchasesTab()
+	{
+		purchasesTab = new PurchasesTab( context );
+		
+		purchasesTab.initComponents();
+	
+		tabs.add( purchasesTab );
+	}
+
 	private void createTabs()
 	{
 		/* && Utils.getEnviroment( "LOGFILE" ) != null*/
@@ -181,6 +194,9 @@ public class Dashboard extends VerticalLayout implements SelectedTabChangeListen
 		
 		if ( getContext().hasRight( "configuration.operations" ) )
 			createOperationsTab();
+		
+		if ( getContext().hasRight( "configuration.purchases" ) )
+			createPurchasesTab();
 		
 		if ( getContext().hasRight( "main.log" )  )
 			createLogTab();
@@ -228,6 +244,20 @@ public class Dashboard extends VerticalLayout implements SelectedTabChangeListen
 	public void refreshShipmentsTab()
 	{
 		ShipmentsTabContent content = shipmentsTab.getShipmentsTable();
+		if ( content != null )
+			content.refreshVisibleContent( true );
+	}
+	
+	public void refreshOperationsTab()
+	{
+		OperationsTabContent content = operationsTab.getOperationsTable();
+		if ( content != null )
+			content.refreshVisibleContent( true );
+	}
+	
+	public void refreshPurchasesTab()
+	{
+		PurchasesTabContent content = purchasesTab.getPurchasesTable();
 		if ( content != null )
 			content.refreshVisibleContent( true );
 	}

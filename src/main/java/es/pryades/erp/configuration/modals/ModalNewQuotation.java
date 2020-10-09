@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.vaadin.dialogs.ConfirmDialog;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -21,6 +22,7 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.PopupDateField;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 
 import es.pryades.erp.application.SendEmailDlg;
@@ -38,6 +40,7 @@ import es.pryades.erp.dashboard.Dashboard;
 import es.pryades.erp.dto.BaseDto;
 import es.pryades.erp.dto.Company;
 import es.pryades.erp.dto.CompanyContact;
+import es.pryades.erp.dto.Operation;
 import es.pryades.erp.dto.Quotation;
 import es.pryades.erp.dto.QuotationAttachment;
 import es.pryades.erp.dto.QuotationDelivery;
@@ -514,6 +517,26 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
 			dashboard.refreshInvoicesTab();
 			dashboard.refreshShipmentsTab();
+			
+			if ( ((Quotation)orgDto).getStatus().equals( Quotation.STATUS_SENT ) && newQuotation.getStatus().equals( Quotation.STATUS_APPROVED ) )
+			{
+				ConfirmDialog.show( (UI)getContext().getData( "Application" ), getContext().getString( "modalNewQuotation.operation" ),
+				        new ConfirmDialog.Listener() 
+						{
+							private static final long serialVersionUID = -8550030546274588920L;
+
+							public void onClose(ConfirmDialog dialog) 
+				            {
+				                if ( dialog.isConfirmed() ) 
+				                {
+									onCreateOperation();
+
+									closeModalWindow( true, true );
+				                } 
+				            }
+				        });
+
+			}
 
 			return true;
 		}
@@ -571,7 +594,7 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 		for ( Company company : customers )
 		{
 			comboCustomers.addItem( company.getId() );
-			comboCustomers.setItemCaption( company.getId(), company.getName() );
+			comboCustomers.setItemCaption( company.getId(), company.getAlias() );
 		}
 	}
 
@@ -946,5 +969,27 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 		newQuotation.setRef_user( null );
 		loadUsers();
 		fillComboUsers();
+	}
+	
+	private void onCreateOperation()
+	{
+		try
+		{
+			Operation operation = new Operation();
+
+			operation.setRef_quotation( newQuotation.getId() );
+			operation.setTitle( newQuotation.getTitle() );
+			operation.setStatus( Operation.STATUS_EXCECUTION );
+
+			IOCManager._OperationsManager.setRow( getContext(), null, operation );
+
+			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+			dashboard.refreshOperationsTab();
+		}
+		catch ( Throwable e )
+		{
+			showErrorMessage( e );
+			Utils.logException( e, LOG );
+		}
 	}
 }

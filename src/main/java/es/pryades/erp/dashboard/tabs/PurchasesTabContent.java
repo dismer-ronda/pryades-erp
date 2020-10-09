@@ -18,12 +18,8 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.PopupDateField;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.TextField;
 
-import es.pryades.erp.application.ShowExternalUrlDlg;
 import es.pryades.erp.common.AppContext;
-import es.pryades.erp.common.Authorization;
 import es.pryades.erp.common.BaseException;
 import es.pryades.erp.common.BaseTable;
 import es.pryades.erp.common.CalendarUtils;
@@ -32,63 +28,58 @@ import es.pryades.erp.common.ModalParent;
 import es.pryades.erp.common.ModalWindowsCRUD.OperationCRUD;
 import es.pryades.erp.common.PagedContent;
 import es.pryades.erp.common.Utils;
-import es.pryades.erp.configuration.modals.ModalNewQuotation;
+import es.pryades.erp.configuration.modals.ModalNewPurchase;
 import es.pryades.erp.dal.BaseManager;
 import es.pryades.erp.dto.BaseDto;
 import es.pryades.erp.dto.Company;
+import es.pryades.erp.dto.Purchase;
 import es.pryades.erp.dto.Query;
-import es.pryades.erp.dto.Quotation;
 import es.pryades.erp.dto.User;
 import es.pryades.erp.dto.UserDefault;
 import es.pryades.erp.dto.query.CompanyQuery;
-import es.pryades.erp.dto.query.QuotationQuery;
+import es.pryades.erp.dto.query.PurchaseQuery;
 import es.pryades.erp.dto.query.UserQuery;
 import es.pryades.erp.ioc.IOCManager;
-import es.pryades.erp.vto.QuotationVto;
-import es.pryades.erp.vto.controlers.QuotationControlerVto;
+import es.pryades.erp.vto.PurchaseVto;
+import es.pryades.erp.vto.controlers.PurchaseControlerVto;
 
 /**
  * 
  * @author Dismer Ronda
  * 
  */
-public class QuotationsTabContent extends PagedContent implements ModalParent
+public class PurchasesTabContent extends PagedContent implements ModalParent
 {
-	private static final long serialVersionUID = 1192294998132880196L;
+	private static final long serialVersionUID = -1902287089851682611L;
 
-	private static final Logger LOG = Logger.getLogger( QuotationsTabContent.class );
+	private static final Logger LOG = Logger.getLogger( PurchasesTabContent.class );
 
 	private PopupDateField fromDateField;
 	private PopupDateField toDateField;
 
-	private ComboBox comboCustomers;
+	private ComboBox comboProviders;
 	private ComboBox comboStatus;
-	private ComboBox comboUsers;
-
-	private TextField editReference_request;
-	private TextField editReference_order;
+	private ComboBox comboBuyer;
 
 	private Button bttnApply;
 	
-	private Label labelTotalCost;
-	private Label labelTotalPrice;
-	private Label labelTotalMargin;
+	private Label labelTotalNetPrice;
+	private Label labelTotalTaxes;
+	private Label labelTotalGrossPrice;
 
-	private List<Company> customers;
-	private List<User> users;
+	private List<Company> providers;
+	private List<User> buyers;
 
 	private UserDefault default_from;
 	private UserDefault default_to;
 	private UserDefault default_customer;
 	private UserDefault default_status;
-	private UserDefault default_reference_request;
-	private UserDefault default_reference_order;
 
-	public QuotationsTabContent( AppContext ctx )
+	public PurchasesTabContent( AppContext ctx )
 	{
 		super( ctx );
 		
-		setOrderby( "quotation_date" );
+		setOrderby( "purchase_date" );
 		setOrder( "desc" );
 
 		loadUserDefaults();
@@ -97,7 +88,7 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 	@Override
 	public String getResourceKey()
 	{
-		return "quotationsConfig";
+		return "purchasesTab";
 	}
 
 	public boolean hasNew() 		{ return true; }
@@ -108,23 +99,23 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 	@Override
 	public String[] getVisibleCols()
 	{
-		return new String[]{ "quotation_date", "number", "title", "customer_name", "status", "reference_request", "reference_order", "total_cost", "total_price", "total_profit", "total_quotation" };
+		return new String[]{ "purchase_date", "register_date", "number", "title", "provider_name", "status", "net_price", "net_tax", "gross_price", "payed" };
 	}
 
 	public String[] getSortableCols()
 	{
-		return new String[]{ "quotation_date", "number", "title", "customer_name", "status", "reference_request", "reference_order" };
+		return new String[]{ "purchase_date", "register_date", "number", "title", "provider_name", "status" };
 	}
 	
 	@Override
 	public BaseTable createTable() throws BaseException
 	{
-		BaseTable table = new BaseTable( QuotationVto.class, this, getContext() );//, getContext().getIntegerParameter( Parameter.PAR_DEFAULT_PAGE_SIZE ) );
+		BaseTable table = new BaseTable( PurchaseVto.class, this, getContext() );
 		
-		table.getTable().setData( table );
+		/*table.getTable().setData( table );
 		table.getTable().setCellStyleGenerator( new Table.CellStyleGenerator() 
 		{
-			private static final long serialVersionUID = -2722780059322176413L;
+			private static final long serialVersionUID = 7788851530339856486L;
 
 			@Override
 			public String getStyle( Table source, Object itemId, Object propertyId )
@@ -134,7 +125,7 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 				
 				Object item = source.getItem( itemId );
 				
-				Quotation quotation = (Quotation)((BaseTable)source.getData()).getRawTableContent().get( item );
+				Purchase purchase = (Purchase)((BaseTable)source.getData()).getRawTableContent().get( item );
 				
 				if ( propertyId.equals( "quotation_date" ) )
 				{
@@ -160,7 +151,7 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 				return null;
 			}
 		});
-
+		 */
 		return table;
 	}
 
@@ -173,18 +164,17 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 		rowTotals.setSpacing( true );
 		rowTotals.setMargin( new MarginInfo( false, true, false, true ) );
 		
-		labelTotalCost = new Label();
-		labelTotalCost.setWidth( "300px" );
-		labelTotalPrice = new Label();
-		labelTotalPrice.setWidth( "300px" );
-		labelTotalMargin = new Label();
-		labelTotalMargin.setWidth( "300px" );
-		labelTotalMargin.addStyleName( "green" );
+		labelTotalNetPrice = new Label();
+		labelTotalNetPrice.setWidth( "300px" );
+		labelTotalTaxes = new Label();
+		labelTotalTaxes.setWidth( "300px" );
+		labelTotalGrossPrice = new Label();
+		labelTotalGrossPrice.setWidth( "300px" );
 		
-		rowTotals.addComponent( labelTotalCost );
-		rowTotals.addComponent( labelTotalPrice );
-		rowTotals.addComponent( labelTotalMargin );
-
+		rowTotals.addComponent( labelTotalNetPrice );
+		rowTotals.addComponent( labelTotalTaxes );
+		rowTotals.addComponent( labelTotalGrossPrice );
+		
 		ops.add( rowTotals );
 		
 		return ops;
@@ -199,25 +189,25 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 		fromDateField = new PopupDateField( getContext().getString( "words.from" ) );
 		fromDateField.setResolution( Resolution.DAY );
 		fromDateField.setDateFormat( "dd-MM-yyyy" );
-		fromDateField.setValue( getDefaultDate( default_from.getData_value() ) );
+		//fromDateField.setValue( getDefaultDate( default_from.getData_value() ) );
 		fromDateField.setWidth( "160px" );
 		
 		toDateField = new PopupDateField( getContext().getString( "words.to" ) );
 		toDateField.setResolution( Resolution.DAY );
 		toDateField.setDateFormat( "dd-MM-yyyy" );
-		toDateField.setValue( getDefaultDate( default_to.getData_value() ) );
+		//toDateField.setValue( getDefaultDate( default_to.getData_value() ) );
 		toDateField.setWidth( "160px" );
 		
-		comboCustomers = new ComboBox(getContext().getString( "modalNewQuotation.comboCustomer" ));
-		comboCustomers.setWidth( "100%" );
-		comboCustomers.setNullSelectionAllowed( true );
-		comboCustomers.setTextInputAllowed( true );
-		comboCustomers.setImmediate( true );
+		comboProviders = new ComboBox(getContext().getString( "modalNewPurchase.comboProviders" ));
+		comboProviders.setWidth( "100%" );
+		comboProviders.setNullSelectionAllowed( true );
+		comboProviders.setTextInputAllowed( true );
+		comboProviders.setImmediate( true );
 		fillComboCustomers();
-		comboCustomers.setValue( getDefaultCustomer() );
-		comboCustomers.addValueChangeListener( new Property.ValueChangeListener() 
+//		comboProviders.setValue( getDefaultCustomer() );
+		comboProviders.addValueChangeListener( new Property.ValueChangeListener() 
 		{
-			private static final long serialVersionUID = 6697358072742454601L;
+			private static final long serialVersionUID = -180226785141609420L;
 
 			public void valueChange(ValueChangeEvent event) 
 		    {
@@ -225,16 +215,16 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 		    }
 		});
 
-		comboStatus = new ComboBox(getContext().getString( "modalNewQuotation.comboStatus" ));
+		comboStatus = new ComboBox(getContext().getString( "modalNewPurchase.comboStatus" ));
 		comboStatus.setWidth( "100%" );
 		comboStatus.setNullSelectionAllowed( true );
 		comboStatus.setTextInputAllowed( false );
 		comboStatus.setImmediate( true );
 		fillComboStatus();
-		comboStatus.setValue( getDefaultStatus() );
+//		comboStatus.setValue( getDefaultStatus() );
 		comboStatus.addValueChangeListener( new Property.ValueChangeListener() 
 		{
-			private static final long serialVersionUID = 6697358072742454601L;
+			private static final long serialVersionUID = -6032292646221912144L;
 
 			public void valueChange(ValueChangeEvent event) 
 		    {
@@ -242,31 +232,21 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 		    }
 		});
 		
-		comboUsers = new ComboBox(getContext().getString( "modalNewQuotation.comboUser" ));
-		comboUsers.setWidth( "100%" );
-		comboUsers.setNullSelectionAllowed( true );
-		comboUsers.setTextInputAllowed( true );
-		comboUsers.setImmediate( true );
+		comboBuyer = new ComboBox(getContext().getString( "modalNewPurchase.comboBuyer" ));
+		comboBuyer.setWidth( "100%" );
+		comboBuyer.setNullSelectionAllowed( true );
+		comboBuyer.setTextInputAllowed( true );
+		comboBuyer.setImmediate( true );
 		fillComboUsers();
-		comboUsers.addValueChangeListener( new Property.ValueChangeListener() 
+		comboBuyer.addValueChangeListener( new Property.ValueChangeListener() 
 		{
-			private static final long serialVersionUID = 8939182068419542880L;
+			private static final long serialVersionUID = -7091563748538562850L;
 
 			public void valueChange(ValueChangeEvent event) 
 		    {
 				refreshVisibleContent( true );
 		    }
 		});
-		
-		editReference_request = new TextField( getContext().getString( "modalNewQuotation.editReference_request" ) );
-		editReference_request.setWidth( "100%" );
-		editReference_request.setNullRepresentation( "" );
-		editReference_request.setValue( default_reference_request.getData_value() );
-
-		editReference_order = new TextField( getContext().getString( "modalNewQuotation.editReference_order" ) );
-		editReference_order.setWidth( "100%" );
-		editReference_order.setNullRepresentation( "" );
-		editReference_order.setValue( default_reference_order.getData_value() );
 		
 		bttnApply = new Button( getContext().getString( "words.search" ) );
 		bttnApply.setDescription( getContext().getString( "words.search" ) );
@@ -276,11 +256,9 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 		rowQuery.setSpacing( true );
 		rowQuery.addComponent( fromDateField );
 		rowQuery.addComponent( toDateField );
-		rowQuery.addComponent( comboUsers );
-		rowQuery.addComponent( comboCustomers );
+		rowQuery.addComponent( comboBuyer );
+		rowQuery.addComponent( comboProviders );
 		rowQuery.addComponent( comboStatus );
-		rowQuery.addComponent( editReference_request );
-		rowQuery.addComponent( editReference_order );
 		rowQuery.addComponent( bttnApply );
 		rowQuery.setComponentAlignment( bttnApply, Alignment.BOTTOM_LEFT );
 		
@@ -290,88 +268,80 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 	@Override
 	public Query getQueryObject()
 	{
-		QuotationQuery query = new QuotationQuery();
+		PurchaseQuery query = new PurchaseQuery();
 		
-		query.setFrom_date( fromDateField.getValue() != null ? CalendarUtils.getDateAsLong( fromDateField.getValue() ) : null );
+		/*query.setFrom_date( fromDateField.getValue() != null ? CalendarUtils.getDateAsLong( fromDateField.getValue() ) : null );
 		query.setTo_date( toDateField.getValue() != null ? CalendarUtils.getDateAsLong( toDateField.getValue() ) : null );
 		
-		if ( !editReference_request.getValue().isEmpty() ) 
-			query.setReference_request( "%" + editReference_request.getValue() + "%");
-		
-		if ( !editReference_order.getValue().isEmpty() ) 
-			query.setReference_order( "%" + editReference_order.getValue()  + "%");
-		
-		if ( comboCustomers.getValue() != null )
-			query.setRef_customer( (Long)comboCustomers.getValue() );
+		if ( comboProviders.getValue() != null )
+			query.setRef_provider( (Long)comboProviders.getValue() );
 		
 		if ( comboStatus.getValue() != null )
 			query.setStatus( (Integer)comboStatus.getValue() );
 		
-		if ( comboUsers.getValue() != null )
-			query.setRef_seller( (Long)comboUsers.getValue() );
+		if ( comboBuyer.getValue() != null )
+			query.setRef_buyer( (Long)comboBuyer.getValue() );
 
-		query.setRef_user( getContext().getUser().getId() );
-			
 		saveUserDefaults();
-		
+		*/
 		return query;
 	}
 
 	@Override
 	public void onOperationNew()
 	{
-		new ModalNewQuotation( getContext(), OperationCRUD.OP_ADD, null, QuotationsTabContent.this ).showModalWindow();
+		new ModalNewPurchase( getContext(), OperationCRUD.OP_ADD, null, PurchasesTabContent.this ).showModalWindow();
 	}
 
 	@Override
 	public void onOperationModify( BaseDto dto )
 	{
-		new ModalNewQuotation( getContext(), OperationCRUD.OP_MODIFY, (Quotation)dto, QuotationsTabContent.this ).showModalWindow();
+		new ModalNewPurchase( getContext(), OperationCRUD.OP_MODIFY, (Purchase)dto, PurchasesTabContent.this ).showModalWindow();
 	}
 
 	@Override
 	public GenericControlerVto getControlerVto( AppContext ctx )
 	{
-		return new QuotationControlerVto(ctx);
+		return new PurchaseControlerVto(ctx);
 	}
 
 	@Override
 	public BaseDto getFieldDto() 
 	{ 
-		return new Quotation();
+		return new Purchase();
 	}
 	
 	@Override
 	public BaseManager getFieldManagerImp() 
 	{
-		return IOCManager._QuotationsManager;
+		return IOCManager._PurchasesManager;
 	}
 
 	@Override
 	public void preProcessRows( List<BaseDto> rows )
 	{
-		double totalCost = 0;
-		double totalPrice = 0;
-		double totalMargin = 0;
+		double totalNetPrice = 0;
+		double totalTaxes = 0;
+		double totalGrossPrice = 0;
 		
 		for ( BaseDto row : rows )
 		{
-			Quotation quotation = (Quotation)row;
+			Purchase quotation = (Purchase)row;
 			
-			totalCost += quotation.getTotalCost();
-			totalPrice += quotation.getTotalPrice();
-			totalMargin += quotation.getTotalMargin();
+			totalNetPrice += quotation.getNet_price();
+			totalTaxes += quotation.getNet_tax();
+			totalGrossPrice += quotation.getGrossPrice();
 		}
 		
-		labelTotalCost.setValue(  getContext().getString( "quotationsConfig.totalCost" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalCost ) ) );
-		labelTotalPrice.setValue(  getContext().getString( "quotationsConfig.totalPrice" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalPrice ) ) );
-		labelTotalMargin.setValue(  getContext().getString( "quotationsConfig.totalMargin" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalMargin ) ) );
+		labelTotalNetPrice.setValue(  getContext().getString( "purchasesTab.totalNetPrice" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalNetPrice ) ) );
+		labelTotalTaxes.setValue(  getContext().getString( "purchasesTab.totalTaxes" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalTaxes ) ) );
+		labelTotalGrossPrice.setValue(  getContext().getString( "purchasesTab.totalGrossPrice" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalGrossPrice ) ) );
 	}
 	
 	@Override
 	public boolean hasAddRight()
 	{
-		return getContext().hasRight( "configuration.quotations.add" );
+		return getContext().hasRight( "configuration.purchases.add" );
 	}
 
 	@Override
@@ -388,7 +358,7 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 	{
 		bttnApply.addClickListener( new Button.ClickListener()
 		{
-			private static final long serialVersionUID = -1609767125624817355L;
+			private static final long serialVersionUID = 4803823213706637810L;
 
 			@Override
 			public void buttonClick( ClickEvent event )
@@ -407,51 +377,42 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 			query.setType_company( Company.TYPE_CUSTOMER );
 			query.setRef_user( getContext().getUser().getId() );
 
-			customers = IOCManager._CompaniesManager.getRows( getContext(), query );
+			providers = IOCManager._CompaniesManager.getRows( getContext(), query );
 		}
 		catch ( BaseException e )
 		{
 			e.printStackTrace();
-			customers = new ArrayList<Company>();
+			providers = new ArrayList<Company>();
 		}
 	}
 	
 	private void fillComboCustomers()
 	{
-		comboCustomers.removeAllItems();
-		for ( Company company : customers )
+		comboProviders.removeAllItems();
+		for ( Company company : providers )
 		{
-			comboCustomers.addItem( company.getId() );
-			comboCustomers.setItemCaption( company.getId(), company.getAlias() );
+			comboProviders.addItem( company.getId() );
+			comboProviders.setItemCaption( company.getId(), company.getAlias() );
 		}
 	}
 
 	private void fillComboStatus()
 	{
-		comboStatus.addItem( Quotation.STATUS_CREATED );
-		comboStatus.setItemCaption( Quotation.STATUS_CREATED, getContext().getString( "quotation.status." + Quotation.STATUS_CREATED ) );
+		comboStatus.addItem( Purchase.STATUS_CREATED );
+		comboStatus.setItemCaption( Purchase.STATUS_CREATED, getContext().getString( "purchase.status." + Purchase.STATUS_CREATED ) );
 
-		comboStatus.addItem( Quotation.STATUS_READY );
-		comboStatus.setItemCaption( Quotation.STATUS_READY, getContext().getString( "quotation.status." + Quotation.STATUS_READY ) );
+		comboStatus.addItem( Purchase.STATUS_ORDERED );
+		comboStatus.setItemCaption( Purchase.STATUS_ORDERED, getContext().getString( "purchase.status." + Purchase.STATUS_ORDERED ) );
 
-		comboStatus.addItem( Quotation.STATUS_SENT );
-		comboStatus.setItemCaption( Quotation.STATUS_SENT, getContext().getString( "quotation.status." + Quotation.STATUS_SENT ) );
-
-		comboStatus.addItem( Quotation.STATUS_APPROVED );
-		comboStatus.setItemCaption( Quotation.STATUS_APPROVED, getContext().getString( "quotation.status." + Quotation.STATUS_APPROVED ) );
-
-		comboStatus.addItem( Quotation.STATUS_FINISHED );
-		comboStatus.setItemCaption( Quotation.STATUS_FINISHED, getContext().getString( "quotation.status." + Quotation.STATUS_FINISHED ) );
-
-		comboStatus.addItem( Quotation.STATUS_DISCARDED );
-		comboStatus.setItemCaption( Quotation.STATUS_DISCARDED, getContext().getString( "quotation.status." + Quotation.STATUS_DISCARDED ) );
+		comboStatus.addItem( Purchase.STATUS_RECEIVED );
+		comboStatus.setItemCaption( Purchase.STATUS_RECEIVED, getContext().getString( "purchase.status." + Purchase.STATUS_RECEIVED ) );
 	}
 
 	public void onShowPdf( Long id )
 	{
-		try
+		/*try
 		{
-			Quotation quotation = (Quotation)getTable().getRowValue( id );
+			Purchase quotation = (Purchase)getTable().getRowValue( id );
 			
 			long ts = CalendarUtils.getTodayAsLong( "UTC" );
 			
@@ -489,7 +450,7 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 		catch ( Throwable e )
 		{
 			Utils.logException( e, LOG );
-		}
+		}*/
 	}
 	
 	public void refreshCustomers()
@@ -500,22 +461,22 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 
 	private void loadUserDefaults()
 	{
-		default_from = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.QUOTATIONS_FROM );
+		/*default_from = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.QUOTATIONS_FROM );
 		default_to = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.QUOTATIONS_TO );
 		default_customer = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.QUOTATIONS_CUSTOMER );
 		default_status = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.QUOTATIONS_STATUS );
 		default_reference_request = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.QUOTATIONS_REFERENCE_REQUEST );
-		default_reference_order = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.QUOTATIONS_REFERENCE_ORDER );
+		default_reference_order = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.QUOTATIONS_REFERENCE_ORDER );*/
 	}
 
 	private void saveUserDefaults()
 	{
-		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_from, fromDateField.getValue() != null ? Long.toString( CalendarUtils.getDateAsLong( fromDateField.getValue() ) ) : null );
+		/*IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_from, fromDateField.getValue() != null ? Long.toString( CalendarUtils.getDateAsLong( fromDateField.getValue() ) ) : null );
 		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_to, toDateField.getValue() != null ? Long.toString( CalendarUtils.getDateAsLong( toDateField.getValue() ) ) : null );
-		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_customer, comboCustomers.getValue() != null ? comboCustomers.getValue().toString() : null );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_customer, comboProviders.getValue() != null ? comboProviders.getValue().toString() : null );
 		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_status, comboStatus.getValue() != null ? comboStatus.getValue().toString() : null );
 		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_reference_request, editReference_request.getValue() );
-		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_reference_order, editReference_order.getValue() );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_reference_order, editReference_order.getValue() );*/
 	}
 	
 	private Date getDefaultDate( String date )
@@ -557,27 +518,28 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	private void loadUsers()
 	{
 		try
 		{
 			UserQuery query = new UserQuery();
 
-			users = IOCManager._UsersManager.getRows( getContext(), query );
+			buyers = IOCManager._UsersManager.getRows( getContext(), query );
 		}
 		catch ( BaseException e )
 		{
 			e.printStackTrace();
-			users = new ArrayList<User>();
+			buyers = new ArrayList<User>();
 		}
 	}
 	
 	private void fillComboUsers()
 	{
-		for ( User user: users )
+		for ( User user: buyers )
 		{
-			comboUsers.addItem( user.getId() );
-			comboUsers.setItemCaption( user.getId(), user.getName() );
+			comboBuyer.addItem( user.getId() );
+			comboBuyer.setItemCaption( user.getId(), user.getName() );
 		}
 	}	
 }

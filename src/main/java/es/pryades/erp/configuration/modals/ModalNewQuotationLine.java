@@ -391,7 +391,7 @@ public class ModalNewQuotationLine extends ModalWindowsCRUD implements ModalPare
 		for ( Company company : providers )
 		{
 			comboProviders.addItem( company.getId() );
-			comboProviders.setItemCaption( company.getId(), company.getName() );
+			comboProviders.setItemCaption( company.getId(), company.getAlias() );
 		}
 	}
 	

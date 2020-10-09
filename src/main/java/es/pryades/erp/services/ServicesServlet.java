@@ -13,6 +13,9 @@ import es.pryades.erp.resources.LoginResource;
 import es.pryades.erp.resources.LogoResource;
 import es.pryades.erp.resources.PackingObjectResource;
 import es.pryades.erp.resources.PackingResource;
+import es.pryades.erp.resources.PurchaseInvoiceResource;
+import es.pryades.erp.resources.PurchasePaymentResource;
+import es.pryades.erp.resources.PurchaseQuotationResource;
 import es.pryades.erp.resources.QrResource;
 import es.pryades.erp.resources.QuotationResource;
 import es.pryades.erp.resources.ShipmentBoxResource;
@@ -46,6 +49,9 @@ public class ServicesServlet extends Application
     	router.attach( "/packing_object", PackingObjectResource.class );
     	router.attach( "/labels", LabelsResource.class );
     	router.attach( "/invoices", InvoicesResource.class );
+    	router.attach( "/purchase-invoice", PurchaseInvoiceResource.class );
+    	router.attach( "/purchase-quotation", PurchaseQuotationResource.class );
+    	router.attach( "/purchase-payment", PurchasePaymentResource.class );
     	
     	LOG.info( "started" );
 	    
