@@ -17,6 +17,7 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.PopupDateField;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
@@ -234,7 +235,7 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 		comboStatus.setValue( getDefaultStatus() );
 		comboStatus.addValueChangeListener( new Property.ValueChangeListener() 
 		{
-			private static final long serialVersionUID = 6697358072742454601L;
+			private static final long serialVersionUID = 6697358072742454602L;
 
 			public void valueChange(ValueChangeEvent event) 
 		    {
@@ -292,8 +293,8 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 	{
 		QuotationQuery query = new QuotationQuery();
 		
-		query.setFrom_date( fromDateField.getValue() != null ? CalendarUtils.getDateAsLong( fromDateField.getValue() ) : null );
-		query.setTo_date( toDateField.getValue() != null ? CalendarUtils.getDateAsLong( toDateField.getValue() ) : null );
+		query.setFrom_date( fromDateField.getValue() != null ? CalendarUtils.getDayAsLong( fromDateField.getValue() ) : null );
+		query.setTo_date( toDateField.getValue() != null ? CalendarUtils.getDayAsLong( toDateField.getValue() ) : null );
 		
 		if ( !editReference_request.getValue().isEmpty() ) 
 			query.setReference_request( "%" + editReference_request.getValue() + "%");
@@ -393,7 +394,10 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 			@Override
 			public void buttonClick( ClickEvent event )
 			{
-				refreshVisibleContent( true );
+				if ( CalendarUtils.checkValidPeriod( fromDateField.getValue(), toDateField.getValue() ) )
+					refreshVisibleContent( true );
+				else
+					Utils.showNotification( getContext(), getContext().getString( "error.invalid.period" ), Notification.Type.ERROR_MESSAGE );
 			}
 		} );
 	}
@@ -510,8 +514,8 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 
 	private void saveUserDefaults()
 	{
-		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_from, fromDateField.getValue() != null ? Long.toString( CalendarUtils.getDateAsLong( fromDateField.getValue() ) ) : null );
-		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_to, toDateField.getValue() != null ? Long.toString( CalendarUtils.getDateAsLong( toDateField.getValue() ) ) : null );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_from, fromDateField.getValue() != null ? Long.toString( CalendarUtils.getDayAsLong( fromDateField.getValue() ) ) : null );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_to, toDateField.getValue() != null ? Long.toString( CalendarUtils.getDayAsLong( toDateField.getValue() ) ) : null );
 		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_customer, comboCustomers.getValue() != null ? comboCustomers.getValue().toString() : null );
 		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_status, comboStatus.getValue() != null ? comboStatus.getValue().toString() : null );
 		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_reference_request, editReference_request.getValue() );

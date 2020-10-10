@@ -10,7 +10,7 @@
 		from
 			rights
 		
-		order by display_order asc
+		order by id asc
 	</select>
 
 </mapper>

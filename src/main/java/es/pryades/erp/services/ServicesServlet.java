@@ -6,6 +6,7 @@ import org.restlet.Restlet;
 import org.restlet.routing.Router;
 
 import es.pryades.erp.resources.AttachmentResource;
+import es.pryades.erp.resources.ImportCompaniesResource;
 import es.pryades.erp.resources.InvoiceResource;
 import es.pryades.erp.resources.InvoicesResource;
 import es.pryades.erp.resources.LabelsResource;
@@ -36,6 +37,7 @@ public class ServicesServlet extends Application
     	Router router = new Router( getContext() );
 	       
     	//router.attach( "/test", TestResource.class );
+    	router.attach( "/import-companies", ImportCompaniesResource.class );
 
     	router.attach( "/login", LoginResource.class );
     	router.attach( "/quotation", QuotationResource.class );

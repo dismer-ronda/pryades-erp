@@ -460,7 +460,7 @@
 				AND invoices.invoice_date &gt;= #{from_date}    
 	        </if>
 			<if test="to_date != null">
-				AND invoices.invoice_date &lt; #{to_date}    
+				AND invoices.invoice_date &lt;= #{to_date}    
 	        </if>
 			<if test="reference_request != null">
 				AND quotations.reference_request like #{reference_request}    

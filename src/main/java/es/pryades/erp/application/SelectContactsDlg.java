@@ -21,7 +21,7 @@ import lombok.Setter;
 
 public class SelectContactsDlg extends Window 
 {
-	private static final long serialVersionUID = -8060700375740929738L;
+	private static final long serialVersionUID = 6123476791191738462L;
 
 	private VerticalLayout layout;
 
@@ -107,7 +107,7 @@ public class SelectContactsDlg extends Window
 		buttonOk.setClickShortcut( KeyCode.ENTER );
 		buttonOk.addClickListener(new Button.ClickListener() 
 		{
-			private static final long serialVersionUID = -2190098384878545411L;
+			private static final long serialVersionUID = 4144489997631961097L;
 
 			public void buttonClick(ClickEvent event) 
             {

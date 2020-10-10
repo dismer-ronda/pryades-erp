@@ -397,7 +397,10 @@ public class ModalNewQuotationLine extends ModalWindowsCRUD implements ModalPare
 	
 	private void onAddProvider()
 	{
-		new ModalNewCompany( getContext(), OperationCRUD.OP_ADD, null, ModalNewQuotationLine.this ).showModalWindow();
+		ModalNewCompany modal = new ModalNewCompany( getContext(), OperationCRUD.OP_ADD, null, ModalNewQuotationLine.this );
+		modal.setType( Company.TYPE_PROVIDER );
+		
+		modal.showModalWindow();
 	}
 
 	@Override

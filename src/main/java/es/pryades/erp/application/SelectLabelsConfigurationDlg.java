@@ -21,7 +21,7 @@ import lombok.Setter;
 
 public class SelectLabelsConfigurationDlg extends Window 
 {
-	private static final long serialVersionUID = -8060700375740929738L;
+	private static final long serialVersionUID = 8674387250186918881L;
 
 	private VerticalLayout layout;
 

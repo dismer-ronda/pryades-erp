@@ -86,7 +86,7 @@ public class OperationsTabContent extends PagedContent implements ModalParent
 	@Override
 	public String[] getVisibleCols()
 	{
-		return new String[]{ "status", "title", "customer_name", "quotation_number", "predicted_cost", "real_cost", "total_invoiced", "profit" };
+		return new String[]{ "status", "title", "customer_name", "quotation_number", "predicted_cost", "real_cost", "price", "profit" };
 	}
 
 	public String[] getSortableCols()
@@ -251,12 +251,16 @@ public class OperationsTabContent extends PagedContent implements ModalParent
 		
 		for ( BaseDto row : rows )
 		{
-			Invoice quotation = (Invoice)row;
+			Operation operation = (Operation)row;
+			LOG.info(  "base = "  + operation.getTotalSold() );
+			//LOG.info(  "taxes = "  + operation.getGrandTotalTaxes() );
+			//LOG.info(  "total = "  + operation.getGrandTotalAfterTaxes() );
 			
-			totalPrice += quotation.getGrandTotalInvoice();
+			//totalPrice += quotation.getGrandTotalInvoice();
 		}
 		
 		labelTotalPrice.setValue(  getContext().getString( "invoicesConfig.totalPrice" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalPrice ) ) );*/
+		
 	}
 	
 	@Override
@@ -279,7 +283,7 @@ public class OperationsTabContent extends PagedContent implements ModalParent
 	{
 		bttnApply.addClickListener( new Button.ClickListener()
 		{
-			private static final long serialVersionUID = 6308412745183922396L;
+			private static final long serialVersionUID = 7428847307624807218L;
 
 			@Override
 			public void buttonClick( ClickEvent event )

@@ -21,7 +21,7 @@ public class OperationVto extends GenericVto
 	private String status;
 	private String predicted_cost;
 	private String real_cost;
-	private String total_invoiced;
+	private String price;
 	private String profit;
     
 	public OperationVto()

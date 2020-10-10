@@ -26,9 +26,9 @@ public class ShipmentsManagerImpl extends BaseManagerImpl implements ShipmentsMa
 		super( ShipmentMapper.class, Shipment.class, LOG );
 	}
 
-	@Override
+/*	@Override
 	public boolean setEmptyToNull()
 	{
 		return false;
-	}
+	}*/
 }

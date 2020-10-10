@@ -183,16 +183,25 @@ public class CalendarUtils
 		return (long)sec + (long)min * 100 + (long)hour * 10000 + (long)day * 1000000 + (long)month * 100000000L + (long)year * 10000000000L;
 	}
 
-	public static long getDateAsLong( Date date )
+	public static long getDayAsLong( Date date )
+	{
+		Calendar calendar = GregorianCalendar.getInstance();
+
+		calendar.setTime( date );
+						
+		return CalendarUtils.getDayFirstSecondAsLong( calendar );
+	}
+
+	/*public static long getDateAsLong( Date date )
 	{
 		Calendar calendar = GregorianCalendar.getInstance();
 
 		calendar.setTime( date );
 						
 		return CalendarUtils.getCalendarTimeAsLong( calendar );
-	}
+	}*/
 
-	public static long getDateFromTimeZoneToUTC( Date date, String timezone )
+	/*public static long getDateFromTimeZoneToUTC( Date date, String timezone )
 	{
 		long dateLong = getDateAsLong( date );
 		
@@ -206,7 +215,7 @@ public class CalendarUtils
 		{
 			return getTodayAsLong();
 		}
-	}
+	}*/
 	
 	public static long getServerDateAsLong()
 	{
@@ -975,4 +984,12 @@ public class CalendarUtils
 		return calendar;
 	}
 	*/
+	
+	public static boolean checkValidPeriod( Date from, Date to)
+	{
+		if ( from == null || to == null )
+			return true;
+
+		return to.compareTo( from ) >= 0;
+	}
 }

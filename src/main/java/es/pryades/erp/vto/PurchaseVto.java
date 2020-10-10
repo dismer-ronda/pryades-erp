@@ -20,7 +20,9 @@ public class PurchaseVto extends GenericVto
 	private String purchase_date;						
 	private String register_date;						
 	
+	private String invoice_number;
 	private String provider_name;
+	private String operation_title;
 
 	private String net_price;
 	private String net_tax;

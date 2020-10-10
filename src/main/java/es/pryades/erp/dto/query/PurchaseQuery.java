@@ -18,4 +18,5 @@ public class PurchaseQuery extends Purchase
 	
 	private Long from_date;						
 	private Long to_date;
+	private Long ref_operation;
 }

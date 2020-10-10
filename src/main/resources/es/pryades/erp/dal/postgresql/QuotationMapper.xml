@@ -345,7 +345,7 @@
 				AND quotations.quotation_date &gt;= #{from_date}    
 	        </if>
 			<if test="to_date != null">
-				AND quotations.quotation_date &lt; #{to_date}    
+				AND quotations.quotation_date &lt;= #{to_date}    
 	        </if>
 			<if test="reference_request != null">
 				AND quotations.reference_request like #{reference_request}    

@@ -12,6 +12,7 @@ import com.vaadin.ui.TabSheet.Tab;
 import es.pryades.erp.common.AppContext;
 import es.pryades.erp.common.BaseException;
 import es.pryades.erp.common.PagedContent;
+import es.pryades.erp.configuration.tabs.AccountsConfig;
 import es.pryades.erp.configuration.tabs.AuditsConfig;
 import es.pryades.erp.configuration.tabs.CompaniesConfig;
 import es.pryades.erp.configuration.tabs.ParametersConfig;
@@ -71,6 +72,9 @@ public class EnermetTabbedContainerConfig extends VerticalLayout implements TabS
 
 				if ( ctx.hasRight( "configuration.companies" ) )
 					tabContentList.add( new CompaniesConfig( ctx ) );
+
+				if ( ctx.hasRight( "configuration.accounts" ) )
+					tabContentList.add( new AccountsConfig( ctx ) );
 
 				if ( ctx.hasRight( "configuration.tasks" ) )
 					tabContentList.add( new TasksConfig( ctx ) );

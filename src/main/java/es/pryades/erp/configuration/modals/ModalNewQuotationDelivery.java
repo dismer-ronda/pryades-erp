@@ -156,7 +156,7 @@ public class ModalNewQuotationDelivery extends ModalWindowsCRUD
 		try
 		{
 			newQuotation.setId( null );
-			newQuotation.setDeparture_date( CalendarUtils.getDateAsLong( poputDepartureDate.getValue() ) );
+			newQuotation.setDeparture_date( CalendarUtils.getDayAsLong( poputDepartureDate.getValue() ) );
 			newQuotation.setFree_delivery( checkFree_delivery.getValue().booleanValue() ? Boolean.TRUE : Boolean.FALSE );
 
 			IOCManager._QuotationsDeliveriesManager.setRow( getContext(), null, newQuotation );
@@ -179,7 +179,7 @@ public class ModalNewQuotationDelivery extends ModalWindowsCRUD
 	{
 		try
 		{
-			newQuotation.setDeparture_date( CalendarUtils.getDateAsLong( poputDepartureDate.getValue() ) );
+			newQuotation.setDeparture_date( CalendarUtils.getDayAsLong( poputDepartureDate.getValue() ) );
 			newQuotation.setFree_delivery( checkFree_delivery.getValue().booleanValue() ? Boolean.TRUE : Boolean.FALSE );
 
 			IOCManager._QuotationsDeliveriesManager.setRow( getContext(), (QuotationDelivery) orgDto, newQuotation );

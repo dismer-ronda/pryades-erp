@@ -36,6 +36,8 @@ import es.pryades.erp.dto.Company;
 import es.pryades.erp.dto.CompanyContact;
 import es.pryades.erp.dto.query.CompanyContactQuery;
 import es.pryades.erp.ioc.IOCManager;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * 
@@ -50,7 +52,7 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 	@SuppressWarnings("unused")
 	private static final Logger LOG = Logger.getLogger( ModalNewCompany.class );
 
-	protected Company newCompany;
+	@Getter protected Company newCompany;
 
 	private ComboBox comboLanguage;
 	private ComboBox comboTypes;
@@ -70,6 +72,8 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 	private List<CompanyContact> contacts;
 	private Panel panelContacts;
 	private List<HorizontalLayout> contacts_rows;
+	
+	@Getter @Setter private Integer type;
 
 	/**
 	 * 
@@ -260,11 +264,11 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 
 			IOCManager._CompaniesManager.setRow( getContext(), null, newCompany );
 
+			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
 			if ( newCompany.getType_company().equals( Company.TYPE_CUSTOMER ) )
-			{
-				Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
 				dashboard.refreshCustomers();
-			}
+			else if ( newCompany.getType_company().equals( Company.TYPE_PROVIDER ) )
+				dashboard.refreshProviders();
 			
 			return true;
 		}
@@ -283,11 +287,11 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 		{
 			IOCManager._CompaniesManager.setRow( getContext(), (Company) orgDto, newCompany );
 
+			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
 			if ( newCompany.getType_company().equals( Company.TYPE_CUSTOMER ) )
-			{
-				Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
 				dashboard.refreshCustomers();
-			}
+			else if ( newCompany.getType_company().equals( Company.TYPE_PROVIDER ) )
+				dashboard.refreshProviders();
 
 			saveContacts();
 			
@@ -315,11 +319,11 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 		{
 			IOCManager._CompaniesManager.delRow( getContext(), newCompany );
 
+			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
 			if ( newCompany.getType_company().equals( Company.TYPE_CUSTOMER ) )
-			{
-				Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
 				dashboard.refreshCustomers();
-			}
+			else if ( newCompany.getType_company().equals( Company.TYPE_PROVIDER ) )
+				dashboard.refreshProviders();
 			
 			return true;
 		}
@@ -583,5 +587,16 @@ public class ModalNewCompany extends ModalWindowsCRUD implements Receiver, Succe
 				showErrorMessage( e );
 			}
 		}
+	}
+
+	public void showModalWindow()
+	{
+		if ( type != null )
+		{
+			comboTypes.setValue( type );
+			comboTypes.setReadOnly( true );
+		}
+
+		super.showModalWindow();
 	}
 }

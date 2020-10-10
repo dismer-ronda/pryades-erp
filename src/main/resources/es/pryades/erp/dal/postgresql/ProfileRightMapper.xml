@@ -43,6 +43,8 @@
 		
 		where
 			profiles_rights.ref_profile = #{ref_profile}
+			
+		order by profiles_rights.ref_profile, profiles_rights.ref_right
 	</select>
 
 	<select id="getRow" parameterType="es.pryades.erp.dto.ProfileRight" resultType="es.pryades.erp.dto.ProfileRight">

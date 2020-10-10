@@ -6,6 +6,7 @@ import java.io.Serializable;
 import org.apache.tapestry5.ioc.Registry;
 import org.apache.tapestry5.ioc.RegistryBuilder;
 
+import es.pryades.erp.dal.AccountsManager;
 import es.pryades.erp.dal.AuditsManager;
 import es.pryades.erp.dal.CompaniesContactsManager;
 import es.pryades.erp.dal.CompaniesManager;
@@ -71,6 +72,7 @@ public class IOCManager  implements Serializable
 	public static CompaniesContactsManager _CompaniesContactsManager;
 	public static OperationsManager _OperationsManager;
 	public static PurchasesManager _PurchasesManager;
+	public static AccountsManager _AccountsManager;
 
 	public IOCManager() 
 	{
@@ -129,6 +131,7 @@ public class IOCManager  implements Serializable
 		_CompaniesContactsManager = (CompaniesContactsManager)getInstanceOf( CompaniesContactsManager.class );
 		_OperationsManager = (OperationsManager)getInstanceOf( OperationsManager.class );
 		_PurchasesManager = (PurchasesManager)getInstanceOf( PurchasesManager.class );
+		_AccountsManager = (AccountsManager)getInstanceOf( AccountsManager.class );
 	}
 	
 	/**

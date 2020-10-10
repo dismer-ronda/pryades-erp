@@ -1,10 +1,20 @@
 CREATE SEQUENCE gendat START 10000;
+alter sequence gendat OWNER TO pryades;
+
 CREATE SEQUENCE gencfg START 1000;
+alter sequence gencfg OWNER TO pryades;
 
 CREATE SEQUENCE seq_quotations 	START 2020001;
-CREATE SEQUENCE seq_invoices 	START 2020001;
-CREATE SEQUENCE seq_shipments 	START 2020001;
-CREATE SEQUENCE seq_purchases 	START 202000001;
+alter sequence seq_quotations OWNER TO pryades;
+
+CREATE SEQUENCE seq_invoices START 2020001;
+alter sequence seq_invoices OWNER TO pryades;
+
+CREATE SEQUENCE seq_shipments START 2020001;
+alter sequence seq_shipments OWNER TO pryades;
+
+CREATE SEQUENCE seq_purchases START 202000001;
+alter sequence seq_purchases OWNER TO pryades;
 
 -- user profiles
 create table profiles (
@@ -14,6 +24,7 @@ create table profiles (
 	constraint pk_profiles primary key(id),
 	constraint uk_profiles_description unique (description)	
 );
+alter table profiles OWNER TO pryades;
 	
 -- user rights
 create table rights (
@@ -24,6 +35,7 @@ create table rights (
 	constraint pk_rights primary key(id),
 	constraint uk_rights_code unique (code)	
 );
+alter table rights OWNER TO pryades;
 	
 create table profiles_rights (
     ref_profile bigint not null,
@@ -34,6 +46,7 @@ create table profiles_rights (
     constraint fk_profiles_rights_profile foreign key (ref_profile) references profiles(id),
     constraint fk_profiles_rights_right foreign key (ref_right) references rights(id)		
     );
+alter table profiles_rights OWNER TO pryades;
 
 -- users
 create table users (
@@ -57,6 +70,7 @@ create table users (
 	constraint uk_users_code unique(login),
 	constraint uk_users_email unique(email)
     );
+alter table users OWNER TO pryades;
 
 -- plattform parameters
 create table parameters (
@@ -69,6 +83,7 @@ create table parameters (
 	constraint pk_parameters primary key(id),
 	constraint uk_parameters unique(description)
 );
+alter table parameters OWNER TO pryades;
 create index ix_parameters_description on parameters(description);
 
 -- user_defaults
@@ -84,17 +99,7 @@ create table user_defaults (
 	constraint uk_user_defaults_key unique(ref_user, data_key),
 	constraint fk_user_defaults_user foreign key (ref_user) references users(id)
 );
-
-create table files (
-    id bigint not null,
-    file_name varchar(128) not null,				-- name of the file
-    file_date bigint not null, 						-- date of the file
-	file_binary bytea,								-- contents of the file
-	
-    constraint pk_files primary key(id)
-    ); 
-create index ix_files_name on files(file_name);
-create index ix_files_date on files(file_date);
+alter table user_defaults OWNER TO pryades;
 
 -- audits
 create table audits (
@@ -109,6 +114,7 @@ create table audits (
     constraint pk_audits primary key(id),
 	constraint fk_audits_user foreign key (ref_user) references users(id)
 );
+alter table audits OWNER TO pryades;
 create index ix_audits_date on audits(audit_date);
 create index ix_audits_type on audits(audit_type);
 create index ix_audits_user on audits(ref_user);
@@ -133,6 +139,7 @@ create table tasks (
 
 	constraint pk_tasks primary key(id)
 );
+alter table tasks OWNER TO pryades;
 create index ix_tasks_clazz on tasks(clazz);
 create index ix_tasks_system on tasks(system);
 
@@ -155,6 +162,7 @@ CREATE TABLE companies
 
   	constraint uk_companies_alias unique(alias)
 );
+alter table companies OWNER TO pryades;
 create index ix_companies_alias on companies(alias);
 create index ix_companies_tax_id on companies(tax_id);
 
@@ -193,6 +201,7 @@ create table quotations
   	constraint fk_quotations_user foreign key (ref_user) references users(id),
   	constraint uk_quotations_number unique(number)
 );
+alter table quotations OWNER TO pryades;
 create index ix_quotations_reference_request on quotations(reference_request);
 create index ix_quotations_reference_order on quotations(reference_order);
 
@@ -215,6 +224,7 @@ create table quotations_deliveries
 
   	constraint fk_quotations_deliveries_quotation foreign key (ref_quotation) references quotations(id) on delete cascade
 );
+alter table quotations_deliveries OWNER TO pryades;
 
 create table quotations_lines
 (
@@ -240,6 +250,7 @@ create table quotations_lines
   	constraint fk_quotations_lines_quotation foreign key (ref_quotation) references quotations(id) on delete cascade,
   	constraint fk_quotations_lines_provider foreign key (ref_provider) references companies(id) on delete set null
 );
+alter table quotations_lines OWNER TO pryades;
 create index ix_quotations_lines_title on quotations_lines(title);
 
 create table quotations_lines_deliveries
@@ -256,6 +267,7 @@ create table quotations_lines_deliveries
   	constraint fk_quotations_lines_deliveries_quotation_delivery foreign key (ref_quotation_delivery) references quotations_deliveries(id) on delete cascade,
   	constraint fk_quotations_lines_deliveries_quotation_line foreign key (ref_quotation_line) references quotations_lines(id) on delete cascade
 );
+alter table quotations_lines_deliveries OWNER TO pryades;
 
 create table quotations_attachments 
 (
@@ -272,6 +284,7 @@ create table quotations_attachments
 
   	constraint fk_quotations_attachments_quotation foreign key (ref_quotation) references quotations(id) on delete cascade
 );
+alter table quotations_attachments OWNER TO pryades;
 
 create table shipments 
 (
@@ -310,6 +323,7 @@ create table shipments
 	constraint fk_shipments_notify_contact foreign key (ref_notify_contact) references companies_contacts(id),
 	constraint fk_shipments_user foreign key (ref_user) references users(id)
 );
+alter table shipments OWNER TO pryades;
 
 create table invoices 
 (
@@ -334,6 +348,7 @@ create table invoices
   	constraint fk_invoices_quotation foreign key (ref_quotation) references quotations(id),
   	constraint fk_invoices_shipment foreign key (ref_shipment) references shipments(id) on delete set null
 );
+alter table invoices OWNER TO pryades;
 
 create table invoices_lines
 (
@@ -349,6 +364,7 @@ create table invoices_lines
   	constraint fk_invoices_lines_invoice foreign key (ref_invoice) references invoices(id) on delete cascade,
   	constraint fk_invoices_lines_quotation_line foreign key (ref_quotation_line) references quotations_lines(id)
 );
+alter table invoices_lines OWNER TO pryades;
 
 create table shipments_boxes 
 (
@@ -370,6 +386,7 @@ create table shipments_boxes
   	constraint fk_shipments_boxes_shipment foreign key (ref_shipment) references shipments(id) on delete cascade,
   	constraint fk_shipments_boxes_container foreign key (ref_container) references shipments_boxes(id) on delete cascade
 );
+alter table shipments_boxes OWNER TO pryades;
 
 create table shipments_boxes_lines 
 (
@@ -388,6 +405,7 @@ create table shipments_boxes_lines
   	constraint fk_shipments_boxes_lines_box foreign key (ref_box) references shipments_boxes(id) on delete cascade,
   	constraint fk_shipments_boxes_lines_invoice_line foreign key (ref_invoice_line) references invoices_lines(id)
 );
+alter table shipments_boxes_lines OWNER TO pryades;
 
 create table users_companies 
 (
@@ -401,6 +419,7 @@ create table users_companies
   	constraint fk_users_companies_user foreign key (ref_user) references users(id) on delete cascade,
   	constraint fk_users_companies_company foreign key (ref_company) references companies(id)
 );
+alter table users_companies OWNER TO pryades;
 
 create table companies_contacts
 (
@@ -414,19 +433,7 @@ create table companies_contacts
   	constraint pk_companies_contacts primary key( id ),
   	constraint fk_companies_contacts_company foreign key (ref_company) references companies(id) on delete cascade
 );
-
-create table banks
-(
-	id bigint not null,
-  	
-	ref_bank bigint not null,
-  	name varchar(128) not null,
-  	account varchar(128),
-  	balance real not null default 0,
-
-  	constraint pk_banks primary key( id ),
-  	constraint fk_banks_bank foreign key (ref_bank) references companies(id)
-);
+alter table companies_contacts OWNER TO pryades;
 
 create table operations
 (

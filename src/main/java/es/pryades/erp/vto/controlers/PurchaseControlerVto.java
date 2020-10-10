@@ -6,6 +6,7 @@ import es.pryades.erp.common.CalendarUtils;
 import es.pryades.erp.common.GenericControlerVto;
 import es.pryades.erp.common.GenericVto;
 import es.pryades.erp.common.VtoControllerFactory;
+import es.pryades.erp.dto.Operation;
 import es.pryades.erp.dto.Purchase;
 import es.pryades.erp.vto.PurchaseVto;
 
@@ -36,6 +37,7 @@ public class PurchaseControlerVto extends GenericControlerVto
 				result = new PurchaseVto();
 				
 				Purchase purchase = (Purchase) dtoObj;
+				Operation operation = purchase.getOperation();
 				
 				result.setFactory( factory );
 				result.setDtoObj( dtoObj );
@@ -48,6 +50,8 @@ public class PurchaseControlerVto extends GenericControlerVto
 				result.setRegister_date( CalendarUtils.getDateFromLongAsString( purchase.getRegister_date(), "dd-MM-yyyy" ) );
 				
 				result.setProvider_name( purchase.getProvider().getAlias() ); 
+				result.setInvoice_number( purchase.getInvoice_number()!= null ? purchase.getInvoice_number() : "" ); 
+				result.setOperation_title( operation != null ? operation.getTitle() : "" ); 
 				
 				result.setNet_price( purchase.getNetPriceAsString() );
 				result.setNet_tax( purchase.getNetTaxAsString() );

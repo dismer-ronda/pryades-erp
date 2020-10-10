@@ -239,11 +239,17 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 		editTitle = new TextField( getContext().getString( "modalNewShipment.editTitle" ), bi.getItemProperty( "title" ) );
 		editTitle.setWidth( "100%" );
 		editTitle.setNullRepresentation( "" );
+		editTitle.setRequired( true );
+		editTitle.setRequiredError( getContext().getString( "words.required" ) );
+		editTitle.setInvalidCommitted( true );
 
 		editDescription = new TextArea( getContext().getString( "modalNewShipment.editDescription" ), bi.getItemProperty( "description" ) );
 		editDescription.setWidth( "100%" );
 		editDescription.setNullRepresentation( "" );
 		editDescription.setRows( 2 );
+		editDescription.setRequired( true );
+		editDescription.setRequiredError( getContext().getString( "words.required" ) );
+		editDescription.setInvalidCommitted( true );
 
 		editDeparture_port = new TextField( getContext().getString( "modalNewShipment.editDeparture_port" ), bi.getItemProperty( "departure_port" ) );
 		editDeparture_port.setWidth( "100%" );
@@ -453,8 +459,8 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 		try
 		{
 			newShipment.setId( null );
-			newShipment.setShipment_date( CalendarUtils.getDateAsLong( popupDateShipment.getValue() ) );
-			newShipment.setDeparture_date( CalendarUtils.getDateAsLong( popupDateDeparture.getValue() ) );
+			newShipment.setShipment_date( CalendarUtils.getDayAsLong( popupDateShipment.getValue() ) );
+			newShipment.setDeparture_date( CalendarUtils.getDayAsLong( popupDateDeparture.getValue() ) );
 			
 			IOCManager._ShipmentsManager.setRow( getContext(), null, newShipment );
 			
@@ -480,8 +486,8 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 	{
 		try
 		{
-			newShipment.setShipment_date( CalendarUtils.getDateAsLong( popupDateShipment.getValue() ) );
-			newShipment.setDeparture_date( CalendarUtils.getDateAsLong( popupDateDeparture.getValue() ) );
+			newShipment.setShipment_date( CalendarUtils.getDayAsLong( popupDateShipment.getValue() ) );
+			newShipment.setDeparture_date( CalendarUtils.getDayAsLong( popupDateDeparture.getValue() ) );
 
 			IOCManager._ShipmentsManager.setRow( getContext(), (Shipment) orgDto, newShipment );
 

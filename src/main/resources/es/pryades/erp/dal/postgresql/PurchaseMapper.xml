@@ -171,10 +171,10 @@
 	<sql id="es.pryades.erp.dal.ibatis.PurchaseMapper.where">
 		<where>
 			<if test="from_date != null">
-				AND purchases.purchase_date &gt;= #{from_date}    
+				AND (purchases.purchase_date &gt;= #{from_date} OR purchases.register_date &gt;= #{from_date})    
 	        </if>
 			<if test="to_date != null">
-				AND purchases.purchase_date &lt; #{to_date}    
+				AND (purchases.purchase_date &lt;= #{to_date} OR purchases.register_date &lt;= #{to_date})  
 	        </if>
 			<if test="ref_provider != null">
 				AND purchases.ref_provider = #{ref_provider}    
@@ -184,6 +184,9 @@
 	        </if>
 			<if test="ref_buyer != null">
 				AND purchases.ref_buyer = #{ref_buyer}    
+	        </if>
+			<if test="ref_operation != null">
+				AND purchases.ref_operation = #{ref_operation}    
 	        </if>
 		</where>
 	</sql>
@@ -198,6 +201,9 @@
 			</when>
 			<when test="orderby.equals( 'provider_name' )">
 				companies.name
+			</when>
+			<when test="orderby.equals( 'operation_title' )">
+				operations.title
 			</when>
 			<when test="orderby.equals( 'status' )">
 				purchases.status

@@ -482,7 +482,7 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 		try
 		{
 			newQuotation.setId( null );
-			newQuotation.setQuotation_date( CalendarUtils.getDateAsLong( fromDateField.getValue() ) );
+			newQuotation.setQuotation_date( CalendarUtils.getDayAsLong( fromDateField.getValue() ) );
 			
 			IOCManager._QuotationsManager.setRow( getContext(), null, newQuotation );
 			
@@ -491,6 +491,7 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
 			dashboard.refreshInvoicesTab();
 			dashboard.refreshShipmentsTab();
+			dashboard.refreshOperationsTab();
 			
 			return true;
 		}
@@ -508,7 +509,7 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 	{
 		try
 		{
-			newQuotation.setQuotation_date( CalendarUtils.getDateAsLong( fromDateField.getValue() ) );
+			newQuotation.setQuotation_date( CalendarUtils.getDayAsLong( fromDateField.getValue() ) );
 			
 			IOCManager._QuotationsManager.setRow( getContext(), (Quotation) orgDto, newQuotation );
 
@@ -517,6 +518,7 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
 			dashboard.refreshInvoicesTab();
 			dashboard.refreshShipmentsTab();
+			dashboard.refreshOperationsTab();
 			
 			if ( ((Quotation)orgDto).getStatus().equals( Quotation.STATUS_SENT ) && newQuotation.getStatus().equals( Quotation.STATUS_APPROVED ) )
 			{
@@ -559,7 +561,8 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
 			dashboard.refreshInvoicesTab();
 			dashboard.refreshShipmentsTab();
-
+			dashboard.refreshOperationsTab();
+			
 			return true;
 		}
 		catch ( Throwable e )
@@ -898,7 +901,7 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 				( 
 					new Window.CloseListener() 
 					{
-						private static final long serialVersionUID = -798063903136075292L;
+						private static final long serialVersionUID = -8780826586171850595L;
 
 						@Override
 					    public void windowClose( CloseEvent e ) 
@@ -985,6 +988,8 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 
 			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
 			dashboard.refreshOperationsTab();
+			dashboard.refreshOperations();
+
 		}
 		catch ( Throwable e )
 		{

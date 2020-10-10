@@ -102,6 +102,252 @@
 		order by quotations_lines_deliveries.ref_quotation_delivery asc
 	</select>
 
+	<select id="selectOperationInvoices" parameterType="long" resultMap="mapInvoice">
+		select 
+			invoices.id,
+			
+			invoices.invoice_date,
+			invoices.title,						
+			invoices.number,						
+			invoices.ref_quotation,						
+			invoices.ref_shipment,						
+			invoices.transport_cost,						
+			invoices.free_delivery,						
+			invoices.payment_terms,						
+			invoices.collected,						
+
+			quotations.id					as quotation_id,						
+			quotations.ref_customer			as quotation_ref_customer,
+			quotations.ref_contact			as quotation_ref_contact,
+			quotations.ref_user				as quotation_ref_user,
+			quotations.quotation_date		as quotation_quotation_date,
+			quotations.validity				as quotation_validity,
+			quotations.number				as quotation_number,						
+			quotations.title 				as quotation_title,						
+			quotations.reference_request 	as quotation_reference_request,
+			quotations.reference_order 		as quotation_reference_order,
+			quotations.packaging			as quotation_packaging,
+			quotations.delivery				as quotation_delivery,
+			quotations.warranty				as quotation_warranty,
+			quotations.payment_terms		as quotation_payment_terms,
+			quotations.tax_rate				as quotation_tax_rate,
+			quotations.status				as quotation_status,
+			quotations.weight				as quotation_weight,
+			quotations.volume				as quotation_volume,
+			
+			companies.id 					as quotation_customer_id,
+			companies.name 					as quotation_customer_name,
+			companies.alias					as quotation_customer_alias,
+			companies.address 				as quotation_customer_address,
+			companies.email 				as quotation_customer_email,
+			companies.phone 				as quotation_customer_phone,
+			companies.tax_id 				as quotation_customer_tax_id,
+			companies.taxable 				as quotation_customer_taxable,
+			companies.language 				as quotation_customer_language,
+			companies.type_company 			as quotation_customer_type_company,
+			companies.signature 			as quotation_customer_signature,
+			
+			companies_contacts.id			as quotation_contact_id,
+			companies_contacts.ref_company	as quotation_contact_ref_company,
+			companies_contacts.name			as quotation_contact_name,
+			companies_contacts.email		as quotation_contact_email,
+			companies_contacts.phone		as quotation_contact_phone,
+			
+			users.id						as quotation_user_id,
+			users.name						as quotation_user_name,
+			users.login						as quotation_user_login,
+			users.email						as quotation_user_email,
+			users.pwd						as quotation_user_pwd,
+			users.changed					as quotation_user_changed,
+			users.retries					as quotation_user_retries,
+			users.ref_profile				as quotation_user_ref_profile,
+			users.status					as quotation_user_status,
+			
+			( 
+				select 
+					sum(transport_cost) 
+				 
+				from 
+					invoices invoices1
+			
+				where 
+					invoices1.ref_quotation = quotations.id AND NOT invoices1.free_delivery
+					
+					
+			) 							as quotation_transport_invoiced
+			
+
+		from invoices
+		
+		inner join quotations
+		on invoices.ref_quotation = quotations.id
+		
+		inner join operations
+		on operations.ref_quotation = quotations.id
+		
+		inner join companies
+		on quotations.ref_customer = companies.id
+		
+		inner join companies_contacts
+		on quotations.ref_contact = companies_contacts.id
+
+		inner join users
+		on quotations.ref_user = users.id
+		 		
+		where 
+			operations.id = #{id}
+			
+		order by invoices.invoice_date asc
+	</select>
+
+	<select id="selectInvocesLines" parameterType="long" resultMap="mapInvoiceLine">
+		select 
+			invoices_lines.id,
+		
+			invoices_lines.ref_invoice,
+			invoices_lines.ref_quotation_line,
+			
+			invoices_lines.quantity,
+		 
+			( 
+				select 
+					sum( shipments_boxes_lines.quantity ) 
+					 
+				from 
+					shipments_boxes_lines 
+					
+				where 
+					shipments_boxes_lines.ref_invoice_line = invoices_lines.id
+						
+			) as total_packed,
+	
+			quotations_lines.id				as quotation_line_id,
+			quotations_lines.line_order		as quotation_line_line_order,
+			quotations_lines.ref_quotation 	as quotation_line_ref_quotation,
+			quotations_lines.ref_provider 	as quotation_line_ref_provider,
+
+			quotations_lines.origin 		as quotation_line_origin,
+			quotations_lines.reference 		as quotation_line_reference,
+			quotations_lines.title 			as quotation_line_title,
+			quotations_lines.description 	as quotation_line_description,
+
+			quotations_lines.cost 			as quotation_line_cost,
+			quotations_lines.real_cost 		as quotation_line_real_cost,
+			quotations_lines.margin 		as quotation_line_margin,
+			quotations_lines.tax_rate 		as quotation_line_tax_rate
+			
+		from invoices_lines
+		
+		inner join quotations_lines
+		on invoices_lines.ref_quotation_line = quotations_lines.id
+		
+		where 
+			invoices_lines.ref_invoice = #{id}
+			
+		order by quotations_lines.line_order asc
+	</select>
+
+	<select id="selectOperationPurchases" parameterType="long" resultMap="mapPurchase">
+		select 
+			purchases.id,
+			
+			purchases.purchase_type,						
+			purchases.number,						
+			purchases.title,						
+			purchases.description,						
+			purchases.purchase_date,						
+			purchases.register_date,						
+			
+			purchases.net_price,
+			purchases.net_tax,
+			purchases.payed,
+			purchases.status,						
+	
+			purchases.quotation_number,
+			purchases.invoice_number,
+	
+			purchases.ref_buyer,
+			purchases.ref_operation,
+			purchases.ref_provider,
+			purchases.ref_contact,
+	
+			companies.id				as provider_id,
+			companies.name				as provider_name,
+			companies.alias				as provider_alias,
+			companies.tax_id			as provider_tax_id,
+			companies.address			as provider_address,
+			companies.email				as provider_email,
+			companies.phone				as provider_phone,
+			companies.type_company		as provider_type_company,
+			companies.taxable			as provider_taxable,
+			companies.language			as provider_language,
+			companies.signature			as provider_signature,
+			
+			companies_contacts.id			as contact_id,
+			companies_contacts.ref_company	as contact_ref_company,
+			companies_contacts.name			as contact_name,
+			companies_contacts.email		as contact_email,
+			companies_contacts.phone		as contact_phone,
+			
+			users.id				as buyer_id,
+			users.name				as buyer_name,
+			users.login				as buyer_login,
+			users.email				as buyer_email,
+			users.pwd				as buyer_pwd,
+			users.changed			as buyer_changed,
+			users.retries			as buyer_retries,
+			users.ref_profile		as buyer_ref_profile,
+			users.status			as buyer_status
+			
+		from purchases
+			
+		inner join operations
+		on purchases.ref_operation = operations.id
+		
+		inner join companies
+		on purchases.ref_provider = companies.id
+
+		left join companies_contacts
+		on purchases.ref_contact = companies_contacts.id
+
+		inner join users
+		on purchases.ref_buyer = users.id
+		
+		where operations.id = #{id}
+			
+		order by purchases.purchase_date asc
+			
+	</select>
+	
+	<resultMap id="mapPurchase" type="es.pryades.erp.dto.Purchase">
+		<id property="id" column="id"/>
+		
+		<result property="purchase_type" column="purchase_type"/>
+		<result property="number" column="number"/>
+		<result property="title" column="title"/>
+		<result property="description" column="description"/>
+		<result property="purchase_date" column="purchase_date"/>
+		<result property="register_date" column="register_date"/>
+		<result property="net_price" column="net_price"/>
+		<result property="net_tax" column="net_tax"/>
+		<result property="payed" column="payed"/>
+		<result property="status" column="status"/>
+		<result property="invoice" column="invoice"/>
+		<result property="invoice_number" column="invoice_number"/>
+		<result property="quotation" column="quotation"/>
+		<result property="quotation_number" column="quotation_number"/>
+		<result property="payment" column="payment"/>
+
+		<result property="ref_operation" column="ref_operation"/>
+		<result property="ref_buyer" column="ref_buyer"/>
+		<result property="ref_provider" column="ref_provider"/>
+		<result property="ref_contact" column="ref_contact"/>
+		
+		<association property="provider" javaType="es.pryades.erp.dto.Company" resultMap="mapCompany" columnPrefix="provider_" />
+		<association property="contact" javaType="es.pryades.erp.dto.CompanyContact" resultMap="mapCompanyContact" columnPrefix="contact_" />
+		<association property="buyer" javaType="es.pryades.erp.dto.User" resultMap="mapUser" columnPrefix="buyer_" />
+	</resultMap>
+	
 	<resultMap id="mapCompanyContact" type="es.pryades.erp.dto.CompanyContact">
 		<id property="id" column="id"/>
 		
@@ -216,6 +462,35 @@
 		<collection property="deliveries" column="id" ofType="mapQuotationDelivery" select="selectQuotationDeliveries"> </collection>
 	</resultMap>
 	
+	<resultMap id="mapInvoiceLine" type="es.pryades.erp.dto.InvoiceLine">
+		<id property="id" column="id"/>
+		
+		<result property="ref_invoice" column="ref_invoice"/>
+		<result property="ref_quotation_line" column="ref_quotation_line"/>
+		<result property="quantity" column="quantity"/>
+		<result property="total_packed" column="total_packed"/>
+
+		<association property="quotation_line" javaType="es.pryades.erp.dto.QuotationLine" resultMap="mapQuotationLine" columnPrefix="quotation_line_" />
+	</resultMap>
+	
+	<resultMap id="mapInvoice" type="es.pryades.erp.dto.Invoice">
+		<id property="id" column="id"/>
+		
+		<result property="title" column="title"/>
+		<result property="number" column="number"/>
+		<result property="invoice_date" column="invoice_date"/>
+		<result property="ref_quotation" column="ref_quotation"/>
+		<result property="ref_shipment" column="ref_shipment"/>
+		<result property="transport_cost" column="transport_cost"/>
+		<result property="free_delivery" column="free_delivery"/>
+		<result property="payment_terms" column="payment_terms"/>
+		<result property="collected" column="collected"/>
+		
+		<association property="quotation" javaType="es.pryades.erp.dto.Quotation" resultMap="mapQuotation" columnPrefix="quotation_" />
+
+		<collection property="lines" column="id" ofType="mapInvoiceLine" select="selectInvocesLines"> </collection>
+	</resultMap>
+	
 	<resultMap id="mapOperation" type="es.pryades.erp.dto.Operation">
 		<id property="id" column="id"/>
 		
@@ -224,6 +499,9 @@
 		<result property="status" column="status"/>
 		
 		<association property="quotation" javaType="es.pryades.erp.dto.Quotation" resultMap="mapQuotation" columnPrefix="quotation_" />
+
+		<collection property="invoices" column="id" ofType="mapInvoice" select="selectOperationInvoices"> </collection>
+		<collection property="purchases" column="id" ofType="mapPurchase" select="selectOperationPurchases"> </collection>
 	</resultMap>
 
 	<sql id="es.pryades.erp.dal.ibatis.OperationMapper.fields">

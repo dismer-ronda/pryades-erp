@@ -39,29 +39,31 @@ public class OperationControlerVto extends GenericControlerVto
 				result.setFactory( factory );
 				result.setDtoObj( dtoObj );
 
-				result.setId(((Operation) dtoObj).getId());
+				Operation operation = (Operation) dtoObj;
 
-				result.setTitle(((Operation) dtoObj).getTitle());
+				result.setId( operation.getId() );
+
+				result.setTitle( operation.getTitle());
 				
 				double predicted_cost = 0;
-				double real_cost = 0;
-				double total_invoiced = 0;
+				double real_cost = operation.getTotalPurchased();
+				double price = operation.getTotalSold();
 				
-				Quotation quotation = ((Operation) dtoObj).getQuotation();
+				Quotation quotation = operation.getQuotation();
+				
 				if ( quotation != null )
 				{
 					result.setCustomer_name( quotation.getCustomer().getAlias() );
 					result.setQuotation_number( quotation.getFormattedNumber() );
 					
 					predicted_cost = quotation.getTotalCost();
-					total_invoiced = quotation.getTotalInvoiced();
 				}
 
 				result.setPredicted_cost( Utils.getFormattedCurrency( predicted_cost ) );
-				result.setReal_cost( Utils.getFormattedCurrency( real_cost ) );
-				result.setTotal_invoiced( Utils.getFormattedCurrency( total_invoiced ) );
+				result.setReal_cost( operation.getTotalPurchasedAsString() );
+				result.setPrice( operation.getTotalSoldAsString() );
 				
-				result.setProfit( Utils.getFormattedCurrency( total_invoiced - real_cost ) );
+				result.setProfit( Utils.getFormattedCurrency( price - real_cost ) );
 				
 				result.setStatus( getContext().getString( "operation.status." + ((Operation) dtoObj).getStatus()) );
 			}

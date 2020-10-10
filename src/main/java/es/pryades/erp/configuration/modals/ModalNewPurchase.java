@@ -14,20 +14,21 @@ import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.PopupDateField;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.FailedEvent;
 import com.vaadin.ui.Upload.FailedListener;
 import com.vaadin.ui.Upload.ProgressListener;
 import com.vaadin.ui.Upload.Receiver;
 import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.PopupDateField;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.Upload;
-import com.vaadin.ui.Notification;
+import com.vaadin.ui.Window;
 
 import es.pryades.erp.application.ShowExternalUrlDlg;
 import es.pryades.erp.common.AppContext;
@@ -37,6 +38,7 @@ import es.pryades.erp.common.CalendarUtils;
 import es.pryades.erp.common.ModalParent;
 import es.pryades.erp.common.ModalWindowsCRUD;
 import es.pryades.erp.common.Utils;
+import es.pryades.erp.dashboard.Dashboard;
 import es.pryades.erp.dto.BaseDto;
 import es.pryades.erp.dto.Company;
 import es.pryades.erp.dto.CompanyContact;
@@ -83,7 +85,8 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 	private ComboBox comboBuyer;
 	private ComboBox comboType;
 	private ComboBox comboOperation;
-	
+	private Button btnAdd;
+
 	private TextField editTitle;
 	private TextArea editDescription;
 	private TextField editNetPrice;
@@ -127,9 +130,11 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 			newPurchase = new Purchase();
 			newPurchase.setPurchase_date( CalendarUtils.getTodayAsLong() );
 			newPurchase.setRegister_date( CalendarUtils.getTodayAsLong() );
+			newPurchase.setPurchase_type( Purchase.TYPE_SELL );
 			newPurchase.setStatus( Purchase.STATUS_CREATED );
 			newPurchase.setRef_buyer( getContext().getUser().getId() );
 			newPurchase.setPayed( 0.0 );
+			newPurchase.setNet_tax( 0.0 );
 		}
 
 		layout.setHeight( "-1px" );
@@ -272,6 +277,16 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 		editInvoiceNumber.setWidth( "100%" );
 		editInvoiceNumber.setNullRepresentation( "" );
 
+		btnAdd = new Button(" + ");
+		btnAdd.addClickListener( new Button.ClickListener()
+		{
+			private static final long serialVersionUID = 2127064478675096874L;
+
+			public void buttonClick( ClickEvent event )
+			{
+				onAddProvider();
+			}
+		} );
 
 		HorizontalLayout row1 = new HorizontalLayout();
 		row1.setWidth( "100%" );
@@ -281,6 +296,15 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 		row1.addComponent( registerDateField );
 		row1.addComponent( comboType );
 
+		
+		HorizontalLayout rowProvider = new HorizontalLayout();
+		rowProvider.setWidth( "100%" );
+		rowProvider.setSpacing( true );
+		rowProvider.addComponent( comboProviders );
+		rowProvider.addComponent( btnAdd );
+		rowProvider.setComponentAlignment( btnAdd, Alignment.BOTTOM_LEFT );
+		rowProvider.setExpandRatio( comboProviders, 1.0f );
+
 		HorizontalLayout row2 = new HorizontalLayout();
 		row2.setWidth( "100%" );
 		row2.setSpacing( true );
@@ -289,7 +313,7 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 		{
 			row2.addComponent( comboStatus );
 		}
-		row2.addComponent( comboProviders );
+		row2.addComponent( rowProvider );
 		row2.addComponent( comboContacts );
 		
 		HorizontalLayout row3 = new HorizontalLayout();
@@ -336,8 +360,6 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 			bttnPdf.setCaption( getContext().getString( "modalNewPurchase.pdfOrder" ) );
 			bttnPdf.addClickListener( new Button.ClickListener()
 			{
-				private static final long serialVersionUID = 7538387530542749190L;
-
 				public void buttonClick( ClickEvent event )
 				{
 					onPdfOrder();
@@ -351,8 +373,6 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 			btnEmail.setCaption( getContext().getString( "modalNewPurchase.emailOrder" ) );
 			btnEmail.addClickListener( new Button.ClickListener()
 			{
-				private static final long serialVersionUID = -1265552269291389575L;
-
 				public void buttonClick( ClickEvent event )
 				{
 					onEmailOrder();
@@ -388,7 +408,7 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 			bttnViewQuotation.setWidth( "200px" );
 			bttnViewQuotation.addClickListener( new Button.ClickListener()
 			{
-				private static final long serialVersionUID = 7538387530542749190L;
+				private static final long serialVersionUID = 7538387530542749191L;
 
 				public void buttonClick( ClickEvent event )
 				{
@@ -402,7 +422,7 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 			bttnViewInvoice.setWidth( "200px" );
 			bttnViewInvoice.addClickListener( new Button.ClickListener()
 			{
-				private static final long serialVersionUID = 2127064478675096874L;
+				private static final long serialVersionUID = -1265552269291389575L;
 
 				public void buttonClick( ClickEvent event )
 				{
@@ -416,7 +436,7 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 			bttnViewPayment.setWidth( "200px" );
 			bttnViewPayment.addClickListener( new Button.ClickListener()
 			{
-				private static final long serialVersionUID = -1265552269291389575L;
+				private static final long serialVersionUID = -8195744485998107398L;
 
 				public void buttonClick( ClickEvent event )
 				{
@@ -447,17 +467,18 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 	{
 		try
 		{
+			LOG.info(  "date "+ purchaseDateField.getValue() );
+			
 			newPurchase.setId( null );
-			newPurchase.setPurchase_date( CalendarUtils.getDateAsLong( purchaseDateField.getValue() ) );
-			newPurchase.setRegister_date( CalendarUtils.getDateAsLong( registerDateField.getValue() ) );
+			newPurchase.setPurchase_date( CalendarUtils.getDayAsLong( purchaseDateField.getValue() ) );
+			newPurchase.setRegister_date( CalendarUtils.getDayAsLong( registerDateField.getValue() ) );
 			
 			IOCManager._PurchasesManager.setRow( getContext(), null, newPurchase );
 			
 			saveUserDefaults();
 
-			/*Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
-			dashboard.refreshInvoicesTab();
-			dashboard.refreshShipmentsTab();*/
+			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+			dashboard.refreshOperationsTab();
 			
 			return true;
 		}
@@ -475,36 +496,15 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 	{
 		try
 		{
-			newPurchase.setPurchase_date( CalendarUtils.getDateAsLong( purchaseDateField.getValue() ) );
-			newPurchase.setRegister_date( CalendarUtils.getDateAsLong( registerDateField.getValue() ) );
+			newPurchase.setPurchase_date( CalendarUtils.getDayAsLong( purchaseDateField.getValue() ) );
+			newPurchase.setRegister_date( CalendarUtils.getDayAsLong( registerDateField.getValue() ) );
 			
 			IOCManager._PurchasesManager.setRow( getContext(), (Purchase) orgDto, newPurchase );
 
 			saveUserDefaults();
 
-			/*Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
-			dashboard.refreshInvoicesTab();
-			dashboard.refreshShipmentsTab();*/
-			
-			/*if ( ((Quotation)orgDto).getStatus().equals( Quotation.STATUS_SENT ) && newPurchase.getStatus().equals( Quotation.STATUS_APPROVED ) )
-			{
-				ConfirmDialog.show( (UI)getContext().getData( "Application" ), getContext().getString( "modalNewQuotation.operation" ),
-				        new ConfirmDialog.Listener() 
-						{
-							private static final long serialVersionUID = -8550030546274588920L;
-
-							public void onClose(ConfirmDialog dialog) 
-				            {
-				                if ( dialog.isConfirmed() ) 
-				                {
-									onCreateOperation();
-
-									closeModalWindow( true, true );
-				                } 
-				            }
-				        });
-
-			}*/
+			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+			dashboard.refreshOperationsTab();
 
 			return true;
 		}
@@ -524,9 +524,8 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 		{
 			IOCManager._PurchasesManager.delRow( getContext(), newPurchase );
 
-			/*Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
-			dashboard.refreshInvoicesTab();
-			dashboard.refreshShipmentsTab();*/
+			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+			dashboard.refreshOperationsTab();
 
 			return true;
 		}
@@ -1107,6 +1106,40 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 			{
 				Utils.logException( e, LOG );
 			}
+		}
+	}
+
+	private void onAddProvider()
+	{
+		final ModalNewCompany modal = new ModalNewCompany( getContext(), OperationCRUD.OP_ADD, null, ModalNewPurchase.this );
+		modal.setType( Company.TYPE_PROVIDER );
+		modal.addCloseListener
+		( 
+			new Window.CloseListener() 
+			{
+				private static final long serialVersionUID = 6841622953032797314L;
+
+				@Override
+			    public void windowClose( CloseEvent e ) 
+			    {
+					loadProviders();
+					fillComboProviders();
+					
+					selectNewProvider( modal.getNewCompany().getId() );
+			    }
+			}
+		);
+		
+		modal.showModalWindow();
+	}
+
+	private void selectNewProvider( Long id )
+	{
+		if ( id != null )
+		{
+			for ( Company company : providers )
+				if ( company.getId().equals( id ) )
+					comboProviders.setValue( company.getId() );
 		}
 	}
 }

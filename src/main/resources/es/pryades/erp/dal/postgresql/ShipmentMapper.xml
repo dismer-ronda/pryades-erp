@@ -366,7 +366,7 @@
 				AND shipments.shipment_date &gt;= #{from_date}    
 	        </if>
 			<if test="to_date != null">
-				AND shipments.shipment_date &lt; #{to_date}    
+				AND shipments.shipment_date &lt;= #{to_date}    
 	        </if>
 			<if test="ref_consignee != null">
 				AND shipments.ref_consignee = #{ref_consignee}    

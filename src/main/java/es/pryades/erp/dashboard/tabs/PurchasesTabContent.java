@@ -17,6 +17,7 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.PopupDateField;
 
 import es.pryades.erp.common.AppContext;
@@ -32,11 +33,13 @@ import es.pryades.erp.configuration.modals.ModalNewPurchase;
 import es.pryades.erp.dal.BaseManager;
 import es.pryades.erp.dto.BaseDto;
 import es.pryades.erp.dto.Company;
+import es.pryades.erp.dto.Operation;
 import es.pryades.erp.dto.Purchase;
 import es.pryades.erp.dto.Query;
 import es.pryades.erp.dto.User;
 import es.pryades.erp.dto.UserDefault;
 import es.pryades.erp.dto.query.CompanyQuery;
+import es.pryades.erp.dto.query.OperationQuery;
 import es.pryades.erp.dto.query.PurchaseQuery;
 import es.pryades.erp.dto.query.UserQuery;
 import es.pryades.erp.ioc.IOCManager;
@@ -57,6 +60,7 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 	private PopupDateField fromDateField;
 	private PopupDateField toDateField;
 
+	private ComboBox comboOperations;
 	private ComboBox comboProviders;
 	private ComboBox comboStatus;
 	private ComboBox comboBuyer;
@@ -67,6 +71,7 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 	private Label labelTotalTaxes;
 	private Label labelTotalGrossPrice;
 
+	private List<Operation> operations;
 	private List<Company> providers;
 	private List<User> buyers;
 
@@ -99,12 +104,12 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 	@Override
 	public String[] getVisibleCols()
 	{
-		return new String[]{ "purchase_date", "register_date", "number", "title", "provider_name", "status", "net_price", "net_tax", "gross_price", "payed" };
+		return new String[]{ "purchase_date", "register_date", "number", "title", "operation_title", "provider_name", "invoice_number", "status", "net_price", "net_tax", "gross_price", "payed" };
 	}
 
 	public String[] getSortableCols()
 	{
-		return new String[]{ "purchase_date", "register_date", "number", "title", "provider_name", "status" };
+		return new String[]{ "purchase_date", "register_date", "number", "title", "operation_title", "invoice_number", "provider_name", "status" };
 	}
 	
 	@Override
@@ -183,6 +188,7 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 	@Override
 	public Component getQueryComponent()
 	{
+		loadOperations();
 		loadCustomers();
 		loadUsers();
 
@@ -198,16 +204,33 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 		//toDateField.setValue( getDefaultDate( default_to.getData_value() ) );
 		toDateField.setWidth( "160px" );
 		
+		comboOperations = new ComboBox(getContext().getString( "modalNewPurchase.comboOperation" ));
+		comboOperations.setWidth( "100%" );
+		comboOperations.setNullSelectionAllowed( true );
+		comboOperations.setTextInputAllowed( true );
+		comboOperations.setImmediate( true );
+		fillComboOperations();
+//		comboProviders.setValue( getDefaultCustomer() );
+		comboOperations.addValueChangeListener( new Property.ValueChangeListener() 
+		{
+			private static final long serialVersionUID = -180226785141609420L;
+
+			public void valueChange(ValueChangeEvent event) 
+		    {
+				refreshVisibleContent( true );
+		    }
+		});
+
 		comboProviders = new ComboBox(getContext().getString( "modalNewPurchase.comboProviders" ));
 		comboProviders.setWidth( "100%" );
 		comboProviders.setNullSelectionAllowed( true );
 		comboProviders.setTextInputAllowed( true );
 		comboProviders.setImmediate( true );
-		fillComboCustomers();
+		fillComboProviders();
 //		comboProviders.setValue( getDefaultCustomer() );
 		comboProviders.addValueChangeListener( new Property.ValueChangeListener() 
 		{
-			private static final long serialVersionUID = -180226785141609420L;
+			private static final long serialVersionUID = -6032292646221912144L;
 
 			public void valueChange(ValueChangeEvent event) 
 		    {
@@ -224,7 +247,7 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 //		comboStatus.setValue( getDefaultStatus() );
 		comboStatus.addValueChangeListener( new Property.ValueChangeListener() 
 		{
-			private static final long serialVersionUID = -6032292646221912144L;
+			private static final long serialVersionUID = -6032292646221912145L;
 
 			public void valueChange(ValueChangeEvent event) 
 		    {
@@ -257,6 +280,7 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 		rowQuery.addComponent( fromDateField );
 		rowQuery.addComponent( toDateField );
 		rowQuery.addComponent( comboBuyer );
+		rowQuery.addComponent( comboOperations );
 		rowQuery.addComponent( comboProviders );
 		rowQuery.addComponent( comboStatus );
 		rowQuery.addComponent( bttnApply );
@@ -270,8 +294,11 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 	{
 		PurchaseQuery query = new PurchaseQuery();
 		
-		/*query.setFrom_date( fromDateField.getValue() != null ? CalendarUtils.getDateAsLong( fromDateField.getValue() ) : null );
-		query.setTo_date( toDateField.getValue() != null ? CalendarUtils.getDateAsLong( toDateField.getValue() ) : null );
+		query.setFrom_date( fromDateField.getValue() != null ? CalendarUtils.getDayAsLong( fromDateField.getValue() ) : null );
+		query.setTo_date( toDateField.getValue() != null ? CalendarUtils.getDayAsLong( toDateField.getValue() ) : null );
+		
+		if ( comboOperations.getValue() != null )
+			query.setRef_operation( (Long)comboOperations.getValue() );
 		
 		if ( comboProviders.getValue() != null )
 			query.setRef_provider( (Long)comboProviders.getValue() );
@@ -283,7 +310,7 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 			query.setRef_buyer( (Long)comboBuyer.getValue() );
 
 		saveUserDefaults();
-		*/
+		
 		return query;
 	}
 
@@ -363,7 +390,10 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 			@Override
 			public void buttonClick( ClickEvent event )
 			{
-				refreshVisibleContent( true );
+				if ( CalendarUtils.checkValidPeriod( fromDateField.getValue(), toDateField.getValue() ) )
+					refreshVisibleContent( true );
+				else
+					Utils.showNotification( getContext(), getContext().getString( "error.invalid.period" ), Notification.Type.ERROR_MESSAGE );
 			}
 		} );
 	}
@@ -374,8 +404,7 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 		try
 		{
 			CompanyQuery query = new CompanyQuery();
-			query.setType_company( Company.TYPE_CUSTOMER );
-			query.setRef_user( getContext().getUser().getId() );
+			query.setType_company( Company.TYPE_PROVIDER );
 
 			providers = IOCManager._CompaniesManager.getRows( getContext(), query );
 		}
@@ -386,7 +415,7 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 		}
 	}
 	
-	private void fillComboCustomers()
+	private void fillComboProviders()
 	{
 		comboProviders.removeAllItems();
 		for ( Company company : providers )
@@ -453,10 +482,10 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 		}*/
 	}
 	
-	public void refreshCustomers()
+	public void refreshProviders()
 	{
 		loadCustomers();
-		fillComboCustomers();
+		fillComboProviders();
 	}
 
 	private void loadUserDefaults()
@@ -542,5 +571,37 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 			comboBuyer.setItemCaption( user.getId(), user.getName() );
 		}
 	}	
+
+	@SuppressWarnings("unchecked")
+	private void loadOperations()
+	{
+		try
+		{
+			OperationQuery query = new OperationQuery();
+
+			operations = IOCManager._OperationsManager.getRows( getContext(), query );
+		}
+		catch ( BaseException e )
+		{
+			e.printStackTrace();
+			operations = new ArrayList<Operation>();
+		}
+	}
+	
+	private void fillComboOperations()
+	{
+		comboOperations.removeAllItems();
+		for ( Operation operation : operations )
+		{
+			comboOperations.addItem( operation.getId() );
+			comboOperations.setItemCaption( operation.getId(), operation.getTitle() );
+		}
+	}
+
+	public void refreshOperations()
+	{
+		loadOperations();
+		fillComboOperations();
+	}
 }
 

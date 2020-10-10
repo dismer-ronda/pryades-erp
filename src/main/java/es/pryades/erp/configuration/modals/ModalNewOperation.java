@@ -17,10 +17,10 @@ import es.pryades.erp.common.BaseException;
 import es.pryades.erp.common.ModalParent;
 import es.pryades.erp.common.ModalWindowsCRUD;
 import es.pryades.erp.common.Utils;
+import es.pryades.erp.dashboard.Dashboard;
 import es.pryades.erp.dto.BaseDto;
 import es.pryades.erp.dto.Operation;
 import es.pryades.erp.dto.Quotation;
-import es.pryades.erp.dto.UserDefault;
 import es.pryades.erp.dto.query.QuotationQuery;
 import es.pryades.erp.ioc.IOCManager;
 import lombok.Getter;
@@ -47,8 +47,6 @@ public class ModalNewOperation extends ModalWindowsCRUD implements ModalParent
 	private TextField editTitle;
 	private ComboBox comboStatus;
 	
-	private UserDefault quotation;
-	
 	/**
 	 * editReference_order
 	 * @param context
@@ -69,8 +67,6 @@ public class ModalNewOperation extends ModalWindowsCRUD implements ModalParent
 	{
 		super.initComponents();
 
-		loadUserDefaults();
-		
 		try
 		{
 			newOperation = (Operation) Utils.clone( (Operation) orgDto );
@@ -78,9 +74,6 @@ public class ModalNewOperation extends ModalWindowsCRUD implements ModalParent
 		catch ( Throwable e1 )
 		{
 			newOperation = new Operation();
-
-			if ( Utils.getLong( quotation.getData_value(), 0 ) != 0)
-				newOperation.setRef_quotation( Utils.getLong( quotation.getData_value(), 0 ) );
 			newOperation.setStatus( Operation.STATUS_EXCECUTION );
 		}
 
@@ -119,17 +112,20 @@ public class ModalNewOperation extends ModalWindowsCRUD implements ModalParent
 			comboStatus.setImmediate( true );
 			fillComboStatus();
 			comboStatus.setPropertyDataSource( bi.getItemProperty( "status" ) );
-			
-			editTitle = new TextField( getContext().getString( "modalNewOperation.editTitle" ), bi.getItemProperty( "title" ) );
-			editTitle.setWidth( "100%" );
-			editTitle.setNullRepresentation( "" );
 		}
 		
+		editTitle = new TextField( getContext().getString( "modalNewOperation.editTitle" ), bi.getItemProperty( "title" ) );
+		editTitle.setWidth( "100%" );
+		editTitle.setNullRepresentation( "" );
+
 		HorizontalLayout row1 = new HorizontalLayout();
 		row1.setWidth( "100%" );
 		row1.setSpacing( true );
 		if ( getOperation().equals( OperationCRUD.OP_ADD ) )
+		{
 			row1.addComponent( comboQuotation );
+			row1.addComponent( editTitle );
+		}
 		else
 		{
 			row1.addComponent( editTitle );
@@ -159,11 +155,8 @@ public class ModalNewOperation extends ModalWindowsCRUD implements ModalParent
 			
 			IOCManager._OperationsManager.setRow( getContext(), null, newOperation );
 			
-			saveUserDefaults();
-
-			/*Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
-			dashboard.refreshInvoicesTab();
-			dashboard.refreshQuotationsTab();*/
+			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+			dashboard.refreshOperations();
 
 			return true;
 		}
@@ -183,11 +176,8 @@ public class ModalNewOperation extends ModalWindowsCRUD implements ModalParent
 		{
 			IOCManager._OperationsManager.setRow( getContext(), (Operation) orgDto, newOperation );
 
-			saveUserDefaults();
-
-			/*Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
-			dashboard.refreshInvoicesTab();
-			dashboard.refreshQuotationsTab();*/
+			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+			dashboard.refreshOperations();
 
 			return true;
 		}
@@ -207,10 +197,9 @@ public class ModalNewOperation extends ModalWindowsCRUD implements ModalParent
 		{
 			IOCManager._OperationsManager.delRow( getContext(), newOperation );
 
-			/*Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
-			dashboard.refreshInvoicesTab();
-			dashboard.refreshQuotationsTab();*/
-			
+			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+			dashboard.refreshOperations();
+
 			return true;
 		}
 		catch ( Throwable e )
@@ -268,7 +257,7 @@ public class ModalNewOperation extends ModalWindowsCRUD implements ModalParent
 		getModalParent().refreshVisibleContent( true );
 	}
 	
-	@Override
+/*	@Override
 	protected boolean editAfterNew()
 	{
 		return true;
@@ -279,17 +268,7 @@ public class ModalNewOperation extends ModalWindowsCRUD implements ModalParent
 	{
 		new ModalNewOperation( getContext(), OperationCRUD.OP_MODIFY, (Operation)newOperation, getModalParent() ).showModalWindow();
 	}
-
-	private void loadUserDefaults()
-	{
-		quotation = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.OPERATIONS_QUOTATION );
-	}
-
-	private void saveUserDefaults()
-	{
-		IOCManager._UserDefaultsManager.setUserDefault( getContext(), quotation, newOperation.getRef_quotation() != null ? newOperation.getRef_quotation().toString() : null );
-	}
-	
+*/
 	@Override
 	protected boolean hasDelete()
 	{
@@ -362,6 +341,6 @@ public class ModalNewOperation extends ModalWindowsCRUD implements ModalParent
 
 	private void onSelectedQuotation()
 	{
-		newOperation.setTitle( comboQuotation.getItemCaption( comboQuotation.getValue() ) );
+		editTitle.setValue( comboQuotation.getItemCaption( comboQuotation.getValue() ) );
 	}
 }

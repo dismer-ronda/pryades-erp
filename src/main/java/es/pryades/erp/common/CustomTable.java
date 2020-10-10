@@ -28,7 +28,7 @@ public class CustomTable extends Table
 		String key = getResourceKey() + ".table.headerHint." + property;
 		String tooltip = getContext().getString( key );
 		
-		if ( tooltip.equals( key ) )
+		if ( tooltip.equals( "!" + key ) )
 			tooltip = getContext().getString( getResourceKey() + ".table.headerName." + property );
 	
 		return "<label title=\"" + tooltip + "\">" + super.getColumnHeader( property ) + "</label>";

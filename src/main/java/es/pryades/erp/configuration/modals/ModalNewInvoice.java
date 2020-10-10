@@ -74,7 +74,7 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 	private TextField editTransport_cost;
 	private CheckBox checkFree_delivery;
 	private TextArea editPayment_terms;
-	private TextField editMonth;
+	//private TextField editMonth;
 
 	private List<TextField> editsLines;
 	private List<CheckBox> checksLines;
@@ -178,12 +178,12 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 		editPayment_terms.setNullRepresentation( "" );
 		editPayment_terms.setRows( 3 );
 		
-		editMonth = new TextField( getContext().getString( "modalNewInvoice.editMonth" ), bi.getItemProperty( "month" ) );
+		/*editMonth = new TextField( getContext().getString( "modalNewInvoice.editMonth" ), bi.getItemProperty( "month" ) );
 		editMonth.setWidth( "100%" );
 		editMonth.setNullRepresentation( "" );
 		editMonth.setRequired( true );
 		editMonth.setRequiredError( getContext().getString( "words.required" ) );
-		editMonth.setInvalidCommitted( true );
+		editMonth.setInvalidCommitted( true );*/
 		
 		HorizontalLayout row1 = new HorizontalLayout();
 		row1.setWidth( "100%" );
@@ -191,7 +191,7 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 		if ( getOperation().equals( OperationCRUD.OP_ADD ) )
 			row1.addComponent( comboQuotations );
 		row1.addComponent( fromDateField );
-		row1.addComponent( editMonth );
+		//row1.addComponent( editMonth );
 		row1.addComponent( editTitle );
 		//row1.setExpandRatio( editTitle, 1.0f );
 		
@@ -359,7 +359,7 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 		try
 		{
 			newInvoice.setId( null );
-			newInvoice.setInvoice_date( CalendarUtils.getDateAsLong( fromDateField.getValue() ) );
+			newInvoice.setInvoice_date( CalendarUtils.getDayAsLong( fromDateField.getValue() ) );
 			newInvoice.setFree_delivery( checkFree_delivery.getValue().booleanValue() ? Boolean.TRUE : Boolean.FALSE );
 			
 			IOCManager._InvoicesManager.setRow( getContext(), null, newInvoice );
@@ -368,6 +368,7 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 
 			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
 			dashboard.refreshShipmentsTab();
+			dashboard.refreshOperationsTab();
 
 			return true;
 		}
@@ -475,16 +476,13 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 		
 		try
 		{
-			newInvoice.setInvoice_date( CalendarUtils.getDateAsLong( fromDateField.getValue() ) );
+			newInvoice.setInvoice_date( CalendarUtils.getDayAsLong( fromDateField.getValue() ) );
 			newInvoice.setFree_delivery( checkFree_delivery.getValue().booleanValue() ? Boolean.TRUE : Boolean.FALSE );
 
 			IOCManager._InvoicesManager.setRow( getContext(), (Invoice) orgDto, newInvoice );
 
 			saveUserDefaults();
 
-			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
-			dashboard.refreshShipmentsTab();
-			
 			for ( TextField edit : editsLines )
 			{
 				QuotationLine quotationLine = (QuotationLine)edit.getData();
@@ -554,6 +552,10 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 						}
 					}
 				}
+				
+				Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+				dashboard.refreshShipmentsTab();
+				dashboard.refreshOperationsTab();
 			}
 
 			return true;
@@ -576,6 +578,7 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 
 			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
 			dashboard.refreshShipmentsTab();
+			dashboard.refreshOperationsTab();
 
 			return true;
 		}

@@ -12,8 +12,6 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.TextField;
-
 import es.pryades.erp.common.AppContext;
 import es.pryades.erp.common.BaseException;
 import es.pryades.erp.common.BaseTable;
@@ -22,36 +20,33 @@ import es.pryades.erp.common.ModalParent;
 import es.pryades.erp.common.ModalWindowsCRUD.OperationCRUD;
 import es.pryades.erp.common.PagedContent;
 import es.pryades.erp.common.PagedTable;
-import es.pryades.erp.configuration.modals.ModalNewCompany;
+import es.pryades.erp.configuration.modals.ModalNewAccount;
 import es.pryades.erp.dal.BaseManager;
+import es.pryades.erp.dto.Account;
 import es.pryades.erp.dto.BaseDto;
-import es.pryades.erp.dto.Company;
 import es.pryades.erp.dto.Parameter;
 import es.pryades.erp.dto.Query;
-import es.pryades.erp.dto.query.CompanyQuery;
 import es.pryades.erp.ioc.IOCManager;
-import es.pryades.erp.vto.CompanyVto;
-import es.pryades.erp.vto.controlers.CompanyControlerVto;
+import es.pryades.erp.vto.AccountVto;
+import es.pryades.erp.vto.controlers.AccountControlerVto;
 
 /**
  * 
  * @author Dismer Ronda
  * 
  */
-public class CompaniesConfig extends PagedContent implements ModalParent
+public class AccountsConfig extends PagedContent implements ModalParent
 {
-	private static final long serialVersionUID = -4112153786008059013L;
+	private static final long serialVersionUID = 2194864758855672809L;
 
 	@SuppressWarnings("unused")
-	private static final Logger LOG = Logger.getLogger( CompaniesConfig.class );
+	private static final Logger LOG = Logger.getLogger( AccountsConfig.class );
 
-	private TextField editAlias;
-	private TextField editTax_id;
 	private ComboBox comboTypes;
 
 	private Button bttnApply;
 	
-	public CompaniesConfig( AppContext ctx )
+	public AccountsConfig( AppContext ctx )
 	{
 		super( ctx );
 		
@@ -62,7 +57,7 @@ public class CompaniesConfig extends PagedContent implements ModalParent
 	@Override
 	public String getResourceKey()
 	{
-		return "companiesConfig";
+		return "accountsConfig";
 	}
 
 	public boolean hasNew() 		{ return true; }
@@ -73,18 +68,18 @@ public class CompaniesConfig extends PagedContent implements ModalParent
 	@Override
 	public String[] getVisibleCols()
 	{
-		return new String[]{ "tax_id", "alias", "name", "email", "phone", "type_company" };
+		return new String[]{ "account_type", "company_name", "name", "number", "balance" };
 	}
 
 	public String[] getSortableCols()
 	{
-		return new String[]{ "tax_id", "alias", "name", "email", "phone", "type_company" };
+		return new String[]{ "account_type", "company_name", "name", "number", "balance" };
 	}
 	
 	@Override
 	public BaseTable createTable() throws BaseException
 	{
-		return new PagedTable( CompanyVto.class, this, getContext(), getContext().getIntegerParameter( Parameter.PAR_DEFAULT_PAGE_SIZE ) );
+		return new PagedTable( AccountVto.class, this, getContext(), getContext().getIntegerParameter( Parameter.PAR_DEFAULT_PAGE_SIZE ) );
 	}
 
 	public List<Component> getCustomOperations()
@@ -95,15 +90,7 @@ public class CompaniesConfig extends PagedContent implements ModalParent
 	@Override
 	public Component getQueryComponent()
 	{
-		editAlias = new TextField( getContext().getString( "companiesConfig.editAlias" ) );
-		editAlias.setWidth( "100%" );
-		editAlias.setNullRepresentation( "" );
-		
-		editTax_id = new TextField( getContext().getString( "companiesConfig.editTax_id" ) );
-		editTax_id.setWidth( "100%" );
-		editTax_id.setNullRepresentation( "" );
-		
-		comboTypes = new ComboBox(getContext().getString( "companiesConfig.comboTypes" ));
+		comboTypes = new ComboBox(getContext().getString( "accountsConfig.comboTypes" ));
 		comboTypes.setWidth( "100%" );
 		comboTypes.setNullSelectionAllowed( true );
 		comboTypes.setTextInputAllowed( false );
@@ -112,7 +99,7 @@ public class CompaniesConfig extends PagedContent implements ModalParent
 		fillComboTypes();
 		comboTypes.addValueChangeListener( new Property.ValueChangeListener() 
 		{
-			private static final long serialVersionUID = 1879348808118163417L;
+			private static final long serialVersionUID = -4273898552150870296L;
 
 			public void valueChange(ValueChangeEvent event) 
 		    {
@@ -126,8 +113,6 @@ public class CompaniesConfig extends PagedContent implements ModalParent
 
 		HorizontalLayout rowQuery = new HorizontalLayout();
 		rowQuery.setSpacing( true );
-		rowQuery.addComponent( editAlias );
-		rowQuery.addComponent( editTax_id );
 		rowQuery.addComponent( comboTypes );
 		rowQuery.addComponent( bttnApply );
 		rowQuery.setComponentAlignment( bttnApply, Alignment.BOTTOM_LEFT );
@@ -138,18 +123,10 @@ public class CompaniesConfig extends PagedContent implements ModalParent
 	@Override
 	public Query getQueryObject()
 	{
-		CompanyQuery query = new CompanyQuery();
+		Account query = new Account();
 		
-		if ( !editAlias.getValue().isEmpty() )
-			query.setAlias( "%" + editAlias.getValue() + "%" );
-		
-		if ( !editTax_id.getValue().isEmpty() )
-			query.setTax_id( editTax_id.getValue() );
-
 		if ( comboTypes.getValue() != null )
-			query.setType_company( (Integer)comboTypes.getValue() );
-
-		//query.setRef_user( getContext().getUser().getId() );
+			query.setAccount_type( (Integer)comboTypes.getValue() );
 		
 		return query;
 	}
@@ -157,31 +134,31 @@ public class CompaniesConfig extends PagedContent implements ModalParent
 	@Override
 	public void onOperationNew()
 	{
-		new ModalNewCompany( getContext(), OperationCRUD.OP_ADD, null, CompaniesConfig.this ).showModalWindow();
+		new ModalNewAccount( getContext(), OperationCRUD.OP_ADD, null, AccountsConfig.this ).showModalWindow();
 	}
 
 	@Override
 	public void onOperationModify( BaseDto dto )
 	{
-		new ModalNewCompany( getContext(), OperationCRUD.OP_MODIFY, (Company)dto, CompaniesConfig.this ).showModalWindow();
+		new ModalNewAccount( getContext(), OperationCRUD.OP_MODIFY, (Account)dto, AccountsConfig.this ).showModalWindow();
 	}
 
 	@Override
 	public GenericControlerVto getControlerVto( AppContext ctx )
 	{
-		return new CompanyControlerVto(ctx);
+		return new AccountControlerVto(ctx);
 	}
 
 	@Override
 	public BaseDto getFieldDto() 
 	{ 
-		return new Company();
+		return new Account();
 	}
 	
 	@Override
 	public BaseManager getFieldManagerImp() 
 	{
-		return IOCManager._CompaniesManager;
+		return IOCManager._AccountsManager;
 	}
 
 	@Override
@@ -192,7 +169,7 @@ public class CompaniesConfig extends PagedContent implements ModalParent
 	@Override
 	public boolean hasAddRight()
 	{
-		return getContext().hasRight( "configuration.companies.add" );
+		return getContext().hasRight( "configuration.accounts.add" );
 	}
 
 	@Override
@@ -209,7 +186,7 @@ public class CompaniesConfig extends PagedContent implements ModalParent
 	{
 		bttnApply.addClickListener( new Button.ClickListener()
 		{
-			private static final long serialVersionUID = 309512710669351392L;
+			private static final long serialVersionUID = 1023337437523177453L;
 
 			@Override
 			public void buttonClick( ClickEvent event )
@@ -221,10 +198,10 @@ public class CompaniesConfig extends PagedContent implements ModalParent
 
 	private void fillComboTypes()
 	{
-		for ( int i = Company.TYPE_PROVIDER; i <= Company.TYPE_BANK; i++ )
+		for ( int i = Account.TYPE_BANK; i <= Account.TYPE_PROVIDER; i++ )
 		{
 			comboTypes.addItem( i );
-			comboTypes.setItemCaption( i, getContext().getString( "company.type." + i ) );
+			comboTypes.setItemCaption( i, getContext().getString( "account.type." + i ) );
 		}	
 	}
 }

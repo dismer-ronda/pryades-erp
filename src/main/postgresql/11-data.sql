@@ -114,6 +114,16 @@ insert into profiles_rights (ref_profile, ref_right) values (0, 44);
 insert into profiles_rights (ref_profile, ref_right) values (0, 45);
 insert into profiles_rights (ref_profile, ref_right) values (0, 46);
 
+insert into rights (id, code) values (47, 'configuration.accounts');
+insert into rights (id, code) values (48, 'configuration.accounts.add');
+insert into rights (id, code) values (49, 'configuration.accounts.modify');
+insert into rights (id, code) values (50, 'configuration.accounts.delete');
+insert into profiles_rights (ref_profile, ref_right) values (0, 47);
+insert into profiles_rights (ref_profile, ref_right) values (0, 48);
+insert into profiles_rights (ref_profile, ref_right) values (0, 49);
+insert into profiles_rights (ref_profile, ref_right) values (0, 50);
+
+
 ---------------------------------------------    
 -- users 
 ---------------------------------------------

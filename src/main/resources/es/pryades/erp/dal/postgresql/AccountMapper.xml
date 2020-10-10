@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="es.pryades.erp.dal.ibatis.AccountMapper">
+
+	<select id="selectCompanyContacts" parameterType="long" resultMap="mapCompanyContact">
+		select 
+			companies_contacts.id,
+		
+			companies_contacts.ref_company,
+			companies_contacts.name,
+			companies_contacts.email,
+			companies_contacts.phone
+
+		from companies_contacts
+		 		
+		where 
+			companies_contacts.ref_company = #{id}
+			
+		order by companies_contacts.id asc
+	</select>
+
+	<resultMap id="mapCompanyContact" type="es.pryades.erp.dto.CompanyContact">
+		<id property="id" column="id"/>
+		
+		<result property="ref_company" column="ref_company"/>
+		<result property="name" column="name"/>
+		<result property="email" column="email"/>
+		<result property="phone" column="phone"/>
+	</resultMap>
+
+	<resultMap id="mapCompany" type="es.pryades.erp.dto.Company">
+		<id property="id" column="id"/>
+		
+		<result property="name" column="name"/>
+		<result property="alias" column="alias"/>
+		<result property="tax_id" column="tax_id"/>
+		<result property="address" column="address"/>
+		<result property="email" column="email"/>
+		<result property="phone" column="phone"/>
+		<result property="type_company" column="type_company"/>
+		<result property="taxable" column="taxable"/>
+		<result property="language" column="language"/>
+		<result property="signature" column="signature"/>
+		
+		<collection property="contacts" column="id" ofType="mapCompanyContact" select="selectCompanyContacts"> </collection>
+	</resultMap>
+
+	<resultMap id="mapAccount" type="es.pryades.erp.dto.Account">
+		<id property="id" column="id"/>
+		
+		<result property="account_type" column="account_type"/>
+		<result property="name" column="name"/>
+		<result property="number" column="number"/>
+		<result property="balance" column="balance"/>
+		<result property="ref_company" column="ref_company"/>
+		
+		<association property="company" javaType="es.pryades.erp.dto.Company" resultMap="mapCompany" columnPrefix="company_" />
+	</resultMap>
+
+	<sql id="es.pryades.erp.dal.ibatis.AccountMapper.fields">
+		accounts.id,
+		
+		accounts.account_type,						
+		accounts.name,						
+		accounts.number,						
+		accounts.balance,						
+		
+		accounts.ref_company,
+		
+		companies.id				as company_id,
+		companies.name				as company_name,
+		companies.alias				as company_alias,
+		companies.tax_id			as company_tax_id,
+		companies.address			as company_address,
+		companies.email				as company_email,
+		companies.phone				as company_phone,
+		companies.type_company		as company_type_company,
+		companies.taxable			as company_taxable,
+		companies.language			as company_language,
+		companies.signature			as company_signature
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.AccountMapper.joins">
+		left join companies
+		on accounts.ref_company = companies.id
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.AccountMapper.where">
+		<where>
+			<if test="ref_company != null">
+				AND accounts.ref_company = #{ref_company}    
+	        </if>
+			<if test="account_type != null">
+				AND accounts.account_type = #{account_type}    
+	        </if>
+			<if test="id != null">
+				AND accounts.id = #{id}    
+	        </if>
+		</where>
+	</sql>
+	
+	<sql id="es.pryades.erp.dal.ibatis.AccountMapper.orderby">
+		<choose>
+			<when test="orderby.equals( 'number' )">
+				accounts.number
+			</when>
+			<when test="orderby.equals( 'name' )">
+				accounts.name
+			</when>
+			<when test="orderby.equals( 'company_name' )">
+				companies.alias
+			</when>
+			<otherwise>
+				accounts.id
+			</otherwise>
+		</choose>
+
+		<choose>
+			<when test="order.equalsIgnoreCase( 'asc' )">
+				asc
+			</when>
+			<otherwise>
+				desc
+			</otherwise>
+		</choose>
+	</sql>
+	
+	<select id="getNumberOfRows" parameterType="es.pryades.erp.dto.Query" resultType="long">
+		select 
+			count(1) 
+		from 
+			accounts
+
+    	<include refid="es.pryades.erp.dal.ibatis.AccountMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.AccountMapper.where" />
+	</select>
+
+	<select id="getPage" parameterType="es.pryades.erp.dto.Query" resultMap="mapAccount">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.AccountMapper.fields" />
+		
+		from
+			accounts
+		
+   		<include refid="es.pryades.erp.dal.ibatis.AccountMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.AccountMapper.where" />
+
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.AccountMapper.orderby" />
+
+		LIMIT #{pageSize} OFFSET (#{pageSize} * (#{pageNumber} - 1))
+	</select>
+
+	<select id="getRows" parameterType="es.pryades.erp.dto.Query" resultMap="mapAccount">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.AccountMapper.fields" />
+		
+		from
+			accounts
+		
+    	<include refid="es.pryades.erp.dal.ibatis.AccountMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.AccountMapper.where" />
+		
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.AccountMapper.orderby" />
+	</select>
+
+	<select id="getRow" parameterType="es.pryades.erp.dto.Query" resultMap="mapAccount">
+		select
+			<include refid="es.pryades.erp.dal.ibatis.AccountMapper.fields" />
+		
+		from
+			accounts
+		
+		<include refid="es.pryades.erp.dal.ibatis.AccountMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.AccountMapper.where" />
+	</select>
+
+	<insert id="addRow" parameterType="es.pryades.erp.dto.Account">
+
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			SELECT nextval('gendat');
+		</selectKey>
+
+		insert into accounts
+		(
+			id,
+
+			account_type,						
+			name,
+			number,
+			balance,
+			
+			ref_company
+		)
+		values
+		(
+			#{id},
+			
+			#{account_type},						
+			#{name},
+			#{number},
+			#{balance},
+			
+			#{ref_company}
+		)
+	</insert>
+
+	<update id="setRow" parameterType="es.pryades.erp.dto.Account">
+		update accounts set
+			account_type=#{account_type},						
+			name=#{name},
+			number=#{number},
+			balance=#{balance},
+			ref_company=#{ref_company}
+		where id = #{id}
+	</update>
+
+	<update id="delRow" parameterType="es.pryades.erp.dto.Account">
+		delete from accounts where id = #{id}
+	</update>
+
+</mapper>

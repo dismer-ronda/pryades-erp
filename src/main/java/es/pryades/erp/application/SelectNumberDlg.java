@@ -58,7 +58,7 @@ public class SelectNumberDlg extends Window
 		button1.setClickShortcut( KeyCode.ENTER );
 		button1.addClickListener(new Button.ClickListener() 
 		{
-			private static final long serialVersionUID = 31563218448960611L;
+			private static final long serialVersionUID = 31563218448960612L;
 
 			public void buttonClick(ClickEvent event) 
             {
