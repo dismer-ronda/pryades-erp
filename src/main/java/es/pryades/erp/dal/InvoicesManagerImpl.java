@@ -1,15 +1,17 @@
 package es.pryades.erp.dal;
 
-import org.apache.ibatis.session.SqlSession;
+import java.io.ByteArrayOutputStream;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 
 import es.pryades.erp.common.AppContext;
-import es.pryades.erp.common.BaseException;
-import es.pryades.erp.common.CalendarUtils;
+import es.pryades.erp.common.Utils;
 import es.pryades.erp.dal.ibatis.InvoiceMapper;
 import es.pryades.erp.dto.Invoice;
-import es.pryades.erp.dto.InvoiceLine;
+import es.pryades.erp.dto.query.InvoiceQuery;
 import es.pryades.erp.ioc.IOCManager;
+import es.pryades.erp.reports.PdfExportInvoice;
 
 /**
 *
@@ -33,63 +35,66 @@ public class InvoicesManagerImpl extends BaseManagerImpl implements InvoicesMana
 	}
 
 	@Override
-	public boolean duplicateInvoice( AppContext ctx, Invoice src ) throws BaseException
+	public boolean setEmptyToNull()
 	{
-		SqlSession session = ctx.getSession();
-		
-		boolean finish = session == null;		
-		
-		if ( finish )
-			session = ctx.openSession();
-
-		try 
-		{
-			Invoice newQuotation = new Invoice();
-			
-			newQuotation.setInvoice_date( CalendarUtils.getTodayAsLong() );
-			newQuotation.setRef_quotation( src.getRef_quotation() );
-			newQuotation.setTransport_cost( src.getTransport_cost() );
-			newQuotation.setFree_delivery( src.getFree_delivery() );
-			newQuotation.setRef_quotation( src.getRef_quotation() );
-			
-			IOCManager._InvoicesManager.setRow( ctx, null, newQuotation );
-			
-			for ( InvoiceLine line : src.getLines()  )
-			{
-				InvoiceLine newLine = new InvoiceLine();
-				
-				newLine.setRef_invoice( newQuotation.getId() );
-				newLine.setRef_quotation_line( line.getRef_quotation_line() );
-				newLine.setQuantity( 0 );
-				
-				IOCManager._InvoicesLinesManager.setRow( ctx, null, newLine );
-			}
-			
-			if ( finish )
-				session.commit();
-			
-			return false;
-		}
-		catch ( Throwable e )
-		{
-			if ( finish ) 
-				session.rollback();
-			
-			if ( isLogEnabled( ctx, "E" ) )			
-				getLogger().info( e.getCause() != null ? e.getCause().toString() : e.toString() );
-		}
-		finally
-		{
-			if ( finish )
-				ctx.closeSession();
-		}
-
 		return false;
 	}
 
 	@Override
-	public boolean setEmptyToNull()
+	public byte[] generatePdf( AppContext ctx, Invoice invoice ) throws Throwable
 	{
-		return false;
+    	String template = invoice.getQuotation().getCustomer().getTaxable().booleanValue() ? "national-invoice-template" : "international-invoice-template";
+		
+		PdfExportInvoice export = new PdfExportInvoice( invoice );
+		
+		export.setOrientation( "portrait" );
+		export.setPagesize( "A4" );
+		export.setTemplate( template );
+	
+		AppContext ctx1 = new AppContext( invoice.getQuotation().getCustomer().getLanguage() );
+		IOCManager._ParametersManager.loadParameters( ctx1 );
+		ctx1.setUser( ctx.getUser() );
+		ctx1.addData( "Url", ctx.getData( "Url" ) );
+    	ctx1.loadOwnerCompany();
+
+		export.setContext( ctx1 );
+
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		export.doExport( os );
+		
+		return os.toByteArray();
+	}
+
+	@Override
+	public byte[] generateListZip( AppContext ctx, InvoiceQuery query ) throws Throwable
+	{
+    	@SuppressWarnings("unchecked")
+		List<Invoice> invoices = IOCManager._InvoicesManager.getRows( ctx, query );
+    	
+    	String fileNames = "";
+    	for ( Invoice invoice : invoices )
+    	{
+    		String fileName = "/tmp/" + invoice.getFormattedNumber() + ".pdf";
+    		
+    		byte[] bytes = generatePdf( ctx, invoice );
+    		
+    		Utils.writeBinaryFile( fileName, bytes );
+    		
+    		if ( !fileNames.isEmpty() )
+    			fileNames += " ";
+    		fileNames += fileName;
+    	}
+    	
+    	Utils.cmdExec( "zip -Dj /tmp/invoices-list.zip " + fileNames );
+    	
+    	byte[] bytes = Utils.readBinaryFile( "/tmp/invoices-list.zip" );
+    	
+    	String parts[] = fileNames.split( " " );
+    	for ( String part : parts )
+    		Utils.DeleteFile( part );
+    	
+    	Utils.DeleteFile( "/tmp/invoices-list.zip" );
+    	
+    	return bytes;
 	}
 }

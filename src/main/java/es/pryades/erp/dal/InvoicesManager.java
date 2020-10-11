@@ -2,6 +2,7 @@ package es.pryades.erp.dal;
 
 import es.pryades.erp.common.AppContext;
 import es.pryades.erp.dto.Invoice;
+import es.pryades.erp.dto.query.InvoiceQuery;
 
 /**
 *
@@ -10,5 +11,6 @@ import es.pryades.erp.dto.Invoice;
 */
 public interface InvoicesManager extends BaseManager
 {
-	public boolean duplicateInvoice( AppContext ctx, Invoice src ) throws Throwable;
+	byte[] generatePdf( AppContext ctx, Invoice invoice ) throws Throwable;
+	byte[] generateListZip( AppContext ctx, InvoiceQuery query ) throws Throwable;
 }

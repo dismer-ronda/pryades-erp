@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.vaadin.dialogs.ConfirmDialog;
 
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.ui.Alignment;
@@ -11,8 +12,10 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 
 import es.pryades.erp.common.AppContext;
 import es.pryades.erp.common.BaseException;
@@ -20,13 +23,18 @@ import es.pryades.erp.common.CalendarUtils;
 import es.pryades.erp.common.ModalParent;
 import es.pryades.erp.common.ModalWindowsCRUD;
 import es.pryades.erp.common.Utils;
+import es.pryades.erp.dashboard.Dashboard;
 import es.pryades.erp.dto.BaseDto;
 import es.pryades.erp.dto.Company;
+import es.pryades.erp.dto.Operation;
+import es.pryades.erp.dto.Purchase;
+import es.pryades.erp.dto.Quotation;
 import es.pryades.erp.dto.QuotationDelivery;
 import es.pryades.erp.dto.QuotationLine;
 import es.pryades.erp.dto.QuotationLineDelivery;
 import es.pryades.erp.dto.UserDefault;
 import es.pryades.erp.dto.query.CompanyQuery;
+import es.pryades.erp.dto.query.OperationQuery;
 import es.pryades.erp.ioc.IOCManager;
 
 /**
@@ -169,7 +177,6 @@ public class ModalNewQuotationLine extends ModalWindowsCRUD implements ModalPare
 		row1.addComponent( editLine_order );
 		row1.addComponent( editOrigin );
 		row1.addComponent( editTitle );
-		row1.addComponent( editTax_rate );
 
 		HorizontalLayout row2 = new HorizontalLayout();
 		row2.setWidth( "100%" );
@@ -182,6 +189,7 @@ public class ModalNewQuotationLine extends ModalWindowsCRUD implements ModalPare
 		row3.setSpacing( true );
 		row3.addComponent( editCost );
 		row3.addComponent( editReal_cost );
+		row3.addComponent( editTax_rate );
 		row3.addComponent( editMargin );
 		row3.addComponent( comboProviders );
 		row3.addComponent( btnAdd );
@@ -213,6 +221,25 @@ public class ModalNewQuotationLine extends ModalWindowsCRUD implements ModalPare
 				tmp.setValue( Integer.toString( getDeliveryValue( delivery ) ) );
 				
 				row5.addComponent( tmp );
+				
+				if ( ((ModalNewQuotation)getModalParent()).getNewQuotation().getStatus().equals( Quotation.STATUS_APPROVED ) )
+				{
+					Button btnPurchase = new Button( getContext().getString( "modalNewQuotationLine.btnPurchase" ) );
+					btnPurchase.setData( tmp );
+					btnPurchase.addClickListener( new Button.ClickListener()
+					{
+						private static final long serialVersionUID = 3735634355355625038L;
+
+						public void buttonClick( ClickEvent event )
+						{
+							onPurchase( (TextField)event.getButton().getData() );
+						}
+					} );
+					
+					row5.addComponent( btnPurchase );
+					row5.setComponentAlignment( btnPurchase, Alignment.BOTTOM_LEFT );
+					row5.setExpandRatio( tmp, 1.0f );
+				}
 
 				editsDeliveries.add( tmp );
 			}
@@ -220,6 +247,106 @@ public class ModalNewQuotationLine extends ModalWindowsCRUD implements ModalPare
 			componentsContainer.addComponent( row5 );
 		}
 	}	
+	
+	private Operation getQuotationOperation()
+	{
+		try
+		{
+			OperationQuery query = new OperationQuery();
+			query.setRef_quotation( ((ModalNewQuotation)getModalParent()).getNewQuotation().getId() );
+			
+			return (Operation)IOCManager._OperationsManager.getRow( getContext(), query );
+		}
+		catch ( Throwable e )
+		{
+			Utils.logException( e, LOG );
+		}
+		
+		return null;
+	}
+	
+	private void onCreateOperation()
+	{
+		try
+		{
+			Operation operation = new Operation();
+
+			operation.setRef_quotation( ((ModalNewQuotation)getModalParent()).getNewQuotation().getId() );
+			operation.setTitle( ((ModalNewQuotation)getModalParent()).getNewQuotation().getTitle() );
+			operation.setStatus( Operation.STATUS_EXCECUTION );
+
+			IOCManager._OperationsManager.setRow( getContext(), null, operation );
+
+			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+			dashboard.refreshOperationsTab();
+			dashboard.refreshOperations();
+
+		}
+		catch ( Throwable e )
+		{
+			showErrorMessage( e );
+			Utils.logException( e, LOG );
+		}
+	}
+	
+	private void onPurchase( TextField edit )
+	{
+		Operation operation = getQuotationOperation();
+		
+		if ( operation == null )
+		{
+			ConfirmDialog.show( (UI)getContext().getData( "Application" ), getContext().getString( "modalNewQuotationLine.operationNotFound" ),
+		        new ConfirmDialog.Listener() 
+				{
+					private static final long serialVersionUID = -2451737407467323503L;
+
+					public void onClose(ConfirmDialog dialog) 
+		            {
+		                if ( dialog.isConfirmed() ) 
+							onCreateOperation();
+		            }
+		        });
+			
+			//Utils.showNotification( getContext(), getContext().getString( "modalNewQuotationLine.operationNotFound" ), Notification.Type.ERROR_MESSAGE );
+		}
+		else
+		{
+			try
+			{
+				Purchase purchase = new Purchase();
+				
+				double cost = newQuotation.getReal_cost() * Utils.getInt( edit.getValue(), 0 );
+				
+				purchase.setRef_buyer( ((ModalNewQuotation)getModalParent()).getNewQuotation().getRef_user() );
+				purchase.setPurchase_date( CalendarUtils.getTodayAsLong() );
+				purchase.setRegister_date( CalendarUtils.getTodayAsLong() );
+				purchase.setPurchase_type( Purchase.TYPE_SELL );
+				purchase.setStatus( Purchase.STATUS_CREATED );
+				purchase.setRef_buyer( getContext().getUser().getId() );
+				purchase.setPayed( 0.0 );
+				purchase.setNet_tax( 0.0 );
+				purchase.setRef_provider( newQuotation.getRef_provider() );
+				purchase.setNet_price( cost );
+				purchase.setNet_tax( cost * newQuotation.getTax_rate() / 100 );
+				purchase.setTitle( newQuotation.getTitle() );
+				purchase.setDescription( newQuotation.getDescription() );
+				purchase.setRef_operation( getQuotationOperation().getId() );
+		
+				IOCManager._PurchasesManager.setRow( getContext(), null, purchase );
+				
+				Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+				dashboard.refreshPurchasesTab();
+
+				Utils.showNotification( getContext(), getContext().getString( "modalNewQuotationLine.purchaseOk" ), Notification.Type.TRAY_NOTIFICATION );
+			}
+			catch ( Throwable e )
+			{
+				Utils.logException( e, LOG );
+				
+				Utils.showNotification( getContext(), getContext().getString( "modalNewQuotationLine.purchaseError" ), Notification.Type.ERROR_MESSAGE );
+			}
+		}
+	}
 
 	@Override
 	protected String getWindowResourceKey()

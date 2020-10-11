@@ -241,4 +241,14 @@ public class Invoice extends BaseDto
 	{
 		return Utils.getStringAsHtml( StringEscapeUtils.escapeXml( payment_terms ) );
 	}
+
+	public int getTaxRate()
+  	{
+  		return (int)((getGrandTotalTaxes() / getGrandTotalInvoice()) * 100);
+  	}
+  	
+	public String getTaxRateAsString()
+	{
+		return Integer.toString( getTaxRate() );
+	}
 }

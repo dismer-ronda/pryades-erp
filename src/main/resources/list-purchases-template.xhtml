@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
-	<title>$context.getString( "template.list.invoices" ) </title>
+	<title>$context.getString( "template.list.purchases" ) </title>
 		
 	<meta name="author" content="pryades" />
 
@@ -171,7 +171,7 @@
 				<img src="$context.getLogoUrl()" width="256px"> </img> 
 			</td>
 			<td>
-				<div class="text_right titulo1">$context.getString( "template.list.invoices" )</div>
+				<div class="text_right titulo1">$context.getString( "template.list.purchases" )</div>
 			</td>
 		</tr>
 		<tr>
@@ -179,7 +179,7 @@
 			</td>
 			<td class="text_right">
 				<div id="block_container">
-					<div class="text_regular_size padding_all text_bold">$context.getString( "template.list.invoices.query" ): </div>
+					<div class="text_regular_size padding_all text_bold">$context.getString( "template.list.purchases.query" ): </div>
 					<div class="text_regular_size padding_all">$query.getPeriodToString()</div>
 				</div>
 			</td>
@@ -190,62 +190,64 @@
 	<table class="border_no_spacing text_regular_size text_center" width="100%">
 		<tr>
 			<th width="48px" class="borde">
-				<div class="text_regular_size padding_all">$context.getString( "template.list.invoices.date" )</div>
+				<div class="text_regular_size padding_all">$context.getString( "template.list.purchases.date" )</div>
 			</th>
 			<th class="borde">
-				<div class="text_regular_size padding_all">$context.getString( "template.list.invoices.number" )</div>
+				<div class="text_regular_size padding_all">$context.getString( "template.list.purchases.number" )</div>
 			</th>
 			<th class="borde">
-				<div class="text_regular_size padding_all">$context.getString( "template.list.invoices.title" )</div>
+				<div class="text_regular_size padding_all">$context.getString( "template.list.purchases.title" )</div>
 			</th>
 			<th class="borde">
-				<div class="text_regular_size padding_all">$context.getString( "template.list.invoices.customer" )</div>
+				<div class="text_regular_size padding_all">$context.getString( "template.list.purchases.provider" )</div>
 			</th>
 			<th class="borde">
-				<div class="text_regular_size padding_all">$context.getString( "template.list.invoices.tax_id" )</div>
+				<div class="text_regular_size padding_all">$context.getString( "template.list.purchases.tax_id" )</div>
 			</th>
 			<th width="96px" class="borde">
-				<div class="text_regular_size padding_all">$context.getString( "template.list.invoices.total" )</div>
+				<div class="text_regular_size padding_all">$context.getString( "template.list.purchases.total" )</div>
 			</th>
 			<th class="borde">
-				<div class="text_regular_size padding_all">$context.getString( "template.list.invoices.tax_rate" )</div>
+				<div class="text_regular_size padding_all">$context.getString( "template.list.purchases.tax_rate" )</div>
 			</th>
 			<th width="96px" class="borde">
-				<div class="text_regular_size padding_all">$context.getString( "template.list.invoices.taxes" )</div>
+				<div class="text_regular_size padding_all">$context.getString( "template.list.purchases.taxes" )</div>
 			</th>
 			<th width="96px" class="borde">
-				<div class="text_regular_size padding_all">$context.getString( "template.list.invoices.grand.total" )</div>
+				<div class="text_regular_size padding_all">$context.getString( "template.list.purchases.grand.total" )</div>
 			</th>
 		</tr>
 
-		#foreach( $invoice in $invoices )
+		#foreach( $purchase in $purchases )
 			<tr>
 				<td class="borde text_left vcenter">
-					<div class="text_regular_size padding_all"> $invoice.getFormattedDate() </div>
+					<div class="text_regular_size padding_all"> $purchase.getFormattedDate() </div>
 				</td>
 				<td class="borde padding_all text_left vcenter">
-					<div class="text_regular_size padding_all"> $invoice.getFormattedNumber() </div>
+					<div class="text_regular_size padding_all"> $purchase.getFormattedNumber() </div>
 				</td>
 				<td class="borde padding_all text_left vcenter">
-					<div class="text_regular_size padding_all"> $invoice.getTitle() </div>
+					<div class="text_regular_size padding_all"> $purchase.getTitle() </div>
 				</td>
 				<td class="borde padding_all text_left vcenter">
-					<div class="text_regular_size padding_all"> $invoice.getQuotation().getCustomer().getName() </div>
+					<div class="text_regular_size padding_all"> $purchase.getProvider().getName() </div>
 				</td>
 				<td class="borde padding_all text_left vcenter">
-					<div class="text_regular_size padding_all"> $invoice.getQuotation().getCustomer().getTax_id() </div>
+				#if( $purchase.getProvider().hasTaxId() )
+					<div class="text_regular_size padding_all"> $purchase.getProvider().getTax_id() </div>
+				#end
 				</td>
 				<td class="borde padding_all text_right vcenter">
-					<div class="text_regular_size padding_all"> $invoice.getGrandTotalInvoiceAsString() €</div>
+					<div class="text_regular_size padding_all"> $purchase.getNetPriceAsString() €</div>
 				</td>
 				<td class="borde padding_all text_right vcenter">
-					<div class="text_regular_size padding_all"> $invoice.getTaxRateAsString() %</div>
+					<div class="text_regular_size padding_all"> $purchase.getTaxRateAsString() %</div>
 				</td>
 				<td class="borde padding_all text_right vcenter">
-					<div class="text_regular_size padding_all"> $invoice.getGrandTotalTaxesAsString() €</div>
+					<div class="text_regular_size padding_all"> $purchase.getNetTaxAsString() €</div>
 				</td>
 				<td class="borde padding_all text_right vcenter">
-					<div class="text_regular_size padding_all"> $invoice.getGrandTotalInvoiceAfterTaxesAsString() €</div>
+					<div class="text_regular_size padding_all"> $purchase.getGrossPriceAsString() €</div>
 				</td>
 			</tr>
 		#end
@@ -260,7 +262,7 @@
 			<td class="">
 			</td>
 			<td class="text_right vcenter">
-				<div class="text_regular_size padding_all text_bold"> $context.getString( "template.list.invoices.totals" ):</div>
+				<div class="text_regular_size padding_all text_bold"> $context.getString( "template.list.purchases.totals" ):</div>
 			</td>
 			<td class="text_right vcenter">
 				<div class="text_regular_size padding_all text_bold"> $report.getGrandTotalAsString() €</div>

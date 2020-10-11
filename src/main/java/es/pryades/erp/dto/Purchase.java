@@ -2,6 +2,7 @@ package es.pryades.erp.dto;
 
 import org.apache.log4j.Logger;
 
+import es.pryades.erp.common.CalendarUtils;
 import es.pryades.erp.common.Utils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -32,7 +33,7 @@ public class Purchase extends BaseDto
 	public static final int TYPE_COMMUNICATIONS	= 6;
 	public static final int TYPE_EQUIPMENT		= 7;
 	public static final int TYPE_SERVICE		= 8;
-	public static final int TYPE_OTHER			= 20;
+	public static final int TYPE_OTHER			= 9;
 
 	private Integer purchase_type;						
 
@@ -67,6 +68,11 @@ public class Purchase extends BaseDto
 	private User buyer;
   	private Operation operation;
   	
+	public String getFormattedDate()
+	{
+		return CalendarUtils.getDateFromLongAsString( getPurchase_date(), "dd-MM-yyyy" );
+	}
+	
 	public String getNetPriceAsString()
 	{
 		return Utils.getFormattedCurrency( net_price );
@@ -90,6 +96,16 @@ public class Purchase extends BaseDto
 	public String getGrossPriceAsString()
 	{
 		return Utils.getFormattedCurrency( getGrossPrice() );
+	}
+
+	public int getTaxRate()
+  	{
+  		return (int)((net_tax / net_price) * 100);
+  	}
+  	
+	public String getTaxRateAsString()
+	{
+		return Integer.toString( getTaxRate() );
 	}
 
 	public String getFormattedNumber() 

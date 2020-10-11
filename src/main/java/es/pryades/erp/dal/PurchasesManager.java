@@ -1,5 +1,8 @@
 package es.pryades.erp.dal;
 
+import es.pryades.erp.common.AppContext;
+import es.pryades.erp.dto.query.PurchaseQuery;
+
 /**
 *
 * @author dismer.ronda 
@@ -7,4 +10,5 @@ package es.pryades.erp.dal;
 */
 public interface PurchasesManager extends BaseManager
 {
+	byte[] generateListZip( AppContext ctx, PurchaseQuery query ) throws Throwable;
 }

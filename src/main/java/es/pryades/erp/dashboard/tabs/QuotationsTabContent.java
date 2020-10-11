@@ -152,6 +152,8 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 						return "yellow";
 					else if ( quotation.getStatus().equals( Quotation.STATUS_SENT ) )
 						return "blue";
+					else if ( quotation.getStatus().equals( Quotation.STATUS_FINISHED ) )
+						return "purple";
 					else if ( quotation.getStatus().equals( Quotation.STATUS_DISCARDED ) )
 						return "red";
 					

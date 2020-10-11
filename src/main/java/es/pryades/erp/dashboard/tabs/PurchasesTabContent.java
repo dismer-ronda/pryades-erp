@@ -1,5 +1,7 @@
 package es.pryades.erp.dashboard.tabs;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -8,6 +10,9 @@ import org.apache.log4j.Logger;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.server.FileDownloader;
+import com.vaadin.server.StreamResource;
+import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.ui.Alignment;
@@ -20,7 +25,9 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.PopupDateField;
 
+import es.pryades.erp.application.ShowExternalUrlDlg;
 import es.pryades.erp.common.AppContext;
+import es.pryades.erp.common.Authorization;
 import es.pryades.erp.common.BaseException;
 import es.pryades.erp.common.BaseTable;
 import es.pryades.erp.common.CalendarUtils;
@@ -164,7 +171,27 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 	{
 		List<Component> ops = new ArrayList<Component>();
 
-		HorizontalLayout rowTotals = new HorizontalLayout();
+		Button bttnPdf = new Button();
+		bttnPdf.setCaption( getContext().getString( "purchasesTab.list" ) );
+		bttnPdf.addClickListener( new Button.ClickListener()
+		{
+			private static final long serialVersionUID = -819877665197234072L;
+
+			public void buttonClick( ClickEvent event )
+			{
+				onShowList();
+			}
+		} );
+		ops.add( bttnPdf );
+
+		Button bttnZip = new Button();
+		bttnZip.setCaption( getContext().getString( "purchasesTab.download.zip" ) );
+		ops.add( bttnZip );
+		
+        FileDownloader fileDownloaderXls = new FileDownloader( getZipResource() );
+        fileDownloaderXls.extend( bttnZip );
+
+        HorizontalLayout rowTotals = new HorizontalLayout();
 		rowTotals.setWidth( "100%" );
 		rowTotals.setSpacing( true );
 		rowTotals.setMargin( new MarginInfo( false, true, false, true ) );
@@ -603,5 +630,76 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 		loadOperations();
 		fillComboOperations();
 	}
+
+	private void onShowList()
+	{
+		try
+		{
+			long ts = CalendarUtils.getTodayAsLong( "UTC" );
+			
+			String pagesize = "A4";
+			String template = "list-purchases-template";
+			String timeout = "0";
+			
+			PurchaseQuery query = (PurchaseQuery)getQueryObject();
+			
+			String extra = "ts=" + ts + 
+					"&query=" + Utils.getUrlEncoded( Utils.toJson( query ) ) + 
+					"&pagesize=" + pagesize + 
+					"&language=" + getContext().getLanguage() +
+					"&template=" + template +
+					"&name=" + getContext().getString( "purchasesTab.purchases" ) + "-" + query.getPeriodToString() +
+					"&url=" + getContext().getData( "Url" ) +
+					"&timeout=" + timeout;
+			
+			String user = getContext().getUser().getLogin();
+			String password = getContext().getUser().getPwd();
+			
+			String token = "token=" + Authorization.getTokenString( "" + ts + timeout, password );
+			String code = "code=" + Authorization.encrypt( extra, password ) ;
+
+			String url = getContext().getData( "Url" ) + "/services/purchases" + "?user=" + user + "&" + token + "&" + code + "&ts=" + ts;
+			
+			String caption = getContext().getString( "purchasesTab.purchases" );
+
+			ShowExternalUrlDlg dlg = new ShowExternalUrlDlg(); 
+	
+			dlg.setContext( getContext() );
+			dlg.setUrl( url );
+			dlg.setCaption( caption );
+			dlg.createComponents();
+			
+			getUI().addWindow( dlg );
+		}
+		catch ( Throwable e )
+		{
+			Utils.logException( e, LOG );
+		}
+	}
+
+	private StreamResource getZipResource() 
+	{
+		return new StreamResource( 
+			new StreamSource() 
+			{
+				private static final long serialVersionUID = -4073608207577608599L;
+
+				@Override
+	            public InputStream getStream() 
+	            {
+					try
+					{
+						return new ByteArrayInputStream( IOCManager._PurchasesManager.generateListZip( getContext(), (PurchaseQuery)getQueryObject() ) );
+					}
+					catch ( Throwable e )
+					{
+						e.printStackTrace();
+					}
+					
+					return null;
+	            }
+	        }, 
+	        Utils.getUUID() + ".zip" );
+    }
 }
 

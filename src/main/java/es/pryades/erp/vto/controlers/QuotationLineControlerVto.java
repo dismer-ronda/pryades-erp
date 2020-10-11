@@ -60,7 +60,7 @@ public class QuotationLineControlerVto extends GenericControlerVto
 				labelInvoiced.setStyleName( (totalInvoiced < line.getTotalQuantity()) ? "red" : "green" );
 				
 				result.setTotal_invoiced( labelInvoiced );
-				result.setProvider_name( line.getProvider() != null ? line.getProvider().getName() : "" );
+				result.setProvider_name( line.getProvider() != null ? line.getProvider().getAlias() : "" );
 				
 				result.setPrice( line.getPrice() ); 
 				

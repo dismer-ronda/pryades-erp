@@ -43,4 +43,9 @@ public class Company extends BaseDto
   	
 	private List<CompanyContact> contacts;
 	private List<User> users;
+	
+	public boolean hasTaxId()
+	{
+		return tax_id != null; 
+	}
 }

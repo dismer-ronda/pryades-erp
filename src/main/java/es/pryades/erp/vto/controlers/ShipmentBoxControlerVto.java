@@ -5,8 +5,6 @@ import es.pryades.erp.common.BaseException;
 import es.pryades.erp.common.GenericControlerVto;
 import es.pryades.erp.common.GenericVto;
 import es.pryades.erp.common.VtoControllerFactory;
-import es.pryades.erp.configuration.tabs.ShipmentsBoxesConfig;
-import es.pryades.erp.dto.Shipment;
 import es.pryades.erp.dto.ShipmentBox;
 import es.pryades.erp.vto.ShipmentBoxVto;
 

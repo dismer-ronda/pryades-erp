@@ -605,6 +605,9 @@
 			<if test="title != null">
 				AND operations.title like #{title}    
 	        </if>
+			<if test="id != null">
+				AND operations.id = #{id}    
+	        </if>
 		</where>
 	</sql>
 	
@@ -682,8 +685,7 @@
 			operations
 		
 		<include refid="es.pryades.erp.dal.ibatis.OperationMapper.joins" />
-		
-		where operations.id = #{id}
+		<include refid="es.pryades.erp.dal.ibatis.OperationMapper.where" />
 	</select>
 
 	<insert id="addRow" parameterType="es.pryades.erp.dto.Operation">

@@ -1,5 +1,6 @@
 package es.pryades.erp.dto.query;
 
+import es.pryades.erp.common.CalendarUtils;
 import es.pryades.erp.dto.Purchase;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,5 +19,19 @@ public class PurchaseQuery extends Purchase
 	
 	private Long from_date;						
 	private Long to_date;
-	private Long ref_operation;
+
+	public String getPeriodToString()
+	{
+		String ret = "";
+		
+		if ( getFrom_date() != null )
+			ret += CalendarUtils.getFormatedDate( getFrom_date(), "dd-MM-yyyy" );
+		
+		ret += "  ...  ";
+		
+		if ( getTo_date() != null )
+			ret += CalendarUtils.getFormatedDate( getTo_date(), "dd-MM-yyyy" );
+		
+		return ret;
+	}
 }

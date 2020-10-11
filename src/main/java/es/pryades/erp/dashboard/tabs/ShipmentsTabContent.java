@@ -192,6 +192,11 @@ public class ShipmentsTabContent extends PagedContent implements ModalParent
 
 		return query;
 	}
+	
+	public List<Component> getCustomOperations()
+	{
+		return null;
+	}
 
 	@Override
 	public void onOperationNew()

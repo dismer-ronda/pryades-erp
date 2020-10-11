@@ -794,35 +794,25 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 				queryInvoice.setId( newInvoice.getId() );
 				Invoice invoice = (Invoice)IOCManager._InvoicesManager.getRow( getContext(), queryInvoice );
 
-				String template = newInvoice.getQuotation().getCustomer().getTaxable().booleanValue() ? "national-invoice-template" : "international-invoice-template";
-				String name = newInvoice.getFormattedNumber() + "-" + invoice.getQuotation().getTitle() + ".pdf";
+				byte[] bytes = IOCManager._InvoicesManager.generatePdf( getContext(), invoice );
 				
-				PdfExportInvoice export = new PdfExportInvoice( invoice );
-				
-				export.setOrientation( "portrait" );
-				export.setPagesize( "A4" );
-				export.setTemplate( template );
-			
 				AppContext ctx1 = new AppContext( invoice.getQuotation().getCustomer().getLanguage() );
 				IOCManager._ParametersManager.loadParameters( ctx1 );
 				ctx1.setUser( getContext().getUser() );
 				ctx1.addData( "Url", getContext().getData( "Url" ) );
 		    	ctx1.loadOwnerCompany();
 
-				export.setContext( ctx1 );
-	
-				ByteArrayOutputStream os = new ByteArrayOutputStream();
-				export.doExport( os );
-	
+				String name = newInvoice.getFormattedNumber() + "-" + newInvoice.getQuotation().getTitle() + ".pdf";
+				
 				List<Attachment> attachments = new ArrayList<Attachment>();
-				attachments.add( new Attachment( name, "application/pdf", os.toByteArray() ) );
+				attachments.add( new Attachment( name, "application/pdf", bytes ) );
 				
 				String subject = ctx1.getString( "modalNewInvoice.emailSubject" ).replaceAll( "%name%", name );  
 				String text = ctx1.getString( "modalNewInvoice.emailText" ).
 						replaceAll( "%contact_person%", invoice.getQuotation().getContact().getName() ).
-						replaceAll( "%reference_order%", invoice.getQuotation().getReference_order() );  
+						replaceAll( "%reference_order%",invoice.getQuotation().getReference_order() );  
 	
-				String body = text + "\n\n" + ctx1.getCompanyDataAndLegal( newInvoice.getQuotation().getUser() ); 
+				String body = text + "\n\n" + ctx1.getCompanyDataAndLegal( invoice.getQuotation().getUser() ); 
 				
 				final SendEmailDlg dlg = new SendEmailDlg( getContext(), getContext().getString( "modalNewInvoice.emailTitle" ), attachments, invoice.getQuotation().getCustomer().getContacts() );
 				dlg.setTo( invoice.getQuotation().getContact().getEmail() );

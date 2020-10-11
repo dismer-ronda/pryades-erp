@@ -17,6 +17,7 @@ import es.pryades.erp.resources.PackingResource;
 import es.pryades.erp.resources.PurchaseInvoiceResource;
 import es.pryades.erp.resources.PurchasePaymentResource;
 import es.pryades.erp.resources.PurchaseQuotationResource;
+import es.pryades.erp.resources.PurchasesResource;
 import es.pryades.erp.resources.QrResource;
 import es.pryades.erp.resources.QuotationResource;
 import es.pryades.erp.resources.ShipmentBoxResource;
@@ -54,6 +55,7 @@ public class ServicesServlet extends Application
     	router.attach( "/purchase-invoice", PurchaseInvoiceResource.class );
     	router.attach( "/purchase-quotation", PurchaseQuotationResource.class );
     	router.attach( "/purchase-payment", PurchasePaymentResource.class );
+    	router.attach( "/purchases", PurchasesResource.class );
     	
     	LOG.info( "started" );
 	    

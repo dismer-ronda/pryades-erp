@@ -1,5 +1,7 @@
 package es.pryades.erp.dashboard.tabs;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -8,6 +10,9 @@ import org.apache.log4j.Logger;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.server.FileDownloader;
+import com.vaadin.server.StreamResource;
+import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.ui.Alignment;
@@ -120,18 +125,24 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 		List<Component> ops = new ArrayList<Component>();
 		
 		Button bttnPdf = new Button();
-		bttnPdf.setCaption( getContext().getString( "invoicesConfig.pdf" ) );
+		bttnPdf.setCaption( getContext().getString( "invoicesConfig.list" ) );
 		bttnPdf.addClickListener( new Button.ClickListener()
 		{
 			private static final long serialVersionUID = -819877665197234072L;
 
 			public void buttonClick( ClickEvent event )
 			{
-				onShowPdf();
+				onShowListPdf();
 			}
 		} );
-
 		ops.add( bttnPdf );
+
+		Button bttnZip = new Button();
+		bttnZip.setCaption( getContext().getString( "invoicesConfig.download.zip" ) );
+		ops.add( bttnZip );
+		
+        FileDownloader fileDownloaderXls = new FileDownloader( getZipResource() );
+        fileDownloaderXls.extend( bttnZip );
 
 		HorizontalLayout rowTotals = new HorizontalLayout();
 		rowTotals.setWidth( "100%" );
@@ -390,7 +401,7 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 		return null;
 	}
 	
-	private void onShowPdf()
+	private void onShowListPdf()
 	{
 		try
 		{
@@ -419,7 +430,7 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 
 			String url = getContext().getData( "Url" ) + "/services/invoices" + "?user=" + user + "&" + token + "&" + code + "&ts=" + ts;
 			
-			String caption = getContext().getString( "invoicesConfig.list" );
+			String caption = getContext().getString( "invoicesConfig.invoices" );
 
 			ShowExternalUrlDlg dlg = new ShowExternalUrlDlg(); 
 	
@@ -435,5 +446,30 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 			Utils.logException( e, LOG );
 		}
 	}
+	
+	private StreamResource getZipResource() 
+	{
+		return new StreamResource( 
+			new StreamSource() 
+			{
+				private static final long serialVersionUID = -735471435162882811L;
+
+				@Override
+	            public InputStream getStream() 
+	            {
+					try
+					{
+						return new ByteArrayInputStream( IOCManager._InvoicesManager.generateListZip( getContext(), (InvoiceQuery)getQueryObject() ) );
+					}
+					catch ( Throwable e )
+					{
+						e.printStackTrace();
+					}
+					
+					return null;
+	            }
+	        }, 
+	        Utils.getUUID() + ".zip" );
+    }
 }
 

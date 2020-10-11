@@ -186,6 +186,9 @@ public class Dashboard extends VerticalLayout implements SelectedTabChangeListen
 		if ( getContext().hasRight( "configuration.quotations" ) )
 			createQuotationsTab();
 
+		if ( getContext().hasRight( "configuration.purchases" ) )
+			createPurchasesTab();
+		
 		if ( getContext().hasRight( "configuration.invoices" ) )
 			createInvoicesTab();
 		
@@ -194,9 +197,6 @@ public class Dashboard extends VerticalLayout implements SelectedTabChangeListen
 		
 		if ( getContext().hasRight( "configuration.operations" ) )
 			createOperationsTab();
-		
-		if ( getContext().hasRight( "configuration.purchases" ) )
-			createPurchasesTab();
 		
 		if ( getContext().hasRight( "main.log" )  )
 			createLogTab();

@@ -46,6 +46,11 @@
 }
 
 .v-table-cell-content-yellow {
-    color: #FF6700;
+    color: orange;
+	font-weight: bold;
+}
+
+.v-table-cell-content-purple {
+    color: purple;
 	font-weight: bold;
 }

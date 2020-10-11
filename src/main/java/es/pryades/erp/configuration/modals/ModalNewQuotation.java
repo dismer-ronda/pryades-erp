@@ -520,7 +520,7 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 			dashboard.refreshShipmentsTab();
 			dashboard.refreshOperationsTab();
 			
-			if ( ((Quotation)orgDto).getStatus().equals( Quotation.STATUS_SENT ) && newQuotation.getStatus().equals( Quotation.STATUS_APPROVED ) )
+			if ( ((Quotation)orgDto).getStatus() < Quotation.STATUS_APPROVED && newQuotation.getStatus().equals( Quotation.STATUS_APPROVED ) )
 			{
 				ConfirmDialog.show( (UI)getContext().getData( "Application" ), getContext().getString( "modalNewQuotation.operation" ),
 				        new ConfirmDialog.Listener() 

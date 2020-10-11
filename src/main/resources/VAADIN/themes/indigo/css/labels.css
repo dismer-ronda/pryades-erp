@@ -148,6 +148,11 @@
 	font-weight: bold;
 }
 
+.v-label-yellow {
+	color: orange;
+	font-weight: bold;
+}
+
 .tooltip {
     position: relative;
     display: inline-block;
