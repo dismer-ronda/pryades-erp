@@ -26,11 +26,11 @@ import es.pryades.erp.reports.PdfExportInvoices;
 import es.pryades.erp.services.Return;
 import es.pryades.erp.services.ReturnFactory;
 
-public class InvoicesResource extends ServerResource 
+public class InvoicesPdfResource extends ServerResource 
 {
-	private static final Logger LOG = Logger.getLogger( InvoicesResource.class );
+	private static final Logger LOG = Logger.getLogger( InvoicesPdfResource.class );
 
-	public InvoicesResource() 
+	public InvoicesPdfResource() 
 	{
 		super();
 	}
@@ -96,7 +96,7 @@ public class InvoicesResource extends ServerResource
 						try
 						{
 					    	InvoiceQuery query = (InvoiceQuery)Utils.toPojo( Utils.getUrlDecoded( q ), InvoiceQuery.class, false );
-					    	query.setOrder( "asc" );
+					    	query.setOrder( "desc" );
 					    	query.setOrderby( "invoice_date" );
 					    	
 					    	List<Invoice> invoices = IOCManager._InvoicesManager.getRows( ctx, query );

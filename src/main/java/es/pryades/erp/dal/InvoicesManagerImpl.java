@@ -4,6 +4,13 @@ import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import es.pryades.erp.common.AppContext;
 import es.pryades.erp.common.Utils;
@@ -23,6 +30,8 @@ public class InvoicesManagerImpl extends BaseManagerImpl implements InvoicesMana
 	private static final long serialVersionUID = 7316344102356022841L;
 	
 	private static final Logger LOG = Logger.getLogger( InvoicesManagerImpl.class );
+
+	public static final String moneyFormat = "0.00 [$€-C0A];[RED]-0.00 [$€-C0A]";
 
 	public static BaseManager build()
 	{
@@ -68,6 +77,9 @@ public class InvoicesManagerImpl extends BaseManagerImpl implements InvoicesMana
 	@Override
 	public byte[] generateListZip( AppContext ctx, InvoiceQuery query ) throws Throwable
 	{
+		query.setOrderby( "invoice_date" );
+		query.setOrder( "desc" );
+
     	@SuppressWarnings("unchecked")
 		List<Invoice> invoices = IOCManager._InvoicesManager.getRows( ctx, query );
     	
@@ -97,4 +109,162 @@ public class InvoicesManagerImpl extends BaseManagerImpl implements InvoicesMana
     	
     	return bytes;
 	}
+	
+	@Override
+	public byte[] exportListXls( AppContext ctx, InvoiceQuery query ) throws Throwable
+	{
+		query.setOrderby( "invoice_date" );
+		query.setOrder( "desc" );
+
+		@SuppressWarnings("resource")
+		Workbook workbook = new XSSFWorkbook();
+		
+		Sheet sheet = workbook.createSheet();
+		
+		int i = 0;
+		
+		Row sheetRow = sheet.createRow( i++ );
+		
+        CellStyle styleHeader = workbook.createCellStyle();
+        Font fontHeader = workbook.createFont();
+        fontHeader.setBoldweight( Font.BOLDWEIGHT_BOLD );
+        styleHeader.setAlignment(CellStyle.ALIGN_CENTER );
+        styleHeader.setFont( fontHeader );
+
+        CellStyle styleFooter = workbook.createCellStyle();
+        Font fontFooter = workbook.createFont();
+        fontFooter.setBoldweight( Font.BOLDWEIGHT_BOLD );
+        styleFooter.setAlignment(CellStyle.ALIGN_RIGHT );
+        styleFooter.setFont( fontFooter);
+        
+        CellStyle styleCurrency = workbook.createCellStyle();
+        Font fontCurrency = workbook.createFont();
+        styleCurrency.setAlignment(CellStyle.ALIGN_RIGHT );
+        styleCurrency.setFont( fontCurrency );
+        styleCurrency.setDataFormat( workbook.createDataFormat().getFormat( moneyFormat ) );
+
+        CellStyle styleFooterCurrency = workbook.createCellStyle();
+        Font fontFooterCurrency = workbook.createFont();
+        fontFooterCurrency.setBoldweight( Font.BOLDWEIGHT_BOLD );
+        styleFooterCurrency.setAlignment(CellStyle.ALIGN_RIGHT );
+        styleFooterCurrency.setFont( fontFooter);
+        styleFooterCurrency.setDataFormat( workbook.createDataFormat().getFormat( moneyFormat ) );
+        
+		int j = 0;
+        Cell cell = sheetRow.createCell( j++ );
+        cell.setCellStyle(styleHeader);
+		cell.setCellValue( ctx.getString( "template.list.invoices.date" ) );
+
+		cell = sheetRow.createCell( j++ );
+        cell.setCellStyle(styleHeader);
+		cell.setCellValue( ctx.getString( "template.list.invoices.invoice_number" ) );
+		
+		cell = sheetRow.createCell( j++ );
+        cell.setCellStyle(styleHeader);
+		cell.setCellValue( ctx.getString( "template.list.invoices.title" ) );
+
+		cell = sheetRow.createCell( j++ );
+        cell.setCellStyle(styleHeader);
+		cell.setCellValue( ctx.getString( "template.list.invoices.customer" ) );
+		
+		cell = sheetRow.createCell( j++ );
+        cell.setCellStyle(styleHeader);
+		cell.setCellValue( ctx.getString( "template.list.invoices.tax_id" ) );
+		
+		cell = sheetRow.createCell( j++ );
+        cell.setCellStyle(styleHeader);
+		cell.setCellValue( ctx.getString( "template.list.invoices.total" ) );
+		
+		cell = sheetRow.createCell( j++ );
+        cell.setCellStyle(styleHeader);
+		cell.setCellValue( ctx.getString( "template.list.invoices.tax_rate" ) );
+		
+		cell = sheetRow.createCell( j++ );
+        cell.setCellStyle(styleHeader);
+		cell.setCellValue( ctx.getString( "template.list.invoices.taxes" ) );
+		
+		cell = sheetRow.createCell( j++ );
+        cell.setCellStyle(styleHeader);
+		cell.setCellValue( ctx.getString( "template.list.invoices.grand.total" ) );
+		
+		@SuppressWarnings("unchecked")
+		List<Invoice> invoices = IOCManager._InvoicesManager.getRows( ctx, query );
+    	
+		double totalBase = 0, totalTaxes = 0, totalGross = 0; 
+    	for ( Invoice invoice : invoices )
+    	{
+			sheetRow = sheet.createRow( i++ );
+			
+			j = 0;
+			cell = sheetRow.createCell( j++ );
+			cell.setCellValue( invoice.getFormattedDate() );
+
+			cell = sheetRow.createCell( j++ );
+			cell.setCellValue( invoice.getFormattedNumber() );
+			
+			cell = sheetRow.createCell( j++ );
+			cell.setCellValue( invoice.getTitle() );
+
+			cell = sheetRow.createCell( j++ );
+			cell.setCellValue( invoice.getQuotation().getCustomer().getName() );
+			
+			cell = sheetRow.createCell( j++ );
+			cell.setCellValue( invoice.getQuotation().getCustomer().getTax_id() );
+			
+			cell = sheetRow.createCell( j++ );
+	        cell.setCellStyle(styleCurrency);
+			cell.setCellValue( invoice.getGrandTotalInvoice() );
+			
+			cell = sheetRow.createCell( j++ );
+			cell.setCellValue( invoice.getTaxRate() );
+			
+			cell = sheetRow.createCell( j++ );
+	        cell.setCellStyle(styleCurrency);
+			cell.setCellValue( invoice.getTotalTaxes() );
+			
+			cell = sheetRow.createCell( j++ );
+	        cell.setCellStyle(styleCurrency);
+			cell.setCellValue( invoice.getGrandTotalInvoiceAfterTaxes() );
+			
+			totalBase += invoice.getGrandTotalInvoice();
+			totalTaxes += invoice.getTotalTaxes();
+			totalGross += invoice.getGrandTotalInvoiceAfterTaxes();
+		}
+		
+		sheetRow = sheet.createRow( i++ );
+		sheetRow = sheet.createRow( i++ );
+		
+		j = 0;
+		cell = sheetRow.createCell( j++ );
+		cell = sheetRow.createCell( j++ );
+		cell = sheetRow.createCell( j++ );
+		cell = sheetRow.createCell( j++ );
+		
+		cell = sheetRow.createCell( j++);
+        cell.setCellStyle(styleFooter);
+		cell.setCellValue( ctx.getString( "template.list.invoices.totals" ) );
+
+		cell = sheetRow.createCell( j++ );
+        cell.setCellStyle(styleFooterCurrency);
+		cell.setCellValue( totalBase );
+	
+		cell = sheetRow.createCell( j++ );
+		
+		cell = sheetRow.createCell( j++ );
+        cell.setCellStyle(styleFooterCurrency);
+		cell.setCellValue( totalTaxes );
+		
+		cell = sheetRow.createCell( j++ );
+        cell.setCellStyle(styleFooterCurrency);
+		cell.setCellValue( totalGross );
+
+		for ( int col = 0; col < j; col++ )
+			sheet.autoSizeColumn( col );
+		
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		workbook.write( os );
+		
+		return os.toByteArray();
+	}
+	
 }

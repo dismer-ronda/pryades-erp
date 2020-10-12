@@ -59,21 +59,16 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 {
 	private static final long serialVersionUID = -6400806879059724780L;
 
-	@SuppressWarnings("unused")
 	private static final Logger LOG = Logger.getLogger( InvoicesTabContent.class );
 
 	private PopupDateField fromDateField;
 	private PopupDateField toDateField;
-
 	private ComboBox comboCustomers;
-
 	private TextField editReference_request;
 	private TextField editReference_order;
-
 	private Button bttnApply;
-
 	private Label labelTotalPrice;
-
+	
 	private List<Company> customers;
 
 	private UserDefault default_from;
@@ -125,7 +120,7 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 		List<Component> ops = new ArrayList<Component>();
 		
 		Button bttnPdf = new Button();
-		bttnPdf.setCaption( getContext().getString( "invoicesConfig.list" ) );
+		bttnPdf.setCaption( getContext().getString( "invoicesConfig.list.pdf" ) );
 		bttnPdf.addClickListener( new Button.ClickListener()
 		{
 			private static final long serialVersionUID = -819877665197234072L;
@@ -137,12 +132,20 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 		} );
 		ops.add( bttnPdf );
 
+		Button bttnXls = new Button();
+		bttnXls.setCaption( getContext().getString( "invoicesConfig.list.xls" ) );
+		ops.add( bttnXls );
+		
+		FileDownloader fileDownloaderXls = new FileDownloader( getXlsResource() );
+        fileDownloaderXls.setOverrideContentType( true );
+        fileDownloaderXls.extend( bttnXls );
+
 		Button bttnZip = new Button();
 		bttnZip.setCaption( getContext().getString( "invoicesConfig.download.zip" ) );
 		ops.add( bttnZip );
 		
-        FileDownloader fileDownloaderXls = new FileDownloader( getZipResource() );
-        fileDownloaderXls.extend( bttnZip );
+        FileDownloader fileDownloaderZip = new FileDownloader( getZipResource() );
+        fileDownloaderZip.extend( bttnZip );
 
 		HorizontalLayout rowTotals = new HorizontalLayout();
 		rowTotals.setWidth( "100%" );
@@ -449,7 +452,7 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 	
 	private StreamResource getZipResource() 
 	{
-		return new StreamResource( 
+		StreamResource res = new StreamResource( 
 			new StreamSource() 
 			{
 				private static final long serialVersionUID = -735471435162882811L;
@@ -470,6 +473,40 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 	            }
 	        }, 
 	        Utils.getUUID() + ".zip" );
+		
+		res.setCacheTime( 0 );
+		
+		return res;
     }
+
+	private StreamResource getXlsResource() 
+	{
+		StreamResource res =
+			new StreamResource( 
+				new StreamSource() 
+				{
+					private static final long serialVersionUID = -735471435162882812L;
+	
+					@Override
+		            public InputStream getStream() 
+		            {
+						try
+						{
+							return new ByteArrayInputStream( IOCManager._InvoicesManager.exportListXls( getContext(), (InvoiceQuery)getQueryObject() ) );
+						}
+						catch ( Throwable e )
+						{
+							e.printStackTrace();
+						}
+						
+						return null;
+		            }
+		        }, 
+		        Utils.getUUID() + ".xls" );
+		
+			res.setCacheTime( 0 );
+			
+			return res;
+	    }
 }
 

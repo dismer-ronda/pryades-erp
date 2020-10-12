@@ -96,7 +96,7 @@ public class PurchasesResource extends ServerResource
 						try
 						{
 							PurchaseQuery query = (PurchaseQuery)Utils.toPojo( Utils.getUrlDecoded( q ), PurchaseQuery.class, false );
-					    	query.setOrder( "asc" );
+					    	query.setOrder( "desc" );
 					    	query.setOrderby( "purchase_date" );
 					    	
 					    	@SuppressWarnings("unchecked")

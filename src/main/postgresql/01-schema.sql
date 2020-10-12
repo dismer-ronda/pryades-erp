@@ -450,3 +450,61 @@ create table operations
 );
 alter table operations OWNER TO pryades;
 
+create table purchases 
+(
+	id bigint not null,
+
+	purchase_type int not null, -- 1: producto para cliente, gasto empresa, etc						
+
+	number int not null,						
+	title varchar(128) not null,
+	description text,
+
+	purchase_date bigint not null,
+	register_date bigint not null,
+
+	net_price real not null,
+	net_tax real not null,					-- total de impuestos (por si hay más de uno o algún error de redondeo del proveedor)
+	net_retention real not null,			-- total de retenciones (por si hay más de uno o algún error de redondeo del proveedor)
+
+	payed real not null default 0,
+	
+	status int not null,
+
+	ref_operation bigint not null,
+	ref_buyer bigint not null,
+	ref_provider bigint not null,
+	ref_contact bigint,
+
+	invoice bytea,							-- documento pdf de la factura de compra
+	invoice_number varchar(64),
+	
+	quotation bytea,						-- documento pdf de la oferta
+	quotation_number varchar(64);
+
+	payment bytea,						    -- documento pdf de los pagos
+
+  	constraint pk_purchases primary key( id ),
+  	constraint fk_purchases_provider foreign key (ref_provider) references companies(id),
+  	constraint fk_purchases_contact foreign key (ref_contact) references companies_contacts(id),
+  	constraint fk_purchases_operation foreign key (ref_operation) references operations(id),
+  	constraint fk_purchases_buyer foreign key (ref_buyer) references users(id)
+);
+alter table purchases OWNER TO pryades;
+
+create table accounts
+(
+	id bigint not null,
+
+	account_type int not null,
+  	name varchar(128) not null,
+  	number varchar(128),
+  	balance real not null default 0,
+
+	ref_company bigint not null,
+	
+  	constraint pk_accounts primary key( id ),
+  	constraint fk_accounts_company foreign key (ref_company) references companies(id)
+);
+alter table accounts OWNER TO pryades;
+

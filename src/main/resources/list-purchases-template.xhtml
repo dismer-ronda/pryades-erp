@@ -33,7 +33,7 @@
 			}
 
 			*.text_regular_size {
-				font-size: 14px;
+				font-size: 11px;
 			}
 
 			*.text_left {
@@ -204,16 +204,27 @@
 			<th class="borde">
 				<div class="text_regular_size padding_all">$context.getString( "template.list.purchases.tax_id" )</div>
 			</th>
-			<th width="96px" class="borde">
+			<th class="borde">
+				<div class="text_regular_size padding_all">$context.getString( "template.list.purchases.invoice_number" )</div>
+			</th>
+			<th class="borde">
 				<div class="text_regular_size padding_all">$context.getString( "template.list.purchases.total" )</div>
 			</th>
 			<th class="borde">
 				<div class="text_regular_size padding_all">$context.getString( "template.list.purchases.tax_rate" )</div>
 			</th>
-			<th width="96px" class="borde">
+			<th class="borde">
 				<div class="text_regular_size padding_all">$context.getString( "template.list.purchases.taxes" )</div>
 			</th>
-			<th width="96px" class="borde">
+			#if( $report.hasRetentions() )
+			<th class="borde">
+				<div class="text_regular_size padding_all">$context.getString( "template.list.purchases.retention_rate" )</div>
+			</th>
+			<th class="borde">
+				<div class="text_regular_size padding_all">$context.getString( "template.list.purchases.retention" )</div>
+			</th>
+			#end
+			<th class="borde">
 				<div class="text_regular_size padding_all">$context.getString( "template.list.purchases.grand.total" )</div>
 			</th>
 		</tr>
@@ -237,6 +248,9 @@
 					<div class="text_regular_size padding_all"> $purchase.getProvider().getTax_id() </div>
 				#end
 				</td>
+				<td class="borde padding_all text_left vcenter">
+					<div class="text_regular_size padding_all"> $purchase.getInvoice_number() </div>
+				</td>
 				<td class="borde padding_all text_right vcenter">
 					<div class="text_regular_size padding_all"> $purchase.getNetPriceAsString() €</div>
 				</td>
@@ -246,6 +260,14 @@
 				<td class="borde padding_all text_right vcenter">
 					<div class="text_regular_size padding_all"> $purchase.getNetTaxAsString() €</div>
 				</td>
+				#if( $report.hasRetentions() )
+				<td class="borde padding_all text_right vcenter">
+					<div class="text_regular_size padding_all">$purchase.getRetentionRateAsString() %</div>
+				</td>
+				<td class="borde padding_all text_right vcenter">
+					<div class="text_regular_size padding_all">$purchase.getRetentionAsString() €</div>
+				</td>
+				#end
 				<td class="borde padding_all text_right vcenter">
 					<div class="text_regular_size padding_all"> $purchase.getGrossPriceAsString() €</div>
 				</td>
@@ -253,6 +275,8 @@
 		#end
 		
 		<tr>
+			<td class="">
+			</td>
 			<td class="">
 			</td>
 			<td class="">
@@ -272,6 +296,13 @@
 			<td class="text_right vcenter">
 				<div class="text_regular_size padding_all text_bold"> $report.getGrandTotalTaxesAsString() €</div>
 			</td>
+			#if( $report.hasRetentions() )
+			<td class="text_right vcenter">
+			</td>
+			<td class="text_right vcenter">
+				<div class="text_regular_size padding_all text_bold">$report.getGrandTotalRetentionsAsString() €</div>
+			</td>
+			#end
 			<td class="text_right vcenter">
 				<div class="text_regular_size padding_all text_bold"> $report.getGrandTotalAfterTaxesAsString() €</div>
 			</td>

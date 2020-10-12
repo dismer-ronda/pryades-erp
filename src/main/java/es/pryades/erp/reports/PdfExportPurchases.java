@@ -72,6 +72,21 @@ public class PdfExportPurchases extends PdfExport
 		return Utils.getFormattedCurrency( getGrandTotalTaxes() );
 	}
 
+	public double getGrandTotalRetentions()
+	{
+		double total = 0;
+		
+		for ( Purchase invoice : purchases )
+			total += invoice.getNet_retention();
+
+		return Utils.roundDouble( total, 2 );
+	}
+
+	public String getGrandTotalRetentionsAsString()
+	{
+		return Utils.getFormattedCurrency( getGrandTotalRetentions() );
+	}
+
 	public double getGrandTotalAfterTaxes()
 	{
 		double total = 0;
@@ -85,5 +100,14 @@ public class PdfExportPurchases extends PdfExport
 	public String getGrandTotalAfterTaxesAsString()
 	{
 		return Utils.getFormattedCurrency( getGrandTotalAfterTaxes() );
+	}
+
+	public boolean hasRetentions()
+	{
+		for ( Purchase purchase : purchases )
+			if ( purchase.getNet_retention() != 0 )
+				return true;
+
+		return false;
 	}
 }

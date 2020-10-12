@@ -10,5 +10,5 @@ import es.pryades.erp.dto.Quotation;
 */
 public interface QuotationsManager extends BaseManager
 {
-	public boolean duplicateQuotation( AppContext ctx, Quotation src ) throws Throwable;
+	public boolean duplicateQuotation( AppContext ctx, Quotation src );
 }

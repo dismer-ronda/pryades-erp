@@ -8,7 +8,7 @@ import org.restlet.routing.Router;
 import es.pryades.erp.resources.AttachmentResource;
 import es.pryades.erp.resources.ImportCompaniesResource;
 import es.pryades.erp.resources.InvoiceResource;
-import es.pryades.erp.resources.InvoicesResource;
+import es.pryades.erp.resources.InvoicesPdfResource;
 import es.pryades.erp.resources.LabelsResource;
 import es.pryades.erp.resources.LoginResource;
 import es.pryades.erp.resources.LogoResource;
@@ -51,7 +51,7 @@ public class ServicesServlet extends Application
     	router.attach( "/box", ShipmentBoxResource.class );
     	router.attach( "/packing_object", PackingObjectResource.class );
     	router.attach( "/labels", LabelsResource.class );
-    	router.attach( "/invoices", InvoicesResource.class );
+    	router.attach( "/invoices", InvoicesPdfResource.class );
     	router.attach( "/purchase-invoice", PurchaseInvoiceResource.class );
     	router.attach( "/purchase-quotation", PurchaseQuotationResource.class );
     	router.attach( "/purchase-payment", PurchasePaymentResource.class );

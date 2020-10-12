@@ -172,7 +172,7 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 		List<Component> ops = new ArrayList<Component>();
 
 		Button bttnPdf = new Button();
-		bttnPdf.setCaption( getContext().getString( "purchasesTab.list" ) );
+		bttnPdf.setCaption( getContext().getString( "purchasesTab.list.pdf" ) );
 		bttnPdf.addClickListener( new Button.ClickListener()
 		{
 			private static final long serialVersionUID = -819877665197234072L;
@@ -184,12 +184,20 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 		} );
 		ops.add( bttnPdf );
 
+		Button bttnXls = new Button();
+		bttnXls.setCaption( getContext().getString( "purchasesTab.list.xls" ) );
+		ops.add( bttnXls );
+		
+		FileDownloader fileDownloaderXls = new FileDownloader( getXlsResource() );
+        fileDownloaderXls.setOverrideContentType( true );
+        fileDownloaderXls.extend( bttnXls );
+
 		Button bttnZip = new Button();
 		bttnZip.setCaption( getContext().getString( "purchasesTab.download.zip" ) );
 		ops.add( bttnZip );
-		
-        FileDownloader fileDownloaderXls = new FileDownloader( getZipResource() );
-        fileDownloaderXls.extend( bttnZip );
+
+        FileDownloader fileDownloaderZip = new FileDownloader( getZipResource() );
+        fileDownloaderZip.extend( bttnZip );
 
         HorizontalLayout rowTotals = new HorizontalLayout();
 		rowTotals.setWidth( "100%" );
@@ -679,7 +687,7 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 
 	private StreamResource getZipResource() 
 	{
-		return new StreamResource( 
+		StreamResource res = new StreamResource( 
 			new StreamSource() 
 			{
 				private static final long serialVersionUID = -4073608207577608599L;
@@ -700,6 +708,40 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 	            }
 	        }, 
 	        Utils.getUUID() + ".zip" );
+		
+		res.setCacheTime( 0 );
+		
+		return res;
     }
+
+	private StreamResource getXlsResource() 
+	{
+		StreamResource res =
+			new StreamResource( 
+				new StreamSource() 
+				{
+					private static final long serialVersionUID = -995277148978022912L;
+
+					@Override
+		            public InputStream getStream() 
+		            {
+						try
+						{
+							return new ByteArrayInputStream( IOCManager._PurchasesManager.exportListXls( getContext(), (PurchaseQuery)getQueryObject() ) );
+						}
+						catch ( Throwable e )
+						{
+							e.printStackTrace();
+						}
+						
+						return null;
+		            }
+		        }, 
+		        Utils.getUUID() + ".xls" );
+		
+			res.setCacheTime( 0 );
+			
+			return res;
+	    }
 }
 

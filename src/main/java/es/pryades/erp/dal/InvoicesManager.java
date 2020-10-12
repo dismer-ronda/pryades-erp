@@ -13,4 +13,5 @@ public interface InvoicesManager extends BaseManager
 {
 	byte[] generatePdf( AppContext ctx, Invoice invoice ) throws Throwable;
 	byte[] generateListZip( AppContext ctx, InvoiceQuery query ) throws Throwable;
+	byte[] exportListXls( AppContext ctx, InvoiceQuery query ) throws Throwable;
 }

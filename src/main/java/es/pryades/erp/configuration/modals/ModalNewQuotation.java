@@ -830,19 +830,17 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 
 	public void onDuplicateQuotation()
 	{
-		try
+		if ( IOCManager._QuotationsManager.duplicateQuotation( getContext(), newQuotation ) )
 		{
-			IOCManager._QuotationsManager.duplicateQuotation( getContext(), newQuotation );
-			
 			refreshVisibleContent( true );
 			
 			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
 			dashboard.refreshQuotationsTab();
+			
+			Utils.showNotification( getContext(), getContext().getString( "modalNewQuotation.duplicateSuccess" ), Notification.Type.TRAY_NOTIFICATION );
 		}
-		catch ( Throwable e )
-		{
-			Utils.logException( e, LOG );
-		}
+		else
+			Utils.showNotification( getContext(), getContext().getString( "modalNewQuotation.duplicateError" ), Notification.Type.ERROR_MESSAGE );
 	}
 
 	public void onEmailQuotation()

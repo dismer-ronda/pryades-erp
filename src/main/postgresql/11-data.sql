@@ -123,7 +123,6 @@ insert into profiles_rights (ref_profile, ref_right) values (0, 48);
 insert into profiles_rights (ref_profile, ref_right) values (0, 49);
 insert into profiles_rights (ref_profile, ref_right) values (0, 50);
 
-
 ---------------------------------------------    
 -- users 
 ---------------------------------------------

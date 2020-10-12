@@ -78,6 +78,7 @@
 		<result property="register_date" column="register_date"/>
 		<result property="net_price" column="net_price"/>
 		<result property="net_tax" column="net_tax"/>
+		<result property="net_retention" column="net_retention"/>
 		<result property="payed" column="payed"/>
 		<result property="status" column="status"/>
 		<result property="invoice" column="invoice"/>
@@ -109,6 +110,7 @@
 		
 		purchases.net_price,
 		purchases.net_tax,
+		purchases.net_retention,
 		purchases.payed,
 		purchases.status,						
 
@@ -297,6 +299,7 @@
 			
 			net_price,
 			net_tax,
+			net_retention,
 			payed,
 			status,						
 	
@@ -304,7 +307,6 @@
 			quotation,
 
 			invoice_number,
-
 	
 			ref_buyer,
 			ref_operation,
@@ -324,6 +326,7 @@
 			
 			#{net_price},
 			#{net_tax},
+			#{net_retention},
 			#{payed},
 			#{status},						
 	
@@ -349,6 +352,7 @@
 			
 			net_price=#{net_price},
 			net_tax=#{net_tax},
+			net_retention=#{net_retention},
 			payed=#{payed},
 			status=#{status},						
 	

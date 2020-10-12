@@ -62,7 +62,6 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 {
 	private static final long serialVersionUID = 5833911702982111297L;
 
-	@SuppressWarnings("unused")
 	private static final Logger LOG = Logger.getLogger( ModalNewPurchase.class );
 	
 	private final int UPLOAD_INVOICE 		= 1;
@@ -91,6 +90,7 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 	private TextArea editDescription;
 	private TextField editNetPrice;
 	private TextField editNetTax;
+	private TextField editNetRetention;
 	private Label labelPayed;
 	private TextField editInvoiceNumber;
 	private TextField editQuotationNumber;
@@ -264,6 +264,13 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 		editNetTax.setRequiredError( getContext().getString( "words.required" ) );
 		editNetTax.setInvalidCommitted( true );
 
+		editNetRetention = new TextField( getContext().getString( "modalNewPurchase.editNetRetention" ), bi.getItemProperty( "net_retention" ) );
+		editNetRetention.setWidth( "100%" );
+		editNetRetention.setNullRepresentation( "" );
+		editNetRetention.setRequired( true );
+		editNetRetention.setRequiredError( getContext().getString( "words.required" ) );
+		editNetRetention.setInvalidCommitted( true );
+
 		labelPayed = new Label();
 		labelPayed.setWidth( "100%" );
 		labelPayed.setValue( getContext().getString( "modalNewPurchase.editPayed" ) + " " + newPurchase.getPayedAsString() );
@@ -288,6 +295,21 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 			}
 		} );
 
+		Button btnDuplicate = new Button();
+		btnDuplicate.setCaption( getContext().getString( "modalNewPurchase.btnDuplicate" ) );
+		btnDuplicate.addClickListener( new Button.ClickListener()
+		{
+			private static final long serialVersionUID = 7538387530542749190L;
+
+			public void buttonClick( ClickEvent event )
+			{
+				onDuplicate();
+			}
+		} );
+
+		getDefaultOperationsRow().addComponentAsFirst( btnDuplicate );
+		getDefaultOperationsRow().setComponentAlignment( btnDuplicate, Alignment.MIDDLE_LEFT );
+
 		HorizontalLayout row1 = new HorizontalLayout();
 		row1.setWidth( "100%" );
 		row1.setSpacing( true );
@@ -295,7 +317,6 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 		row1.addComponent( purchaseDateField );
 		row1.addComponent( registerDateField );
 		row1.addComponent( comboType );
-
 		
 		HorizontalLayout rowProvider = new HorizontalLayout();
 		rowProvider.setWidth( "100%" );
@@ -330,6 +351,7 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 		row5.setSpacing( true );
 		row5.addComponent( editNetPrice );
 		row5.addComponent( editNetTax );
+		row5.addComponent( editNetRetention );
 		row5.addComponent( editQuotationNumber );
 		row5.addComponent( editInvoiceNumber );
 		row5.addComponent( labelPayed );
@@ -792,21 +814,20 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 		}*/
 	}
 
-	public void onDuplicateQuotation()
+	public void onDuplicate()
 	{
-		/*try
+		if ( IOCManager._PurchasesManager.duplicatePurchase( getContext(), newPurchase ) )
 		{
-			IOCManager._PurchasesManager.duplicatePurchase( getContext(), newPurchase );
-			
 			refreshVisibleContent( true );
 			
 			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
-			dashboard.refreshQuotationsTab();
+			dashboard.refreshPurchasesTab();
+			dashboard.refreshOperationsTab();
+
+			Utils.showNotification( getContext(), getContext().getString( "modalNewPurchase.duplicateSuccess" ), Notification.Type.TRAY_NOTIFICATION );
 		}
-		catch ( Throwable e )
-		{
-			Utils.logException( e, LOG );
-		}*/
+		else
+			Utils.showNotification( getContext(), getContext().getString( "modalNewPurchase.duplicateError" ), Notification.Type.ERROR_MESSAGE );
 	}
 
 	public void onEmailOrder()

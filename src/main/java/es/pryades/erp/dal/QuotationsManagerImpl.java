@@ -7,7 +7,6 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
 
 import es.pryades.erp.common.AppContext;
-import es.pryades.erp.common.BaseException;
 import es.pryades.erp.common.CalendarUtils;
 import es.pryades.erp.common.Utils;
 import es.pryades.erp.dal.ibatis.QuotationMapper;
@@ -39,17 +38,17 @@ public class QuotationsManagerImpl extends BaseManagerImpl implements Quotations
 	}
 
 	@Override
-	public boolean duplicateQuotation( AppContext ctx, Quotation src ) throws BaseException
+	public boolean duplicateQuotation( AppContext ctx, Quotation src )
 	{
 		SqlSession session = ctx.getSession();
 		
 		boolean finish = session == null;		
 		
-		if ( finish )
-			session = ctx.openSession();
-
 		try 
 		{
+			if ( finish )
+				session = ctx.openSession();
+
 			Quotation newQuotation = new Quotation();
 			
 			newQuotation.setTitle( src.getTitle() );
@@ -124,20 +123,25 @@ public class QuotationsManagerImpl extends BaseManagerImpl implements Quotations
 			if ( finish )
 				session.commit();
 			
-			return false;
+			return true;
 		}
 		catch ( Throwable e )
 		{
+			Utils.logException( e, LOG );
+			
 			if ( finish ) 
 				session.rollback();
-			
-			if ( isLogEnabled( ctx, "E" ) )			
-				getLogger().info( e.getCause() != null ? e.getCause().toString() : e.toString() );
 		}
 		finally
 		{
-			if ( finish )
-				ctx.closeSession();
+			try
+			{
+				if ( finish )
+					ctx.closeSession();
+			}
+			catch ( Throwable e1 )
+			{
+			}
 		}
 
 		return false;
