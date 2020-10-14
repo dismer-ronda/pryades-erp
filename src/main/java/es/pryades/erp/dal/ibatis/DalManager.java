@@ -84,6 +84,7 @@ public class DalManager
 						"<mapper resource='es/pryades/erp/dal/" + engine + "/OperationMapper.xml'/>" +
 						"<mapper resource='es/pryades/erp/dal/" + engine + "/PurchaseMapper.xml'/>" +
 						"<mapper resource='es/pryades/erp/dal/" + engine + "/AccountMapper.xml'/>" +
+						"<mapper resource='es/pryades/erp/dal/" + engine + "/TransactionMapper.xml'/>" +
 					"</mappers>"+
 				"</configuration>";
 				

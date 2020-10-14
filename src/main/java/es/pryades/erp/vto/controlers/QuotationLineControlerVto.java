@@ -51,7 +51,6 @@ public class QuotationLineControlerVto extends GenericControlerVto
 				result.setTitle( line.getTitle() ); 
 				result.setDescription( line.getDescription() ); 
 				result.setCost( line.getCost() ); 
-				result.setReal_cost( line.getReal_cost() ); 
 				result.setMargin( line.getMargin() );
 				
 				Integer totalInvoiced = line.getTotal_invoiced() != null ? line.getTotal_invoiced() : 0;
@@ -69,7 +68,7 @@ public class QuotationLineControlerVto extends GenericControlerVto
 				int quantity = 0;
 				for ( QuotationLineDelivery delivery : line.getLine_deliveries() )
 				{
-					total_cost += delivery.getQuantity() * line.getReal_cost();
+					total_cost += delivery.getQuantity() * line.getCost();
 					total_price += delivery.getQuantity() * line.getPrice();
 					quantity += delivery.getQuantity();
 				}

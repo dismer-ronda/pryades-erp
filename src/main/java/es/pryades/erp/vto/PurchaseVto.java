@@ -1,5 +1,7 @@
 package es.pryades.erp.vto;
 
+import com.vaadin.ui.Label;
+
 import es.pryades.erp.common.GenericVto;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -27,7 +29,7 @@ public class PurchaseVto extends GenericVto
 	private String net_price;
 	private String net_tax;
 	private String gross_price;
-	private String payed;
+	private Label payed;
 	
 	private String status;
 	

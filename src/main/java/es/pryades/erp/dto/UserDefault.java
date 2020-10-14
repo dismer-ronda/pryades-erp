@@ -68,6 +68,7 @@ public class UserDefault extends BaseDto
 
 	public static final String INVOICES_FROM = "invoices.from";
 	public static final String INVOICES_TO = "invoices.to";
+	public static final String INVOICES_OPERATION = "invoices.operation";
 	public static final String INVOICES_CUSTOMER = "invoices.customer";
 	public static final String INVOICES_REFERENCE_REQUEST = "invoices.reference.request";
 	public static final String INVOICES_REFERENCE_ORDER = "invoices.reference.order";
@@ -77,9 +78,22 @@ public class UserDefault extends BaseDto
 	public static final String SHIPMENTS_CUSTOMER = "shipments.customer";
 	public static final String SHIPMENTS_STATUS = "shipments.status";
 
-	public static final String OPERATIONS_QUOTATION = "operations.quotation";
+	public static final String OPERATIONS_CUSTOMER = "operations.customer";
 	public static final String OPERATIONS_STATUS = "operations.status";
 	public static final String OPERATIONS_TITLE = "operations.title";
+
+	public static final String PURCHASES_FROM = "purchases.from";
+	public static final String PURCHASES_TO = "purchases.to";
+	public static final String PURCHASES_PROVIDER = "purchases.provider";
+	public static final String PURCHASES_OPERATION = "purchases.operation";
+	public static final String PURCHASES_BUYER = "purchases.buyer";
+	public static final String PURCHASES_STATUS = "purchases.status";
+	public static final String PURCHASES_TYPE = "purchases.type";
+
+	public static final String TRANSACTIONS_FROM = "transactions.from";
+	public static final String TRANSACTIONS_TO = "transactions.to";
+
+	public static final String TRANSACTION_ACCOUNT = "transaction.account";
 
 	private String data_key;
 	private String data_value;

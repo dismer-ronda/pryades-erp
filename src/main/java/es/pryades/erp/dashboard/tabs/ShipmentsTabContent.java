@@ -123,7 +123,7 @@ public class ShipmentsTabContent extends PagedContent implements ModalParent
 		toDateField.setWidth( "160px" );
 		
 		comboCustomers = new ComboBox(getContext().getString( "shipmentsConfig.comboCustomer" ));
-		comboCustomers.setWidth( "100%" );
+		comboCustomers.setWidth( "200px" );
 		comboCustomers.setNullSelectionAllowed( true );
 		comboCustomers.setTextInputAllowed( true );
 		comboCustomers.setImmediate( true );
@@ -140,7 +140,7 @@ public class ShipmentsTabContent extends PagedContent implements ModalParent
 		});
 
 		comboStatus = new ComboBox(getContext().getString( "shipmentsConfig.comboStatus" ));
-		comboStatus.setWidth( "100%" );
+		comboStatus.setWidth( "160px" );
 		comboStatus.setNullSelectionAllowed( true );
 		comboStatus.setTextInputAllowed( false );
 		comboStatus.setImmediate( true );

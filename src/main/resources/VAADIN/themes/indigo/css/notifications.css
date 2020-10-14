@@ -5,7 +5,7 @@ div.v-Notification {
 	max-width: 80%;
 	background-image: none;
 	color: white;
-	font-size: 20px;
+	font-size: 16px;
 } 
 
 div.v-Notification-error {
@@ -36,6 +36,11 @@ div.v-Notification-tray {
 	font-size: 20px;	
 	text-shadow: none;
 	font-weight: normal;
+}
+
+.v-Notification.mystyle {
+    background: green;
+    color: black;
 }
 
 

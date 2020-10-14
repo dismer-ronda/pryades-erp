@@ -102,7 +102,6 @@ public class QuotationsManagerImpl extends BaseManagerImpl implements Quotations
 				newLine.setDescription( line.getDescription() );
 				newLine.setCost( line.getCost() );
 				newLine.setMargin( line.getMargin() );
-				newLine.setReal_cost( line.getReal_cost() );
 				newLine.setTax_rate( line.getTax_rate() );
 				
 				IOCManager._QuotationsLinesManager.setRow( ctx, null, newLine );

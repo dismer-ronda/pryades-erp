@@ -84,7 +84,6 @@
 		<result property="title" column="title"/>
 		<result property="description" column="description"/>
 		<result property="cost" column="cost"/>
-		<result property="real_cost" column="real_cost"/>
 		<result property="margin" column="margin"/>
 		<result property="tax_rate" column="tax_rate"/>
 
@@ -119,7 +118,6 @@
 		quotations_lines.description,
 
 		quotations_lines.cost,
-		quotations_lines.real_cost,
 		quotations_lines.margin,
 		quotations_lines.tax_rate,
 		
@@ -159,9 +157,6 @@
 			</when>
 			<when test="orderby.equals( 'cost' )">
 				quotations_lines.cost
-			</when>
-			<when test="orderby.equals( 'real_cost' )">
-				quotations_lines.real_cost
 			</when>
 			<when test="orderby.equals( 'margin' )">
 				quotations_lines.margin
@@ -253,7 +248,6 @@
 			description,
 		
 			cost,
-			real_cost,
 			margin,
 			tax_rate
 		)
@@ -271,7 +265,6 @@
 			#{description},
 		
 			#{cost},
-			#{real_cost},
 			#{margin},
 			#{tax_rate}
 		)
@@ -289,7 +282,6 @@
 			description=#{description},
 		
 			cost=#{cost},
-			real_cost=#{real_cost},
 			margin=#{margin},
 			tax_rate=#{tax_rate}
 		where id = #{id}

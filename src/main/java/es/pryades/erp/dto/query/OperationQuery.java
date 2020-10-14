@@ -16,5 +16,6 @@ public class OperationQuery extends Operation
 {
 	private static final long serialVersionUID = -6988907690093283628L;
 	
+	private Long ref_customer;
 	private Long ref_user;
 }

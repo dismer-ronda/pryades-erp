@@ -15,7 +15,6 @@
 		<result property="title" column="title"/>
 		<result property="description" column="description"/>
 		<result property="cost" column="cost"/>
-		<result property="real_cost" column="real_cost"/>
 		<result property="margin" column="margin"/>
 		<result property="tax_rate" column="tax_rate"/>
 		<result property="total_invoiced" column="total_invoiced"/>
@@ -80,7 +79,6 @@
 		quotations_lines.title 				as invoice_line_quotation_line_title,
 		quotations_lines.description 		as invoice_line_quotation_line_description,
 		quotations_lines.cost 				as invoice_line_quotation_line_cost,
-		quotations_lines.real_cost 			as invoice_line_quotation_line_real_cost,
 		quotations_lines.margin 			as invoice_line_quotation_line_margin,
 		quotations_lines.tax_rate 			as invoice_line_quotation_line_tax_rate,
 		

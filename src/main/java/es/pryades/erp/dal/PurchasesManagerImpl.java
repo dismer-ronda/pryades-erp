@@ -95,6 +95,7 @@ public class PurchasesManagerImpl extends BaseManagerImpl implements PurchasesMa
 			copy.setRegister_date( src.getRegister_date() );
 			copy.setNet_price( src.getNet_price() );
 			copy.setNet_tax( src.getNet_tax() );
+			copy.setNet_retention( src.getNet_retention() );
 			copy.setPayed( 0.0 );
 			copy.setStatus( Purchase.STATUS_CREATED );
 			

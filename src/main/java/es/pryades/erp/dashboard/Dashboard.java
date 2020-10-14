@@ -25,6 +25,8 @@ import es.pryades.erp.dashboard.tabs.QuotationsTab;
 import es.pryades.erp.dashboard.tabs.QuotationsTabContent;
 import es.pryades.erp.dashboard.tabs.ShipmentsTab;
 import es.pryades.erp.dashboard.tabs.ShipmentsTabContent;
+import es.pryades.erp.dashboard.tabs.TransactionsTab;
+import es.pryades.erp.dashboard.tabs.TransactionsTabContent;
 
 import com.vaadin.ui.VerticalLayout;
 
@@ -54,6 +56,7 @@ public class Dashboard extends VerticalLayout implements SelectedTabChangeListen
 	private ShipmentsTab shipmentsTab;
 	private OperationsTab operationsTab;
 	private PurchasesTab purchasesTab;
+	private TransactionsTab transactionsTab;
 
 	public Dashboard( AppContext context ) 
 	{
@@ -179,6 +182,15 @@ public class Dashboard extends VerticalLayout implements SelectedTabChangeListen
 		tabs.add( purchasesTab );
 	}
 
+	private void createTransactionsTab()
+	{
+		transactionsTab = new TransactionsTab( context );
+		
+		transactionsTab.initComponents();
+	
+		tabs.add( transactionsTab );
+	}
+
 	private void createTabs()
 	{
 		/* && Utils.getEnviroment( "LOGFILE" ) != null*/
@@ -197,6 +209,9 @@ public class Dashboard extends VerticalLayout implements SelectedTabChangeListen
 		
 		if ( getContext().hasRight( "configuration.operations" ) )
 			createOperationsTab();
+		
+		if ( getContext().hasRight( "configuration.transactions" ) )
+			createTransactionsTab();
 		
 		if ( getContext().hasRight( "main.log" )  )
 			createLogTab();
@@ -258,6 +273,13 @@ public class Dashboard extends VerticalLayout implements SelectedTabChangeListen
 	public void refreshPurchasesTab()
 	{
 		PurchasesTabContent content = purchasesTab.getPurchasesTable();
+		if ( content != null )
+			content.refreshVisibleContent( true );
+	}
+	
+	public void refreshTransactionsTab()
+	{
+		TransactionsTabContent content = transactionsTab.getTransactionsTable();
 		if ( content != null )
 			content.refreshVisibleContent( true );
 	}

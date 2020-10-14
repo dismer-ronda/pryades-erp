@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -23,15 +24,16 @@ import es.pryades.erp.common.GenericControlerVto;
 import es.pryades.erp.common.ModalParent;
 import es.pryades.erp.common.ModalWindowsCRUD.OperationCRUD;
 import es.pryades.erp.common.PagedContent;
+import es.pryades.erp.common.Utils;
 import es.pryades.erp.configuration.modals.ModalNewOperation;
 import es.pryades.erp.dal.BaseManager;
 import es.pryades.erp.dto.BaseDto;
+import es.pryades.erp.dto.Company;
 import es.pryades.erp.dto.Operation;
 import es.pryades.erp.dto.Query;
-import es.pryades.erp.dto.Quotation;
 import es.pryades.erp.dto.UserDefault;
+import es.pryades.erp.dto.query.CompanyQuery;
 import es.pryades.erp.dto.query.OperationQuery;
-import es.pryades.erp.dto.query.QuotationQuery;
 import es.pryades.erp.ioc.IOCManager;
 import es.pryades.erp.vto.OperationVto;
 import es.pryades.erp.vto.controlers.OperationControlerVto;
@@ -48,15 +50,17 @@ public class OperationsTabContent extends PagedContent implements ModalParent
 	@SuppressWarnings("unused")
 	private static final Logger LOG = Logger.getLogger( OperationsTabContent.class );
 
-	private ComboBox comboQuotations;
+	private ComboBox comboCustomers;
 	private ComboBox comboStatus;
 	private TextField editTitle;
 
 	private Button bttnApply;
 
+	private Label labelTotalCost;
 	private Label labelTotalPrice;
+	private Label labelTotalMargin;
 
-	private List<Quotation> quotations;
+	private List<Company> customers;
 
 	private UserDefault default_quotation;
 	private UserDefault default_status;
@@ -104,32 +108,24 @@ public class OperationsTabContent extends PagedContent implements ModalParent
 	{
 		List<Component> ops = new ArrayList<Component>();
 		
-		/*Button bttnPdf = new Button();
-		bttnPdf.setCaption( getContext().getString( "operationsTab.pdf" ) );
-		bttnPdf.addClickListener( new Button.ClickListener()
-		{
-			private static final long serialVersionUID = 8302552775699479003L;
-
-			public void buttonClick( ClickEvent event )
-			{
-				onShowPdf();
-			}
-		} );
-
-		ops.add( bttnPdf );
-
 		HorizontalLayout rowTotals = new HorizontalLayout();
 		rowTotals.setWidth( "100%" );
 		rowTotals.setSpacing( true );
 		rowTotals.setMargin( new MarginInfo( false, true, false, true ) );
 		
+		labelTotalCost = new Label();
+		labelTotalCost.setWidth( "300px" );
 		labelTotalPrice = new Label();
 		labelTotalPrice.setWidth( "300px" );
-		labelTotalPrice.addStyleName( "green" );
+		labelTotalMargin = new Label();
+		labelTotalMargin.setWidth( "300px" );
+		labelTotalMargin.addStyleName( "green" );
 		
+		rowTotals.addComponent( labelTotalCost );
 		rowTotals.addComponent( labelTotalPrice );
+		rowTotals.addComponent( labelTotalMargin );
 
-		ops.add( rowTotals );*/
+		ops.add( rowTotals );
 		
 		return ops;
 	}
@@ -137,18 +133,18 @@ public class OperationsTabContent extends PagedContent implements ModalParent
 	@Override
 	public Component getQueryComponent()
 	{
-		loadQuotations();
+		loadCustomers();
 
-		comboQuotations = new ComboBox(getContext().getString( "operationsTab.comboQuotation" ));
-		comboQuotations.setWidth( "100%" );
-		comboQuotations.setNullSelectionAllowed( true );
-		comboQuotations.setTextInputAllowed( true );
-		comboQuotations.setImmediate( true );
+		comboCustomers = new ComboBox(getContext().getString( "operationsTab.comboCustomer" ));
+		comboCustomers.setWidth( "200px" );
+		comboCustomers.setNullSelectionAllowed( true );
+		comboCustomers.setTextInputAllowed( true );
+		comboCustomers.setImmediate( true );
 		fillComboCustomers();
-		comboQuotations.setValue( getDefaultCustomer() );
-		comboQuotations.addValueChangeListener( new Property.ValueChangeListener() 
+		comboCustomers.setValue( getDefaultCustomer() );
+		comboCustomers.addValueChangeListener( new Property.ValueChangeListener() 
 		{
-			private static final long serialVersionUID = -3155362332814804334L;
+			private static final long serialVersionUID = -5463401325801238863L;
 
 			public void valueChange(ValueChangeEvent event) 
 		    {
@@ -157,7 +153,7 @@ public class OperationsTabContent extends PagedContent implements ModalParent
 		});
 
 		comboStatus = new ComboBox(getContext().getString( "operationsTab.comboStatus" ));
-		comboStatus.setWidth( "100%" );
+		comboStatus.setWidth( "160px" );
 		comboStatus.setNullSelectionAllowed( true );
 		comboStatus.setTextInputAllowed( true );
 		comboStatus.setImmediate( true );
@@ -174,7 +170,7 @@ public class OperationsTabContent extends PagedContent implements ModalParent
 		});
 
 		editTitle = new TextField( getContext().getString( "operationsTab.editTitle" ) );
-		editTitle.setWidth( "100%" );
+		editTitle.setWidth( "200px" );
 		editTitle.setNullRepresentation( "" );
 		editTitle.setValue( default_title.getData_value() );
 		
@@ -184,7 +180,7 @@ public class OperationsTabContent extends PagedContent implements ModalParent
 
 		HorizontalLayout rowQuery = new HorizontalLayout();
 		rowQuery.setSpacing( true );
-		rowQuery.addComponent( comboQuotations );
+		rowQuery.addComponent( comboCustomers );
 		rowQuery.addComponent( comboStatus );
 		rowQuery.addComponent( editTitle );
 		rowQuery.addComponent( bttnApply );
@@ -201,8 +197,8 @@ public class OperationsTabContent extends PagedContent implements ModalParent
 		if ( !editTitle.getValue().isEmpty() ) 
 			query.setTitle( "%" + editTitle.getValue() + "%");
 		
-		if ( comboQuotations.getValue() != null )
-			query.setRef_quotation( (Long)comboQuotations.getValue() );
+		if ( comboCustomers.getValue() != null )
+			query.setRef_customer( (Long)comboCustomers.getValue() );
 		
 		if ( comboStatus.getValue() != null )
 			query.setStatus( (Integer)comboStatus.getValue() );
@@ -247,20 +243,25 @@ public class OperationsTabContent extends PagedContent implements ModalParent
 	@Override
 	public void preProcessRows( List<BaseDto> rows )
 	{
-		/*double totalPrice = 0;
+		double totalCost = 0;
+		double totalPrice = 0;
+		double totalMargin = 0;
 		
 		for ( BaseDto row : rows )
 		{
-			Operation operation = (Operation)row;
-			LOG.info(  "base = "  + operation.getTotalSold() );
-			//LOG.info(  "taxes = "  + operation.getGrandTotalTaxes() );
-			//LOG.info(  "total = "  + operation.getGrandTotalAfterTaxes() );
+			Operation quotation = (Operation)row;
 			
-			//totalPrice += quotation.getGrandTotalInvoice();
+			double cost = quotation.getTotalPurchased();
+			double price = quotation.getTotalSold();
+			
+			totalCost += cost;
+			totalPrice += price;
+			totalMargin += price - cost;
 		}
 		
-		labelTotalPrice.setValue(  getContext().getString( "invoicesConfig.totalPrice" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalPrice ) ) );*/
-		
+		labelTotalCost.setValue(  getContext().getString( "quotationsConfig.totalCost" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalCost ) ) );
+		labelTotalPrice.setValue(  getContext().getString( "quotationsConfig.totalPrice" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalPrice ) ) );
+		labelTotalMargin.setValue(  getContext().getString( "quotationsConfig.totalMargin" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalMargin ) ) );
 	}
 	
 	@Override
@@ -293,49 +294,16 @@ public class OperationsTabContent extends PagedContent implements ModalParent
 		} );
 	}
 
-	@SuppressWarnings("unchecked")
-	private void loadQuotations()
-	{
-		try
-		{
-			QuotationQuery query = new QuotationQuery();
-			query.setRef_user( getContext().getUser().getId() );
-
-			quotations = IOCManager._QuotationsManager.getRows( getContext(), query );
-		}
-		catch ( BaseException e )
-		{
-			e.printStackTrace();
-			quotations = new ArrayList<Quotation>();
-		}
-	}
-	
-	private void fillComboCustomers()
-	{
-		comboQuotations.removeAllItems();
-		for ( Quotation quotation : quotations )
-		{
-			comboQuotations.addItem( quotation.getId() );
-			comboQuotations.setItemCaption( quotation.getId(), quotation.getTitle() );
-		}
-	}
-
-	public void refreshCustomers()
-	{
-		loadQuotations();
-		fillComboCustomers();
-	}
-
 	private void loadUserDefaults()
 	{
-		default_quotation = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.OPERATIONS_QUOTATION );
+		default_quotation = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.OPERATIONS_CUSTOMER );
 		default_status = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.OPERATIONS_STATUS );
 		default_title = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.OPERATIONS_TITLE );
 	}
 
 	private void saveUserDefaults()
 	{
-		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_quotation, comboQuotations.getValue() != null ? comboQuotations.getValue().toString() : null );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_quotation, comboCustomers.getValue() != null ? comboCustomers.getValue().toString() : null );
 		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_status, comboStatus.getValue() != null ? comboStatus.getValue().toString() : null );
 		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_title, editTitle.getValue() );
 	}
@@ -424,5 +392,32 @@ public class OperationsTabContent extends PagedContent implements ModalParent
 		comboStatus.setItemCaption( Operation.STATUS_CLOSED, getContext().getString( "operation.status." + Operation.STATUS_CLOSED ) );
 	}
 
+	@SuppressWarnings("unchecked")
+	private void loadCustomers()
+	{
+		try
+		{
+			CompanyQuery query = new CompanyQuery();
+			query.setType_company( Company.TYPE_CUSTOMER );
+			query.setRef_user( getContext().getUser().getId() );
+
+			customers = IOCManager._CompaniesManager.getRows( getContext(), query );
+		}
+		catch ( BaseException e )
+		{
+			e.printStackTrace();
+			customers = new ArrayList<Company>();
+		}
+	}
+	
+	private void fillComboCustomers()
+	{
+		comboCustomers.removeAllItems();
+		for ( Company company : customers )
+		{
+			comboCustomers.addItem( company.getId() );
+			comboCustomers.setItemCaption( company.getId(), company.getAlias() );
+		}
+	}
 }
 

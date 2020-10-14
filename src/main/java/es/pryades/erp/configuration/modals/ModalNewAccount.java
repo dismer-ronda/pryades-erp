@@ -6,18 +6,26 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.vaadin.data.util.BeanItem;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.Window;
 
+import es.pryades.erp.application.SelectNumberDlg;
 import es.pryades.erp.common.AppContext;
 import es.pryades.erp.common.BaseException;
+import es.pryades.erp.common.CalendarUtils;
 import es.pryades.erp.common.ModalParent;
 import es.pryades.erp.common.ModalWindowsCRUD;
 import es.pryades.erp.common.Utils;
+import es.pryades.erp.dashboard.Dashboard;
 import es.pryades.erp.dto.Account;
 import es.pryades.erp.dto.BaseDto;
 import es.pryades.erp.dto.Company;
+import es.pryades.erp.dto.Transaction;
 import es.pryades.erp.dto.query.CompanyQuery;
 import es.pryades.erp.ioc.IOCManager;
 
@@ -42,7 +50,6 @@ public class ModalNewAccount extends ModalWindowsCRUD
 	private ComboBox comboTypes;
 	private TextField editNumber;
 	private TextField editName;
-	private TextField editBalance;
 
 	/**
 	 * 
@@ -72,7 +79,6 @@ public class ModalNewAccount extends ModalWindowsCRUD
 		{
 			newCompany = new Account();
 			newCompany.setAccount_type( Account.TYPE_BANK);
-			newCompany.setBalance( 0.0 );
 		}
 
 		bi = new BeanItem<BaseDto>( newCompany );
@@ -110,13 +116,21 @@ public class ModalNewAccount extends ModalWindowsCRUD
 		editNumber.setRequiredError( getContext().getString( "words.required" ) );
 		editNumber.setInvalidCommitted( true );
 		
-		editBalance = new TextField( getContext().getString( "modalNewAccount.editBalance" ), bi.getItemProperty( "balance" ) );
-		editBalance.setWidth( "100%" );
-		editBalance.setNullRepresentation( "" );
-		editBalance.setRequired( true );
-		editBalance.setRequiredError( getContext().getString( "words.required" ) );
-		editBalance.setInvalidCommitted( true );
-		
+		Button btnInit = new Button();
+		btnInit.setCaption( getContext().getString( "modalNewAccount.btnInit" ) );
+		btnInit.addClickListener( new Button.ClickListener()
+		{
+			private static final long serialVersionUID = 6009616552424331249L;
+
+			public void buttonClick( ClickEvent event )
+			{
+				onInitAccount();
+			}
+		} );
+
+		getDefaultOperationsRow().addComponentAsFirst( btnInit );
+		getDefaultOperationsRow().setComponentAlignment( btnInit, Alignment.MIDDLE_LEFT );
+
 		HorizontalLayout row1 = new HorizontalLayout();
 		row1.setWidth( "100%" );
 		row1.setSpacing( true );
@@ -128,7 +142,6 @@ public class ModalNewAccount extends ModalWindowsCRUD
 		row2.setWidth( "100%" );
 		row2.setSpacing( true );
 		row2.addComponent( editNumber );
-		row2.addComponent( editBalance );
 
 		componentsContainer.addComponent( row1 );
 		componentsContainer.addComponent( row2 );
@@ -248,5 +261,49 @@ public class ModalNewAccount extends ModalWindowsCRUD
 			comboCompanies.addItem( company.getId() );
 			comboCompanies.setItemCaption( company.getId(), company.getAlias() );
 		}
+	}
+	
+	private void onInitAccount()
+	{
+		final SelectNumberDlg dlg = new SelectNumberDlg( getContext(), getContext().getString( "modalNewAccount.initialization" ) );
+		dlg.addCloseListener
+		( 
+			new Window.CloseListener() 
+			{
+				private static final long serialVersionUID = 6401304507483980881L;
+
+				@Override
+			    public void windowClose( CloseEvent e ) 
+			    {
+					String value = dlg.getValue();
+					
+					if ( value != null && !value.isEmpty() )
+					{
+						try
+						{
+							Double balance = Utils.getDouble( value, 0 );
+							
+							Transaction transaction = new Transaction();
+							transaction.setTransaction_type( Transaction.TYPE_INIT );
+							transaction.setTransaction_date( CalendarUtils.getTodayAsLong() );
+							transaction.setRef_account( newCompany.getId() );
+							transaction.setAmount( balance );
+							transaction.setBalance( balance );
+							transaction.setDescription( getContext().getString( "modalNewAccount.initialization" ) );
+							
+							IOCManager._TransactionsManager.setRow( getContext(), null, transaction );
+									
+							Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+							dashboard.refreshTransactionsTab();
+						}
+						catch ( Throwable e1 )
+						{
+							Utils.logException( e1, LOG );
+						}
+					}
+			    }
+			}
+		);
+		getUI().addWindow( dlg );
 	}
 }

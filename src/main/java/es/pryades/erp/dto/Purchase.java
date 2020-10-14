@@ -42,7 +42,8 @@ public class Purchase extends BaseDto
 	public static final int TYPE_INSURANCE			= 15;
 	public static final int TYPE_MARKETING			= 16;
 	public static final int TYPE_ALLOWANCES			= 17;
-	public static final int TYPE_OTHER				= 18;
+	public static final int TYPE_DONATION			= 18;
+	public static final int TYPE_OTHER				= 19;
 
 	private Integer purchase_type;						
 
@@ -139,5 +140,15 @@ public class Purchase extends BaseDto
 		int index = number % 100000;
 		
 		return Integer.toString( year ) + "-" + String.format("%05d", index );
+	}
+	
+	public boolean isFullyPayed()
+	{
+		return Math.abs( Utils.roundDouble( getGrossPrice(), 2 ) - Utils.roundDouble( payed, 2 ) ) == 0;
+	}
+
+	public boolean pendingPayment()
+	{
+		return Math.abs( Utils.roundDouble( getGrossPrice(), 2 ) - Utils.roundDouble( payed, 2 ) ) > 0;
 	}
 }

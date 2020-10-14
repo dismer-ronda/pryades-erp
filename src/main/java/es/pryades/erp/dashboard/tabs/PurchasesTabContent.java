@@ -71,6 +71,7 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 	private ComboBox comboProviders;
 	private ComboBox comboStatus;
 	private ComboBox comboBuyer;
+	private ComboBox comboType;
 
 	private Button bttnApply;
 	
@@ -84,8 +85,11 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 
 	private UserDefault default_from;
 	private UserDefault default_to;
-	private UserDefault default_customer;
+	private UserDefault default_provider;
+	private UserDefault default_operation;
+	private UserDefault default_buyer;
 	private UserDefault default_status;
+	private UserDefault default_type;
 
 	public PurchasesTabContent( AppContext ctx )
 	{
@@ -230,22 +234,22 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 		fromDateField = new PopupDateField( getContext().getString( "words.from" ) );
 		fromDateField.setResolution( Resolution.DAY );
 		fromDateField.setDateFormat( "dd-MM-yyyy" );
-		//fromDateField.setValue( getDefaultDate( default_from.getData_value() ) );
+		fromDateField.setValue( getDefaultDate( default_from.getData_value() ) );
 		fromDateField.setWidth( "160px" );
 		
 		toDateField = new PopupDateField( getContext().getString( "words.to" ) );
 		toDateField.setResolution( Resolution.DAY );
 		toDateField.setDateFormat( "dd-MM-yyyy" );
-		//toDateField.setValue( getDefaultDate( default_to.getData_value() ) );
+		toDateField.setValue( getDefaultDate( default_to.getData_value() ) );
 		toDateField.setWidth( "160px" );
 		
 		comboOperations = new ComboBox(getContext().getString( "modalNewPurchase.comboOperation" ));
-		comboOperations.setWidth( "100%" );
+		comboOperations.setWidth( "200px" );
 		comboOperations.setNullSelectionAllowed( true );
 		comboOperations.setTextInputAllowed( true );
 		comboOperations.setImmediate( true );
 		fillComboOperations();
-//		comboProviders.setValue( getDefaultCustomer() );
+		comboOperations.setValue( getDefaultOperation() );
 		comboOperations.addValueChangeListener( new Property.ValueChangeListener() 
 		{
 			private static final long serialVersionUID = -180226785141609420L;
@@ -257,12 +261,12 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 		});
 
 		comboProviders = new ComboBox(getContext().getString( "modalNewPurchase.comboProviders" ));
-		comboProviders.setWidth( "100%" );
+		comboProviders.setWidth( "200px" );
 		comboProviders.setNullSelectionAllowed( true );
 		comboProviders.setTextInputAllowed( true );
 		comboProviders.setImmediate( true );
 		fillComboProviders();
-//		comboProviders.setValue( getDefaultCustomer() );
+		comboProviders.setValue( getDefaultProvider() );
 		comboProviders.addValueChangeListener( new Property.ValueChangeListener() 
 		{
 			private static final long serialVersionUID = -6032292646221912144L;
@@ -274,12 +278,12 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 		});
 
 		comboStatus = new ComboBox(getContext().getString( "modalNewPurchase.comboStatus" ));
-		comboStatus.setWidth( "100%" );
+		comboStatus.setWidth( "160px" );
 		comboStatus.setNullSelectionAllowed( true );
 		comboStatus.setTextInputAllowed( false );
 		comboStatus.setImmediate( true );
 		fillComboStatus();
-//		comboStatus.setValue( getDefaultStatus() );
+		comboStatus.setValue( getDefaultStatus() );
 		comboStatus.addValueChangeListener( new Property.ValueChangeListener() 
 		{
 			private static final long serialVersionUID = -6032292646221912145L;
@@ -291,14 +295,32 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 		});
 		
 		comboBuyer = new ComboBox(getContext().getString( "modalNewPurchase.comboBuyer" ));
-		comboBuyer.setWidth( "100%" );
+		comboBuyer.setWidth( "200px" );
 		comboBuyer.setNullSelectionAllowed( true );
 		comboBuyer.setTextInputAllowed( true );
 		comboBuyer.setImmediate( true );
 		fillComboUsers();
+		comboBuyer.setValue( getDefaultBuyer() );
 		comboBuyer.addValueChangeListener( new Property.ValueChangeListener() 
 		{
 			private static final long serialVersionUID = -7091563748538562850L;
+
+			public void valueChange(ValueChangeEvent event) 
+		    {
+				refreshVisibleContent( true );
+		    }
+		});
+		
+		comboType = new ComboBox(getContext().getString( "modalNewPurchase.comboType" ));
+		comboType.setWidth( "200px" );
+		comboType.setNullSelectionAllowed( true );
+		comboType.setTextInputAllowed( true );
+		comboType.setImmediate( true );
+		fillComboType();
+		comboType.setValue( getDefaultType() );
+		comboType.addValueChangeListener( new Property.ValueChangeListener() 
+		{
+			private static final long serialVersionUID = -6012034844546515312L;
 
 			public void valueChange(ValueChangeEvent event) 
 		    {
@@ -311,6 +333,7 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 		addButtonApplyFilterClickListener();
 
 		HorizontalLayout rowQuery = new HorizontalLayout();
+		//rowQuery.setWidth( "100%" );
 		rowQuery.setSpacing( true );
 		rowQuery.addComponent( fromDateField );
 		rowQuery.addComponent( toDateField );
@@ -318,6 +341,7 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 		rowQuery.addComponent( comboOperations );
 		rowQuery.addComponent( comboProviders );
 		rowQuery.addComponent( comboStatus );
+		rowQuery.addComponent( comboType );
 		rowQuery.addComponent( bttnApply );
 		rowQuery.setComponentAlignment( bttnApply, Alignment.BOTTOM_LEFT );
 		
@@ -343,6 +367,9 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 		
 		if ( comboBuyer.getValue() != null )
 			query.setRef_buyer( (Long)comboBuyer.getValue() );
+
+		if ( comboType.getValue() != null )
+			query.setPurchase_type( (Integer)comboType.getValue() );
 
 		saveUserDefaults();
 		
@@ -525,22 +552,24 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 
 	private void loadUserDefaults()
 	{
-		/*default_from = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.QUOTATIONS_FROM );
-		default_to = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.QUOTATIONS_TO );
-		default_customer = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.QUOTATIONS_CUSTOMER );
-		default_status = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.QUOTATIONS_STATUS );
-		default_reference_request = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.QUOTATIONS_REFERENCE_REQUEST );
-		default_reference_order = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.QUOTATIONS_REFERENCE_ORDER );*/
+		default_from = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.PURCHASES_FROM );
+		default_to = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.PURCHASES_TO );
+		default_operation= IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.PURCHASES_OPERATION );
+		default_provider = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.PURCHASES_PROVIDER );
+		default_buyer = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.PURCHASES_BUYER );
+		default_status = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.PURCHASES_STATUS );
+		default_type = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.PURCHASES_TYPE);
 	}
 
 	private void saveUserDefaults()
 	{
-		/*IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_from, fromDateField.getValue() != null ? Long.toString( CalendarUtils.getDateAsLong( fromDateField.getValue() ) ) : null );
-		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_to, toDateField.getValue() != null ? Long.toString( CalendarUtils.getDateAsLong( toDateField.getValue() ) ) : null );
-		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_customer, comboProviders.getValue() != null ? comboProviders.getValue().toString() : null );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_from, fromDateField.getValue() != null ? Long.toString( CalendarUtils.getDayAsLong( fromDateField.getValue() ) ) : null );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_to, toDateField.getValue() != null ? Long.toString( CalendarUtils.getDayAsLong( toDateField.getValue() ) ) : null );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_provider, comboProviders.getValue() != null ? comboProviders.getValue().toString() : null );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_buyer, comboBuyer.getValue() != null ? comboBuyer.getValue().toString() : null );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_operation, comboOperations.getValue() != null ? comboOperations.getValue().toString() : null );
 		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_status, comboStatus.getValue() != null ? comboStatus.getValue().toString() : null );
-		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_reference_request, editReference_request.getValue() );
-		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_reference_order, editReference_order.getValue() );*/
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_type, comboType.getValue() != null ? comboType.getValue().toString() : null );
 	}
 	
 	private Date getDefaultDate( String date )
@@ -556,11 +585,11 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 		return null;
 	}
 	
-	private Long getDefaultCustomer() 
+	private Long getDefaultProvider() 
 	{
 		try
 		{
-			return Long.parseLong( default_customer.getData_value() );
+			return Long.parseLong( default_provider.getData_value() );
 		}
 		catch ( Throwable e )
 		{
@@ -569,11 +598,51 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 		return null;
 	}
 
+	private Long getDefaultOperation() 
+	{
+		try
+		{
+			return Long.parseLong( default_operation.getData_value() );
+		}
+		catch ( Throwable e )
+		{
+		}
+		
+		return null;
+	}
+
+	private Long getDefaultBuyer() 
+	{
+		try
+		{
+			return Long.parseLong( default_buyer.getData_value() );
+		}
+		catch ( Throwable e )
+		{
+		}
+		
+		return null;
+	}
+
+
 	private Integer getDefaultStatus() 
 	{
 		try
 		{
 			return Integer.parseInt( default_status.getData_value() );
+		}
+		catch ( Throwable e )
+		{
+		}
+		
+		return null;
+	}
+
+	private Integer getDefaultType() 
+	{
+		try
+		{
+			return Integer.parseInt( default_type.getData_value() );
 		}
 		catch ( Throwable e )
 		{
@@ -603,9 +672,18 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 		for ( User user: buyers )
 		{
 			comboBuyer.addItem( user.getId() );
-			comboBuyer.setItemCaption( user.getId(), user.getName() );
+			comboBuyer.setItemCaption( user.getId(), user.getLogin() );
 		}
 	}	
+
+	private void fillComboType()
+	{
+		for ( int i = Purchase.TYPE_SELL; i <= Purchase.TYPE_OTHER; i++ )
+		{
+			comboType.addItem( i );
+			comboType.setItemCaption( i, getContext().getString( "purchase.type." + i ) );
+		}
+	}
 
 	@SuppressWarnings("unchecked")
 	private void loadOperations()

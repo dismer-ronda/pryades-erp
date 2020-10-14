@@ -72,7 +72,7 @@ public class QuotationControlerVto extends GenericControlerVto
 				{
 					for ( QuotationLineDelivery delivery : line.getLine_deliveries() )
 					{
-						total_cost += delivery.getQuantity() * line.getReal_cost();
+						total_cost += delivery.getQuantity() * line.getCost();
 						total_price += delivery.getQuantity() * line.getPrice();
 					}
 				}

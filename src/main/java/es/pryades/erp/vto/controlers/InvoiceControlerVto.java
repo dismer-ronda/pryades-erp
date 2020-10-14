@@ -40,26 +40,28 @@ public class InvoiceControlerVto extends GenericControlerVto
 				
 				result.setFactory( factory );
 				result.setDtoObj( dtoObj );
-
-				result.setId(((Invoice) dtoObj).getId());
 				
-				result.setTitle(((Invoice) dtoObj).getTitle());
-				result.setNumber(((Invoice) dtoObj).getFormattedNumber());
-				result.setInvoice_date( CalendarUtils.getDateFromLongAsString( ((Invoice) dtoObj).getInvoice_date(), "dd-MM-yyyy" ) );
-				
-				result.setReference_request( ((Invoice) dtoObj).getQuotation().getReference_request() ); 
-				result.setReference_order( ((Invoice) dtoObj).getQuotation().getReference_order() ); 
-				result.setCustomer_name( ((Invoice) dtoObj).getQuotation().getCustomer().getAlias() ); 
-				result.setQuotation_number( ((Invoice) dtoObj).getQuotation().getFormattedNumber() ); 
+				Invoice invoice = (Invoice) dtoObj; 
 
-				result.setTotal_price( Utils.roundDouble( ((Invoice) dtoObj).getTotalPrice() + ((Invoice) dtoObj).getTransport_cost(), 2 ) );
-				result.setTotal_invoice( Utils.roundDouble( ((Invoice) dtoObj).getGrandTotalInvoiceAfterTaxes(), 2 ) );
-				result.setTotal_taxes( Utils.roundDouble( ((Invoice) dtoObj).getTotalTaxes(), 2 ) );
+				result.setId( invoice.getId() );
+				
+				result.setTitle(invoice.getTitle());
+				result.setNumber(invoice.getFormattedNumber());
+				result.setInvoice_date( CalendarUtils.getDateFromLongAsString( invoice.getInvoice_date(), "dd-MM-yyyy" ) );
+				
+				result.setReference_request( invoice.getQuotation().getReference_request() ); 
+				result.setReference_order( invoice.getQuotation().getReference_order() ); 
+				result.setCustomer_name( invoice.getQuotation().getCustomer().getAlias() ); 
+				result.setQuotation_number( invoice.getQuotation().getFormattedNumber() ); 
+
+				result.setTotal_price( Utils.roundDouble( invoice.getTotalPrice() + invoice.getTransport_cost(), 2 ) );
+				result.setTotal_invoice( Utils.roundDouble( invoice.getGrandTotalInvoiceAfterTaxes(), 2 ) );
+				result.setTotal_taxes( Utils.roundDouble( invoice.getTotalTaxes(), 2 ) );
 
 				Double collected = ((Invoice) dtoObj).getCollected();
 				Label labelCollected = new Label();
 				labelCollected.setValue( Double.toString( Utils.roundDouble( collected,  2 ) ) );
-				labelCollected.setStyleName( (collected < ((Invoice) dtoObj).getTotalPrice()) ? "red" : "green" );
+				labelCollected.setStyleName( invoice.isFullyCollected() ? "green" : "red" );
 				result.setCollected( labelCollected );
 			}
 			else

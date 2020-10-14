@@ -1,7 +1,7 @@
 package es.pryades.erp.dto.query;
 
 import es.pryades.erp.common.CalendarUtils;
-import es.pryades.erp.dto.Invoice;
+import es.pryades.erp.dto.Transaction;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -13,20 +13,13 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper=true)
 @Data
-public class InvoiceQuery extends Invoice
+public class TransactionQuery extends Transaction
 {
-	private static final long serialVersionUID = 1183748481115773254L;
+	private static final long serialVersionUID = -2699568976514593735L;
 	
 	private Long from_date;						
 	private Long to_date;
 
-	private String reference_request;
-	private String reference_order;
-
-	private Long ref_operation;
-	private Long ref_customer;
-	private Long ref_user;
-	
 	public String getPeriodToString()
 	{
 		String ret = "";

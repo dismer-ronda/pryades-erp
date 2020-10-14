@@ -51,8 +51,12 @@ public class Invoice extends BaseDto
 	public double getTotalPrice()
 	{
 		double total_price = 0;
-		for ( InvoiceLine line : getLines() )
-			total_price += line.getTotalPrice();
+		
+		if ( getLines() != null )
+		{
+			for ( InvoiceLine line : getLines() )
+				total_price += line.getTotalPrice();
+		}
 		 
 		return Utils.roundDouble( total_price, 2 );
 	}
@@ -60,6 +64,11 @@ public class Invoice extends BaseDto
 	public String getTotalPriceAsString()
 	{
 		return Utils.getFormattedCurrency( getTotalPrice() );
+	}
+
+	public String getCollectedAsString()
+	{
+		return Utils.getFormattedCurrency( collected );
 	}
 
 	public double getTotalTaxes()
@@ -250,5 +259,10 @@ public class Invoice extends BaseDto
 	public String getTaxRateAsString()
 	{
 		return Integer.toString( getTaxRate() );
+	}
+	
+	public boolean isFullyCollected()
+	{
+		return Utils.roundDouble( getGrandTotalInvoiceAfterTaxes(), 2 ) - Utils.roundDouble( collected, 2 ) == 0;
 	}
 }

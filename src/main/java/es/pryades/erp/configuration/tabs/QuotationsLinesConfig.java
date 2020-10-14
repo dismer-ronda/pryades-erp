@@ -56,12 +56,12 @@ public class QuotationsLinesConfig extends PagedContent implements ModalParent
 	@Override
 	public String[] getVisibleCols()
 	{
-		return new String[]{ "line_order", "title", "quantity", "total_invoiced", "cost", "real_cost", "margin", "price", "total_cost", "total_price", "profit", "provider_name" };
+		return new String[]{ "line_order", "title", "quantity", "total_invoiced", "cost", "margin", "price", "total_cost", "total_price", "profit", "provider_name" };
 	}
 
 	public String[] getSortableCols()
 	{
-		return new String[]{ "line_order", "title", "cost", "real_cost", "margin" };
+		return new String[]{ "line_order", "title", "cost", "margin" };
 	}
 	
 	@Override

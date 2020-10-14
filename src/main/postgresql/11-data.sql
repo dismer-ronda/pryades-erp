@@ -123,6 +123,15 @@ insert into profiles_rights (ref_profile, ref_right) values (0, 48);
 insert into profiles_rights (ref_profile, ref_right) values (0, 49);
 insert into profiles_rights (ref_profile, ref_right) values (0, 50);
 
+insert into rights (id, code) values (51, 'configuration.transactions');
+insert into rights (id, code) values (52, 'configuration.transactions.add');
+insert into rights (id, code) values (53, 'configuration.transactions.modify');
+insert into rights (id, code) values (54, 'configuration.transactions.delete');
+insert into profiles_rights (ref_profile, ref_right) values (0, 51);
+insert into profiles_rights (ref_profile, ref_right) values (0, 52);
+insert into profiles_rights (ref_profile, ref_right) values (0, 53);
+insert into profiles_rights (ref_profile, ref_right) values (0, 54);
+
 ---------------------------------------------    
 -- users 
 ---------------------------------------------

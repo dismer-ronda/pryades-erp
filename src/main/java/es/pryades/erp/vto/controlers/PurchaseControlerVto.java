@@ -1,5 +1,7 @@
 package es.pryades.erp.vto.controlers;
 
+import com.vaadin.ui.Label;
+
 import es.pryades.erp.common.AppContext;
 import es.pryades.erp.common.BaseException;
 import es.pryades.erp.common.CalendarUtils;
@@ -56,7 +58,10 @@ public class PurchaseControlerVto extends GenericControlerVto
 				result.setNet_price( purchase.getNetPriceAsString() );
 				result.setNet_tax( purchase.getNetTaxAsString() );
 				result.setGross_price( purchase.getGrossPriceAsString() );
-				result.setPayed( purchase.getPayedAsString() );
+				
+				Label payed = new Label( purchase.getPayedAsString() );
+				payed.setStyleName( purchase.isFullyPayed() ? "green" : "red" );
+				result.setPayed( payed );
 				
 				result.setStatus( getContext().getString( "purchase.status." + purchase.getStatus() ) );
 			}

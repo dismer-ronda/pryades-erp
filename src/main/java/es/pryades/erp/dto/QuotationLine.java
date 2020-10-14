@@ -31,7 +31,6 @@ public class QuotationLine extends BaseDto
 
 	private Double cost;
 	private Double margin;
-	private Double real_cost;
 	private Double tax_rate;
 
 	private Integer total_invoiced;
@@ -77,7 +76,7 @@ public class QuotationLine extends BaseDto
 
 	public double getTotalCost()
 	{
-		return getReal_cost() * getTotalQuantity();
+		return getCost() * getTotalQuantity();
 	}
 	
 	public String getTotalCostAsString()
@@ -162,6 +161,5 @@ public class QuotationLine extends BaseDto
 		
 		cost = null;;
 		margin = null;
-		real_cost = null;
 	}
 }

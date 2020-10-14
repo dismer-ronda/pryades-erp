@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="es.pryades.erp.dal.ibatis.TransactionMapper">
+
+	<resultMap id="mapPurchase" type="es.pryades.erp.dto.Purchase">
+		<id property="id" column="id"/>
+		
+		<result property="purchase_type" column="purchase_type"/>
+		<result property="number" column="number"/>
+		<result property="title" column="title"/>
+		<result property="description" column="description"/>
+		<result property="purchase_date" column="purchase_date"/>
+		<result property="register_date" column="register_date"/>
+		<result property="net_price" column="net_price"/>
+		<result property="net_tax" column="net_tax"/>
+		<result property="net_retention" column="net_retention"/>
+		<result property="payed" column="payed"/>
+		<result property="status" column="status"/>
+		<result property="invoice" column="invoice"/>
+		<result property="invoice_number" column="invoice_number"/>
+		<result property="quotation" column="quotation"/>
+		<result property="quotation_number" column="quotation_number"/>
+		<result property="payment" column="payment"/>
+		<result property="ref_operation" column="ref_operation"/>
+		<result property="ref_buyer" column="ref_buyer"/>
+		<result property="ref_provider" column="ref_provider"/>
+		<result property="ref_contact" column="ref_contact"/>
+	</resultMap>
+	
+	<resultMap id="mapInvoice" type="es.pryades.erp.dto.Invoice">
+		<id property="id" column="id"/>
+		
+		<result property="title" column="title"/>
+		<result property="number" column="number"/>
+		<result property="invoice_date" column="invoice_date"/>
+		<result property="ref_quotation" column="ref_quotation"/>
+		<result property="ref_shipment" column="ref_shipment"/>
+		<result property="transport_cost" column="transport_cost"/>
+		<result property="free_delivery" column="free_delivery"/>
+		<result property="payment_terms" column="payment_terms"/>
+		<result property="collected" column="collected"/>
+	</resultMap>
+	
+	<resultMap id="mapAccount" type="es.pryades.erp.dto.Account">
+		<id property="id" column="id"/>
+		
+		<result property="account_type" column="account_type"/>
+		<result property="name" column="name"/>
+		<result property="number" column="number"/>
+		<result property="ref_company" column="ref_company"/>
+	</resultMap>
+	
+	<resultMap id="mapTransaction" type="es.pryades.erp.dto.Transaction">
+		<id property="id" column="id"/>
+		
+		<result property="transaction_date" column="transaction_date"/>
+		<result property="transaction_type" column="transaction_type"/>
+		<result property="amount" column="amount"/>
+		<result property="balance" column="balance"/>
+		<result property="description" column="description"/>
+		<result property="ref_purchase" column="ref_purchase"/>
+		<result property="ref_invoice" column="ref_invoice"/>
+		<result property="ref_source" column="ref_source"/>
+		<result property="ref_account" column="ref_account"/>
+		
+		<association property="purchase" javaType="es.pryades.erp.dto.Purchase" resultMap="mapPurchase" columnPrefix="purchase_" />
+		<association property="invoice" javaType="es.pryades.erp.dto.Invoice" resultMap="mapInvoice" columnPrefix="invoice_" />
+		<association property="source" javaType="es.pryades.erp.dto.Account" resultMap="mapAccount" columnPrefix="source_" />
+		<association property="account" javaType="es.pryades.erp.dto.Account" resultMap="mapAccount" columnPrefix="account_" />
+	</resultMap>
+
+	<sql id="es.pryades.erp.dal.ibatis.TransactionMapper.fields">
+		transactions.id,
+		
+		transactions.transaction_type,
+		transactions.transaction_date,
+		transactions.amount,
+		transactions.balance,
+		transactions.description, 
+		transactions.ref_purchase,
+		transactions.ref_invoice,
+		transactions.ref_source,
+		transactions.ref_account,
+		
+		invoices.id						as invoice_id,
+		invoices.invoice_date			as invoice_invoice_date,
+		invoices.title					as invoice_title,
+		invoices.number					as invoice_number,						
+		invoices.ref_quotation			as invoice_ref_quotation,
+		invoices.ref_shipment			as invoice_ref_shipment,
+		invoices.transport_cost			as invoice_transport_cost,
+		invoices.free_delivery			as invoice_free_delivery,
+		invoices.payment_terms			as invoice_payment_terms,
+		invoices.collected				as invoice_collected,
+		
+		purchases.id					as purchase_id,
+		purchases.purchase_type			as purchase_purchase_type,
+		purchases.number				as purchase_number,
+		purchases.title					as purchase_title,
+		purchases.description			as purchase_description,
+		purchases.purchase_date			as purchase_purchase_date,	
+		purchases.register_date			as purchase_register_date,
+		purchases.net_price				as purchase_net_price,
+		purchases.net_tax				as purchase_net_tax,
+		purchases.net_retention			as purchase_net_retention,
+		purchases.payed					as purchase_payed,
+		purchases.status				as purchase_status,						
+		purchases.quotation_number		as purchase_quotation_number,
+		purchases.invoice_number		as purchase_invoice_number,
+		purchases.ref_buyer				as purchase_ref_buyer,
+		purchases.ref_operation			as purchase_ref_operation,
+		purchases.ref_provider			as purchase_ref_provider,
+		purchases.ref_contact			as purchase_ref_contact,
+		
+		accounts1.id					as source_id,
+		accounts1.account_type			as source_account_type,						
+		accounts1.name					as source_name,
+		accounts1.number				as source_number,						
+		accounts1.ref_company			as source_ref_company,
+		
+		accounts2.id					as account_id,
+		accounts2.account_type			as account_account_type,						
+		accounts2.name					as account_name,
+		accounts2.number				as account_number,						
+		accounts2.ref_company			as account_ref_company
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.TransactionMapper.joins">
+		left join purchases
+		on transactions.ref_purchase = purchases.id
+		
+		left join invoices
+		on transactions.ref_invoice = invoices.id
+
+		left join accounts accounts1
+		on transactions.ref_source = accounts1.id
+
+		inner join accounts accounts2
+		on transactions.ref_account = accounts2.id
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.TransactionMapper.where">
+		<where>
+			<if test="ref_account != null">
+				AND transactions.ref_account = #{ref_account}    
+	        </if>
+			<if test="id != null">
+				AND transactions.id = #{id}    
+	        </if>
+		</where>
+	</sql>
+	
+	<sql id="es.pryades.erp.dal.ibatis.TransactionMapper.orderby">
+		<choose>
+			<when test="orderby.equals( 'transaction_date' )">
+				transactions.transaction_date
+			</when>
+			<otherwise>
+				transactions.id
+			</otherwise>
+		</choose>
+
+		<choose>
+			<when test="order.equalsIgnoreCase( 'asc' )">
+				asc
+			</when>
+			<otherwise>
+				desc
+			</otherwise>
+		</choose>
+	</sql>
+	
+	<select id="getNumberOfRows" parameterType="es.pryades.erp.dto.Query" resultType="long">
+		select 
+			count(1) 
+		from 
+			transactions
+
+    	<include refid="es.pryades.erp.dal.ibatis.TransactionMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.TransactionMapper.where" />
+	</select>
+
+	<select id="getPage" parameterType="es.pryades.erp.dto.Query" resultMap="mapTransaction">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.TransactionMapper.fields" />
+		
+		from
+			transactions
+		
+   		<include refid="es.pryades.erp.dal.ibatis.TransactionMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.TransactionMapper.where" />
+
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.TransactionMapper.orderby" />
+
+		LIMIT #{pageSize} OFFSET (#{pageSize} * (#{pageNumber} - 1))
+	</select>
+
+	<select id="getRows" parameterType="es.pryades.erp.dto.Query" resultMap="mapTransaction">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.TransactionMapper.fields" />
+		
+		from
+			transactions
+		
+    	<include refid="es.pryades.erp.dal.ibatis.TransactionMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.TransactionMapper.where" />
+		
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.TransactionMapper.orderby" />
+	</select>
+
+	<select id="getRow" parameterType="es.pryades.erp.dto.Query" resultMap="mapTransaction">
+		select
+			<include refid="es.pryades.erp.dal.ibatis.TransactionMapper.fields" />
+		
+		from
+			transactions
+		
+		<include refid="es.pryades.erp.dal.ibatis.TransactionMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.TransactionMapper.where" />
+	</select>
+
+	<select id="getLastRow" parameterType="es.pryades.erp.dto.Query" resultMap="mapTransaction">
+		select
+			<include refid="es.pryades.erp.dal.ibatis.TransactionMapper.fields" />
+		
+		from
+			transactions
+		
+		<include refid="es.pryades.erp.dal.ibatis.TransactionMapper.joins" />
+		
+		where 
+			transactions.ref_account = #{ref_account}    
+		
+		order by transactions.id desc
+		
+		LIMIT 1 OFFSET 0
+	</select>
+
+	<insert id="addRow" parameterType="es.pryades.erp.dto.Transaction">
+
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			SELECT nextval('gendat');
+		</selectKey>
+
+		insert into transactions
+		(
+			id,
+
+			transaction_type,
+			transaction_date,
+			amount,
+			balance,
+			description,
+			ref_purchase, 
+			ref_invoice,
+			ref_source,
+			ref_account
+		)
+		values
+		(
+			#{id},
+			
+			#{transaction_type},
+			#{transaction_date},
+			#{amount},
+			#{balance},
+			#{description},
+			#{ref_purchase}, 
+			#{ref_invoice},
+			#{ref_source},
+			#{ref_account}
+		)
+	</insert>
+
+	<update id="setRow" parameterType="es.pryades.erp.dto.Transaction">
+		update transactions set
+			transaction_type=#{transaction_type},
+			transaction_date=#{transaction_date},
+			amount=#{amount},
+			balance=#{balance},
+			description=#{description},
+			ref_purchase=#{ref_purchase}, 
+			ref_invoice#{ref_invoice},
+			ref_source=#{ref_source},
+			ref_account=#{ref_account}
+		where id = #{id}
+	</update>
+
+	<update id="delRow" parameterType="es.pryades.erp.dto.Transaction">
+		delete from transactions where id = #{id}
+	</update>
+
+</mapper>

@@ -190,6 +190,9 @@
 			<if test="ref_operation != null">
 				AND purchases.ref_operation = #{ref_operation}    
 	        </if>
+			<if test="purchase_type != null">
+				AND purchases.purchase_type = #{purchase_type}    
+	        </if>
 		</where>
 	</sql>
 	

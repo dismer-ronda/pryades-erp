@@ -60,7 +60,6 @@ public class ModalNewQuotationLine extends ModalWindowsCRUD implements ModalPare
 	private TextField editTitle;
 	private TextArea editDescription;
 	private TextField editCost;
-	private TextField editReal_cost;
 	private TextField editMargin;
 	private TextField editTax_rate;
 	private List<TextField> editsDeliveries;
@@ -140,10 +139,6 @@ public class ModalNewQuotationLine extends ModalWindowsCRUD implements ModalPare
 		editCost.setWidth( "100%" );
 		editCost.setNullRepresentation( "" );
 		
-		editReal_cost = new TextField( getContext().getString( "modalNewQuotationLine.editReal_cost" ), bi.getItemProperty( "real_cost" ) );
-		editReal_cost.setWidth( "100%" );
-		editReal_cost.setNullRepresentation( "" );
-
 		editMargin = new TextField( getContext().getString( "modalNewQuotationLine.editMargin" ), bi.getItemProperty( "margin" ) );
 		editMargin.setWidth( "100%" );
 		editMargin.setNullRepresentation( "" );
@@ -188,7 +183,6 @@ public class ModalNewQuotationLine extends ModalWindowsCRUD implements ModalPare
 		row3.setWidth( "100%" );
 		row3.setSpacing( true );
 		row3.addComponent( editCost );
-		row3.addComponent( editReal_cost );
 		row3.addComponent( editTax_rate );
 		row3.addComponent( editMargin );
 		row3.addComponent( comboProviders );
@@ -315,7 +309,7 @@ public class ModalNewQuotationLine extends ModalWindowsCRUD implements ModalPare
 			{
 				Purchase purchase = new Purchase();
 				
-				double cost = newQuotation.getReal_cost() * Utils.getInt( edit.getValue(), 0 );
+				double cost = newQuotation.getCost() * Utils.getInt( edit.getValue(), 0 );
 				
 				purchase.setRef_buyer( ((ModalNewQuotation)getModalParent()).getNewQuotation().getRef_user() );
 				purchase.setPurchase_date( CalendarUtils.getTodayAsLong() );
@@ -328,6 +322,7 @@ public class ModalNewQuotationLine extends ModalWindowsCRUD implements ModalPare
 				purchase.setRef_provider( newQuotation.getRef_provider() );
 				purchase.setNet_price( cost );
 				purchase.setNet_tax( cost * newQuotation.getTax_rate() / 100 );
+				purchase.setNet_retention( 0.0 );
 				purchase.setTitle( newQuotation.getTitle() );
 				purchase.setDescription( newQuotation.getDescription() );
 				purchase.setRef_operation( getQuotationOperation().getId() );
@@ -367,9 +362,6 @@ public class ModalNewQuotationLine extends ModalWindowsCRUD implements ModalPare
 		{
 			newQuotation.setId( null );
 			
-			if ( newQuotation.getReal_cost() == null )
-				newQuotation.setReal_cost( newQuotation.getCost() );
-
 			IOCManager._QuotationsLinesManager.setRow( getContext(), null, newQuotation );
 			
 			saveUserDefaults();
@@ -415,9 +407,6 @@ public class ModalNewQuotationLine extends ModalWindowsCRUD implements ModalPare
 	{
 		try
 		{
-			if ( newQuotation.getReal_cost() == null )
-				newQuotation.setReal_cost( newQuotation.getCost() );
-
 			IOCManager._QuotationsLinesManager.setRow( getContext(), (QuotationLine) orgDto, newQuotation );
 			
 			saveUserDefaults();

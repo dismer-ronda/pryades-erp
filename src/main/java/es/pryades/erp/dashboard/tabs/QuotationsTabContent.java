@@ -211,8 +211,14 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 		toDateField.setValue( getDefaultDate( default_to.getData_value() ) );
 		toDateField.setWidth( "160px" );
 		
+		/*HorizontalLayout rowDates = new HorizontalLayout();
+		rowDates.setSpacing( true );
+		//rowDates.setMargin( new MarginInfotrue );
+		rowDates.addComponent( fromDateField );
+		rowDates.addComponent( toDateField );*/
+		
 		comboCustomers = new ComboBox(getContext().getString( "modalNewQuotation.comboCustomer" ));
-		comboCustomers.setWidth( "100%" );
+		comboCustomers.setWidth( "200px" );
 		comboCustomers.setNullSelectionAllowed( true );
 		comboCustomers.setTextInputAllowed( true );
 		comboCustomers.setImmediate( true );
@@ -229,7 +235,7 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 		});
 
 		comboStatus = new ComboBox(getContext().getString( "modalNewQuotation.comboStatus" ));
-		comboStatus.setWidth( "100%" );
+		comboStatus.setWidth( "160px" );
 		comboStatus.setNullSelectionAllowed( true );
 		comboStatus.setTextInputAllowed( false );
 		comboStatus.setImmediate( true );
@@ -246,7 +252,7 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 		});
 		
 		comboUsers = new ComboBox(getContext().getString( "modalNewQuotation.comboUser" ));
-		comboUsers.setWidth( "100%" );
+		comboUsers.setWidth( "200px" );
 		comboUsers.setNullSelectionAllowed( true );
 		comboUsers.setTextInputAllowed( true );
 		comboUsers.setImmediate( true );
@@ -262,12 +268,12 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 		});
 		
 		editReference_request = new TextField( getContext().getString( "modalNewQuotation.editReference_request" ) );
-		editReference_request.setWidth( "100%" );
+		editReference_request.setWidth( "200px" );
 		editReference_request.setNullRepresentation( "" );
 		editReference_request.setValue( default_reference_request.getData_value() );
 
 		editReference_order = new TextField( getContext().getString( "modalNewQuotation.editReference_order" ) );
-		editReference_order.setWidth( "100%" );
+		editReference_order.setWidth( "200px" );
 		editReference_order.setNullRepresentation( "" );
 		editReference_order.setValue( default_reference_order.getData_value() );
 		
@@ -276,6 +282,7 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 		addButtonApplyFilterClickListener();
 
 		HorizontalLayout rowQuery = new HorizontalLayout();
+		//rowQuery.setWidth( "100%" );
 		rowQuery.setSpacing( true );
 		rowQuery.addComponent( fromDateField );
 		rowQuery.addComponent( toDateField );
@@ -563,6 +570,7 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	private void loadUsers()
 	{
 		try
@@ -583,7 +591,7 @@ public class QuotationsTabContent extends PagedContent implements ModalParent
 		for ( User user: users )
 		{
 			comboUsers.addItem( user.getId() );
-			comboUsers.setItemCaption( user.getId(), user.getName() );
+			comboUsers.setItemCaption( user.getId(), user.getLogin() );
 		}
 	}	
 }

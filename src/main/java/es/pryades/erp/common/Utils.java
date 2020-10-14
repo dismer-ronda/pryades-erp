@@ -70,7 +70,9 @@ import org.krysalis.barcode4j.impl.code128.Code128Bean;
 import org.krysalis.barcode4j.output.bitmap.BitmapCanvasProvider;
 
 import com.vaadin.addon.charts.model.style.SolidColor;
+import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
+import com.vaadin.shared.Position;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Notification;
@@ -2678,7 +2680,18 @@ public class Utils
 		notification.setIcon( new ThemeResource( "images/alerts-32.png" ) );
 		notification.show( Page.getCurrent() );*/
 		
-		Notification.show( text + (type.equals( Notification.Type.ERROR_MESSAGE ) ? "\n" + ctx.getString( "words.click.escape" ) : ""), type );
+		if ( type.equals( Notification.Type.ERROR_MESSAGE ) )
+		{
+			Notification.show( text + (type.equals( Notification.Type.ERROR_MESSAGE ) ? "\n" + ctx.getString( "words.click.escape" ) : ""), type );
+		}
+		else
+		{
+			Notification n = new Notification( text, type);
+			n.setPosition(Position.MIDDLE_CENTER);
+			n.setDelayMsec(5000);
+			n.setStyleName("mystyle");
+			n.show(Page.getCurrent());
+		}
 	}
 	
 	public static Image getBarcode( String text )

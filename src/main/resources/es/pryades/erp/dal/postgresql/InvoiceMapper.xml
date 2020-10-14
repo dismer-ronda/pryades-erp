@@ -35,7 +35,6 @@
 			quotations_lines.description 	as quotation_line_description,
 
 			quotations_lines.cost 			as quotation_line_cost,
-			quotations_lines.real_cost 		as quotation_line_real_cost,
 			quotations_lines.margin 		as quotation_line_margin,
 			quotations_lines.tax_rate 		as quotation_line_tax_rate
 			
@@ -86,7 +85,6 @@
 			quotations_lines.title,
 			quotations_lines.description,
 			quotations_lines.cost,
-			quotations_lines.real_cost,
 			quotations_lines.margin, 
 			quotations_lines.tax_rate, 
 			
@@ -196,7 +194,6 @@
 		<result property="title" column="title"/>
 		<result property="description" column="description"/>
 		<result property="cost" column="cost"/>
-		<result property="real_cost" column="real_cost"/>
 		<result property="margin" column="margin"/>
 		<result property="tax_rate" column="tax_rate"/>
 		<result property="total_invoiced" column="total_invoiced"/>
@@ -429,6 +426,9 @@
 	<sql id="es.pryades.erp.dal.ibatis.InvoiceMapper.joins">
 		inner join quotations
 		on invoices.ref_quotation = quotations.id
+		
+		inner join operations
+		on operations.ref_quotation = quotations.id
 
 		inner join companies
 		on quotations.ref_customer = companies.id
@@ -467,6 +467,9 @@
 	        </if>
 			<if test="reference_order != null">
 				AND quotations.reference_order like #{reference_order}    
+	        </if>
+			<if test="ref_operation != null">
+				AND operations.id = #{ref_operation}    
 	        </if>
 			<if test="ref_customer != null">
 				AND quotations.ref_customer = #{ref_customer}    

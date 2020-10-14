@@ -1,6 +1,5 @@
 package es.pryades.erp.configuration.modals;
 
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +24,7 @@ import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Window;
 
+import es.pryades.erp.application.SelectPaymentDlg;
 import es.pryades.erp.application.SendEmailDlg;
 import es.pryades.erp.application.ShowExternalUrlDlg;
 import es.pryades.erp.common.AppContext;
@@ -42,11 +42,11 @@ import es.pryades.erp.dto.InvoiceLine;
 import es.pryades.erp.dto.Quotation;
 import es.pryades.erp.dto.QuotationLine;
 import es.pryades.erp.dto.Shipment;
+import es.pryades.erp.dto.Transaction;
 import es.pryades.erp.dto.query.InvoiceQuery;
 import es.pryades.erp.dto.query.QuotationQuery;
 import es.pryades.erp.dto.query.ShipmentQuery;
 import es.pryades.erp.ioc.IOCManager;
-import es.pryades.erp.reports.PdfExportInvoice;
 import lombok.Getter;
 
 /**
@@ -74,7 +74,7 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 	private TextField editTransport_cost;
 	private CheckBox checkFree_delivery;
 	private TextArea editPayment_terms;
-	//private TextField editMonth;
+	private Label labelCollected;
 
 	private List<TextField> editsLines;
 	private List<CheckBox> checksLines;
@@ -184,7 +184,7 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 		editMonth.setRequired( true );
 		editMonth.setRequiredError( getContext().getString( "words.required" ) );
 		editMonth.setInvalidCommitted( true );*/
-		
+
 		HorizontalLayout row1 = new HorizontalLayout();
 		row1.setWidth( "100%" );
 		row1.setSpacing( true );
@@ -196,7 +196,7 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 		//row1.setExpandRatio( editTitle, 1.0f );
 		
 		HorizontalLayout row2 = new HorizontalLayout();
-		row2.setWidth( "100%" );
+		//row2.setWidth( "100%" );
 		row2.setSpacing( true );
 		if ( shipments.size() > 0)
 			row2.addComponent( comboShipments );
@@ -208,6 +208,17 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 		row4.setWidth( "100%" );
 		row4.setSpacing( true );
 		row4.addComponent( editPayment_terms );
+		if ( !getOperation().equals( OperationCRUD.OP_ADD ) )
+		{
+			labelCollected = new Label();
+			labelCollected.setWidth( "-1px" );
+			labelCollected.setValue( getContext().getString( "modalNewInvoice.editCollected" ) + " " + newInvoice.getCollectedAsString() );
+			labelCollected.addStyleName( (newInvoice.isFullyCollected() ? "green" : "red") + " centered" );
+			
+			row4.addComponent( labelCollected );
+			row4.setComponentAlignment( labelCollected, Alignment.MIDDLE_CENTER );
+		}
+		row4.setExpandRatio( editPayment_terms, 1.0f );
 
 		componentsContainer.addComponent( row1 );
 		componentsContainer.addComponent( row2 );
@@ -247,6 +258,22 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 
 			getDefaultOperationsRow().addComponentAsFirst( btnEmail );
 			getDefaultOperationsRow().setComponentAlignment( btnEmail, Alignment.MIDDLE_LEFT );
+			
+			Button btnCollect = new Button();
+			btnCollect.setCaption( getContext().getString( "modalNewInvoice.btnCollect" ) );
+			btnCollect.setEnabled( !newInvoice.isFullyCollected() );
+			btnCollect.addClickListener( new Button.ClickListener()
+			{
+				private static final long serialVersionUID = 6029965102566653456L;
+
+				public void buttonClick( ClickEvent event )
+				{
+					onCollect();
+				}
+			} );
+
+			getDefaultOperationsRow().addComponentAsFirst( btnCollect );
+			getDefaultOperationsRow().setComponentAlignment( btnCollect, Alignment.MIDDLE_LEFT );
 		}
 	}
 
@@ -844,6 +871,54 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 				Utils.logException( e, LOG );
 	
 				Utils.showNotification( getContext(), getContext().getString( "modalNewQuotation.emailError" ), Notification.Type.ERROR_MESSAGE );
+			}
+		}
+	}
+
+	public void onCollect()
+	{
+		if ( onModify() )
+		{
+			try
+			{
+				final Transaction transaction = new Transaction();
+				transaction.setTransaction_type( Transaction.TYPE_INCOME );
+				transaction.setTransaction_date( CalendarUtils.getTodayAsLong() );
+				transaction.setRef_invoice( newInvoice.getId() );
+				transaction.setAmount( newInvoice.getGrandTotalInvoiceAfterTaxes() - newInvoice.getCollected() );
+				transaction.setDescription( newInvoice.getTitle() );
+
+				final SelectPaymentDlg dlg = new SelectPaymentDlg( getContext(), getContext().getString( "modalNewInvoice.collectTitle" ), transaction );
+				dlg.addCloseListener
+				( 
+					new Window.CloseListener() 
+					{
+						private static final long serialVersionUID = 5423140716473782690L;
+
+						@Override
+					    public void windowClose( CloseEvent e ) 
+					    {
+							if ( dlg.isSuccess() )
+							{
+								newInvoice.setCollected( newInvoice.getCollected() + transaction.getAmount() );
+								
+								onModify();
+								
+								Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+								dashboard.refreshTransactionsTab();
+
+								closeModalWindow( true, true );
+							}
+					    }
+					}
+				);
+				getUI().addWindow( dlg );
+			}
+			catch ( Throwable e )
+			{
+				Utils.logException( e, LOG );
+	
+				Utils.showNotification( getContext(), getContext().getString( "modalNewInvoice.payError" ), Notification.Type.ERROR_MESSAGE );
 			}
 		}
 	}

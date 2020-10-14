@@ -30,6 +30,7 @@ import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.Window;
 
+import es.pryades.erp.application.SelectPaymentDlg;
 import es.pryades.erp.application.ShowExternalUrlDlg;
 import es.pryades.erp.common.AppContext;
 import es.pryades.erp.common.Authorization;
@@ -44,6 +45,7 @@ import es.pryades.erp.dto.Company;
 import es.pryades.erp.dto.CompanyContact;
 import es.pryades.erp.dto.Operation;
 import es.pryades.erp.dto.Purchase;
+import es.pryades.erp.dto.Transaction;
 import es.pryades.erp.dto.User;
 import es.pryades.erp.dto.query.CompanyContactQuery;
 import es.pryades.erp.dto.query.CompanyQuery;
@@ -111,7 +113,7 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 	{
 		super( context, parentWindow, modalOperation, orgDto );
 
-		setWidth( "60%" );
+		setWidth( "75%" );
 	}
 
 	@Override
@@ -140,7 +142,7 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 		layout.setHeight( "-1px" );
 		
 		bi = new BeanItem<BaseDto>( newPurchase );
-
+		
 		purchaseDateField = new PopupDateField(getContext().getString( "modalNewPurchase.purchaseDateField" ));
 		purchaseDateField.setResolution( Resolution.DAY );
 		purchaseDateField.setDateFormat( "dd-MM-yyyy" );
@@ -271,11 +273,6 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 		editNetRetention.setRequiredError( getContext().getString( "words.required" ) );
 		editNetRetention.setInvalidCommitted( true );
 
-		labelPayed = new Label();
-		labelPayed.setWidth( "100%" );
-		labelPayed.setValue( getContext().getString( "modalNewPurchase.editPayed" ) + " " + newPurchase.getPayedAsString() );
-		labelPayed.addStyleName( "centered" );
-
 		editQuotationNumber = new TextField( getContext().getString( "modalNewPurchase.editQuotationNumber" ), bi.getItemProperty( "quotation_number" ) );
 		editQuotationNumber.setWidth( "100%" );
 		editQuotationNumber.setNullRepresentation( "" );
@@ -295,20 +292,44 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 			}
 		} );
 
-		Button btnDuplicate = new Button();
-		btnDuplicate.setCaption( getContext().getString( "modalNewPurchase.btnDuplicate" ) );
-		btnDuplicate.addClickListener( new Button.ClickListener()
+		if ( !getOperation().equals( OperationCRUD.OP_ADD ) )
 		{
-			private static final long serialVersionUID = 7538387530542749190L;
-
-			public void buttonClick( ClickEvent event )
+			labelPayed = new Label();
+			labelPayed.setWidth( "100%" );
+			labelPayed.setValue( getContext().getString( "modalNewPurchase.editPayed" ) + " " + newPurchase.getPayedAsString() );
+			labelPayed.addStyleName( (newPurchase.isFullyPayed() ? "green" : "payed") + " centered" );
+			
+			Button btnDuplicate = new Button();
+			btnDuplicate.setCaption( getContext().getString( "modalNewPurchase.btnDuplicate" ) );
+			btnDuplicate.addClickListener( new Button.ClickListener()
 			{
-				onDuplicate();
-			}
-		} );
+				private static final long serialVersionUID = 7538387530542749190L;
 
-		getDefaultOperationsRow().addComponentAsFirst( btnDuplicate );
-		getDefaultOperationsRow().setComponentAlignment( btnDuplicate, Alignment.MIDDLE_LEFT );
+				public void buttonClick( ClickEvent event )
+				{
+					onDuplicate();
+				}
+			} );
+
+			getDefaultOperationsRow().addComponentAsFirst( btnDuplicate );
+			getDefaultOperationsRow().setComponentAlignment( btnDuplicate, Alignment.MIDDLE_LEFT );
+
+			Button btnPay = new Button();
+			btnPay.setCaption( getContext().getString( "modalNewPurchase.btnPay" ) );
+			btnPay.setEnabled( newPurchase.pendingPayment() );
+			btnPay.addClickListener( new Button.ClickListener()
+			{
+				private static final long serialVersionUID = -1265552269291389575L;
+
+				public void buttonClick( ClickEvent event )
+				{
+					onPay();
+				}
+			} );
+
+			getDefaultOperationsRow().addComponentAsFirst( btnPay );
+			getDefaultOperationsRow().setComponentAlignment( btnPay, Alignment.MIDDLE_LEFT );
+		}
 
 		HorizontalLayout row1 = new HorizontalLayout();
 		row1.setWidth( "100%" );
@@ -354,9 +375,12 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 		row5.addComponent( editNetRetention );
 		row5.addComponent( editQuotationNumber );
 		row5.addComponent( editInvoiceNumber );
-		row5.addComponent( labelPayed );
-		row5.setComponentAlignment( labelPayed, Alignment.BOTTOM_CENTER );
-
+		if ( !getOperation().equals( OperationCRUD.OP_ADD ) )
+		{
+			row5.addComponent( labelPayed );
+			row5.setComponentAlignment( labelPayed, Alignment.BOTTOM_CENTER );
+		}
+			
 		componentsContainer.addComponent( row1 );
 		componentsContainer.addComponent( row2 );
 		componentsContainer.addComponent( row3 );
@@ -516,6 +540,20 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 	@Override
 	protected boolean onModify()
 	{
+		if ( newPurchase.getGrossPrice() > 0 && Utils.roundDouble( newPurchase.getGrossPrice(), 2 ) < Utils.roundDouble( newPurchase.getPayed(), 2 ) )
+		{
+			Utils.showNotification( getContext(), getContext().getString( "modalNewPurchase.grossLessThanPayed" ), Notification.Type.ERROR_MESSAGE );
+			
+			return false;
+		}
+			
+		if ( newPurchase.getGrossPrice() < 0 && Utils.roundDouble( newPurchase.getGrossPrice(), 2 ) > Utils.roundDouble( newPurchase.getPayed(), 2 ) )
+		{
+			Utils.showNotification( getContext(), getContext().getString( "modalNewPurchase.grossLessThanPayed" ), Notification.Type.ERROR_MESSAGE );
+			
+			return false;
+		}
+			
 		try
 		{
 			newPurchase.setPurchase_date( CalendarUtils.getDayAsLong( purchaseDateField.getValue() ) );
@@ -665,7 +703,9 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 	{
 		try
 		{
-			operations = IOCManager._OperationsManager.getRows( getContext(), new OperationQuery() );
+			OperationQuery query = new OperationQuery();
+			query.setStatus( Operation.STATUS_EXCECUTION );
+			operations = IOCManager._OperationsManager.getRows( getContext(), query );
 		}
 		catch ( BaseException e )
 		{
@@ -830,6 +870,7 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 			Utils.showNotification( getContext(), getContext().getString( "modalNewPurchase.duplicateError" ), Notification.Type.ERROR_MESSAGE );
 	}
 
+	
 	public void onEmailOrder()
 	{
 		/*if ( onModify() )
@@ -1161,6 +1202,54 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 			for ( Company company : providers )
 				if ( company.getId().equals( id ) )
 					comboProviders.setValue( company.getId() );
+		}
+	}
+
+	public void onPay()
+	{
+		if ( onModify() )
+		{
+			try
+			{
+				final Transaction transaction = new Transaction();
+				transaction.setTransaction_type( Transaction.TYPE_PAYMENT );
+				transaction.setTransaction_date( CalendarUtils.getTodayAsLong() );
+				transaction.setRef_purchase( newPurchase.getId() );
+				transaction.setAmount( newPurchase.getGrossPrice() - newPurchase.getPayed() );
+				transaction.setDescription( newPurchase.getTitle() );
+
+				final SelectPaymentDlg dlg = new SelectPaymentDlg( getContext(), getContext().getString( "modalNewPurchase.paymentTitle" ), transaction );
+				dlg.addCloseListener
+				( 
+					new Window.CloseListener() 
+					{
+						private static final long serialVersionUID = 5423140716473782690L;
+
+						@Override
+					    public void windowClose( CloseEvent e ) 
+					    {
+							if ( dlg.isSuccess() )
+							{
+								newPurchase.setPayed( newPurchase.getPayed() + transaction.getAmount() );
+								
+								onModify();
+								
+								Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+								dashboard.refreshTransactionsTab();
+
+								closeModalWindow( true, true );
+							}
+					    }
+					}
+				);
+				getUI().addWindow( dlg );
+			}
+			catch ( Throwable e )
+			{
+				Utils.logException( e, LOG );
+	
+				Utils.showNotification( getContext(), getContext().getString( "modalNewPurchase.payError" ), Notification.Type.ERROR_MESSAGE );
+			}
 		}
 	}
 }

@@ -7,6 +7,7 @@ import es.pryades.erp.common.GenericVto;
 import es.pryades.erp.common.Utils;
 import es.pryades.erp.common.VtoControllerFactory;
 import es.pryades.erp.dto.Account;
+import es.pryades.erp.dto.Transaction;
 import es.pryades.erp.vto.AccountVto;
 
 /**
@@ -39,13 +40,14 @@ public class AccountControlerVto extends GenericControlerVto
 				result.setDtoObj( dtoObj );
 				
 				Account account = (Account) dtoObj; 
+				Transaction first = account.getTransactions().size() > 0 ? account.getTransactions().get( 0 ) : null; 
 
 				result.setId( account.getId( ));
 				
 				result.setAccount_type( getContext().getString( "account.type." + account.getAccount_type() ) );
 				result.setName( account.getName() );
 				result.setNumber( account.getNumber() );
-				result.setBalance( Utils.getFormattedCurrency( account.getBalance() ) ); 
+				result.setBalance( first != null ? Utils.getFormattedCurrency( first.getBalance() ) : "" ); 
 				result.setCompany_name( account.getCompany() != null ? account.getCompany().getAlias() : "" ); 
 			}
 			else

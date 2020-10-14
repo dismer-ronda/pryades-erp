@@ -42,10 +42,12 @@ import es.pryades.erp.dal.BaseManager;
 import es.pryades.erp.dto.BaseDto;
 import es.pryades.erp.dto.Company;
 import es.pryades.erp.dto.Invoice;
+import es.pryades.erp.dto.Operation;
 import es.pryades.erp.dto.Query;
 import es.pryades.erp.dto.UserDefault;
 import es.pryades.erp.dto.query.CompanyQuery;
 import es.pryades.erp.dto.query.InvoiceQuery;
+import es.pryades.erp.dto.query.OperationQuery;
 import es.pryades.erp.ioc.IOCManager;
 import es.pryades.erp.vto.InvoiceVto;
 import es.pryades.erp.vto.controlers.InvoiceControlerVto;
@@ -63,6 +65,7 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 
 	private PopupDateField fromDateField;
 	private PopupDateField toDateField;
+	private ComboBox comboOperations;
 	private ComboBox comboCustomers;
 	private TextField editReference_request;
 	private TextField editReference_order;
@@ -70,9 +73,11 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 	private Label labelTotalPrice;
 	
 	private List<Company> customers;
+	private List<Operation> operations;
 
 	private UserDefault default_from;
 	private UserDefault default_to;
+	private UserDefault default_operation;
 	private UserDefault default_customer;
 	private UserDefault default_reference_request;
 	private UserDefault default_reference_order;
@@ -167,6 +172,7 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 	public Component getQueryComponent()
 	{
 		loadCustomers();
+		loadOperations();
 
 		fromDateField = new PopupDateField( getContext().getString( "words.from" ) );
 		fromDateField.setResolution( Resolution.DAY );
@@ -180,8 +186,25 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 		toDateField.setWidth( "160px" );
 		toDateField.setValue( getDefaultDate( default_to.getData_value() ) );
 		
+		comboOperations = new ComboBox(getContext().getString( "invoicesConfig.comboOperation" ));
+		comboOperations.setWidth( "200px" );
+		comboOperations.setNullSelectionAllowed( true );
+		comboOperations.setTextInputAllowed( true );
+		comboOperations.setImmediate( true );
+		fillComboOperations();
+		comboOperations.setValue( getDefaultOperation() );
+		comboOperations.addValueChangeListener( new Property.ValueChangeListener() 
+		{
+			private static final long serialVersionUID = -4702148005686238523L;
+
+			public void valueChange(ValueChangeEvent event) 
+		    {
+				refreshVisibleContent( true );
+		    }
+		});
+
 		comboCustomers = new ComboBox(getContext().getString( "invoicesConfig.comboCustomer" ));
-		comboCustomers.setWidth( "100%" );
+		comboCustomers.setWidth( "200px" );
 		comboCustomers.setNullSelectionAllowed( true );
 		comboCustomers.setTextInputAllowed( true );
 		comboCustomers.setImmediate( true );
@@ -198,12 +221,12 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 		});
 
 		editReference_request = new TextField( getContext().getString( "invoicesConfig.editReference_request" ) );
-		editReference_request.setWidth( "100%" );
+		editReference_request.setWidth( "200px" );
 		editReference_request.setNullRepresentation( "" );
 		editReference_request.setValue( default_reference_request.getData_value() );
 		
 		editReference_order = new TextField( getContext().getString( "invoicesConfig.editReference_order" ) );
-		editReference_order.setWidth( "100%" );
+		editReference_order.setWidth( "200px" );
 		editReference_order.setNullRepresentation( "" );
 		editReference_order.setValue( default_reference_order.getData_value() );
 		
@@ -212,9 +235,11 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 		addButtonApplyFilterClickListener();
 
 		HorizontalLayout rowQuery = new HorizontalLayout();
+		//rowQuery.setWidth( "100%" );
 		rowQuery.setSpacing( true );
 		rowQuery.addComponent( fromDateField );
 		rowQuery.addComponent( toDateField );
+		rowQuery.addComponent( comboOperations );
 		rowQuery.addComponent( comboCustomers );
 		rowQuery.addComponent( editReference_request );
 		rowQuery.addComponent( editReference_order );
@@ -240,6 +265,9 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 		
 		if ( comboCustomers.getValue() != null )
 			query.setRef_customer( (Long)comboCustomers.getValue() );
+		
+		if ( comboOperations.getValue() != null )
+			query.setRef_operation( (Long)comboOperations.getValue() );
 		
 		query.setRef_user( getContext().getUser().getId() );
 		
@@ -364,6 +392,7 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 	{
 		default_from = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.INVOICES_FROM );
 		default_to = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.INVOICES_TO );
+		default_operation= IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.INVOICES_OPERATION );
 		default_customer = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.INVOICES_CUSTOMER );
 		default_reference_request = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.INVOICES_REFERENCE_REQUEST );
 		default_reference_order = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.INVOICES_REFERENCE_ORDER );
@@ -376,6 +405,7 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_customer, comboCustomers.getValue() != null ? comboCustomers.getValue().toString() : null );
 		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_reference_request, editReference_request.getValue() );
 		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_reference_order, editReference_order.getValue() );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_operation, comboOperations.getValue() != null ? comboOperations.getValue().toString() : null );
 	}
 	
 	private Date getDefaultDate( String date )
@@ -391,6 +421,19 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 		return null;
 	}
 	
+	private Long getDefaultOperation() 
+	{
+		try
+		{
+			return Long.parseLong( default_operation.getData_value() );
+		}
+		catch ( Throwable e )
+		{
+		}
+		
+		return null;
+	}
+
 	private Long getDefaultCustomer() 
 	{
 		try
@@ -504,9 +547,42 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 		        }, 
 		        Utils.getUUID() + ".xls" );
 		
-			res.setCacheTime( 0 );
+		res.setCacheTime( 0 );
 			
-			return res;
-	    }
+		return res;
+	}
+
+	@SuppressWarnings("unchecked")
+	private void loadOperations()
+	{
+		try
+		{
+			OperationQuery query = new OperationQuery();
+
+			operations = IOCManager._OperationsManager.getRows( getContext(), query );
+		}
+		catch ( BaseException e )
+		{
+			e.printStackTrace();
+			operations = new ArrayList<Operation>();
+		}
+	}
+	
+	private void fillComboOperations()
+	{
+		comboOperations.removeAllItems();
+		for ( Operation operation : operations )
+		{
+			comboOperations.addItem( operation.getId() );
+			comboOperations.setItemCaption( operation.getId(), operation.getTitle() );
+		}
+	}
+
+	public void refreshOperations()
+	{
+		loadOperations();
+		fillComboOperations();
+	}
+	
 }
 
