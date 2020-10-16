@@ -198,7 +198,7 @@ public class AccountsConfig extends PagedContent implements ModalParent
 
 	private void fillComboTypes()
 	{
-		for ( int i = Account.TYPE_BANK; i <= Account.TYPE_PROVIDER; i++ )
+		for ( int i = Account.TYPE_BANK; i <= Account.TYPE_CREDIT; i++ )
 		{
 			comboTypes.addItem( i );
 			comboTypes.setItemCaption( i, getContext().getString( "account.type." + i ) );

@@ -6,8 +6,6 @@ import java.util.List;
 
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.event.ShortcutAction.KeyCode;
-import com.vaadin.server.Page;
-import com.vaadin.shared.Position;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -203,7 +201,7 @@ public class SelectPaymentDlg extends Window
 			
 			try
 			{
-				if ( IOCManager._TransactionsManager.addTransaction( getContext(), transaction ) )
+				if ( IOCManager._TransactionsManager.addTransaction( getContext(), transaction, getAccount() ) )
 				{
 					success = true;
 
@@ -212,9 +210,13 @@ public class SelectPaymentDlg extends Window
 					n.setDelayMsec(5000);
 					n.setStyleName("mystyle");
 					n.show(Page.getCurrent());*/
-					
-					Utils.showNotification( getContext(), getContext().getString( "selectTransactionDlg.success" ), Notification.Type.HUMANIZED_MESSAGE );
-					
+
+					String type = getContext().getString( "transaction.type." + transaction.getTransaction_type() );
+        			String message = getContext().getString( "selectTransactionDlg.success." + transaction.getTransaction_type() )
+        					.replaceAll( "%type%", type );
+        			
+    				Utils.showNotification( getContext(), transaction.getTransactionMessage( message ), Notification.Type.HUMANIZED_MESSAGE );
+
 					IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_account, comboAccounts.getValue() != null ? comboAccounts.getValue().toString() : null );
 
 					close();
@@ -251,8 +253,11 @@ public class SelectPaymentDlg extends Window
 	{
 		for ( Account account : accounts )
 		{
-			comboAccounts.addItem( account.getId() );
-			comboAccounts.setItemCaption( account.getId(), account.getName() );
+			if ( account.getTransactions().size() > 0 )
+			{
+				comboAccounts.addItem( account.getId() );
+				comboAccounts.setItemCaption( account.getId(), account.getName() );
+			}
 		}
 	}
 
@@ -264,6 +269,18 @@ public class SelectPaymentDlg extends Window
 		}
 		catch ( Throwable e )
 		{
+		}
+		
+		return null;
+	}
+	
+	private Account getAccount()
+	{
+		if ( comboAccounts.getValue() != null )
+		{
+			for ( Account account : accounts )
+				if ( account.getId().equals( (Long)comboAccounts.getValue() ) )
+					return account;
 		}
 		
 		return null;

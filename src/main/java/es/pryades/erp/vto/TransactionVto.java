@@ -26,7 +26,8 @@ public class TransactionVto extends GenericVto
 
 	private String purchase_number;						
 	private String invoice_number;						
-	private String source;						
+	private String target;						
+	private String transfer;						
 	
 	public TransactionVto()
 	{

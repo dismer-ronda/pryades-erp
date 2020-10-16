@@ -71,7 +71,8 @@ public class TransactionControlerVto extends GenericControlerVto
 				result.setPurchase_number( transaction.getPurchase() != null ? transaction.getPurchase().getFormattedNumber() : "" );
 				result.setInvoice_number( transaction.getInvoice() != null ? transaction.getInvoice().getFormattedNumber() : "" );
 				
-				result.setSource( transaction.getSource() != null ? transaction.getSource().getName() : "" );
+				result.setTarget( transaction.getTarget() != null ? transaction.getTarget().getName() : "" );
+				result.setTransfer( transaction.getTransfer() != null ? Long.toString( transaction.getTransfer() ).toUpperCase() : "" );
 			}
 			else
 			{

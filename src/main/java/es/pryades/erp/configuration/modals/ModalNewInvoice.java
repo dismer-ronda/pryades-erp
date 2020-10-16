@@ -885,6 +885,7 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 				transaction.setTransaction_type( Transaction.TYPE_INCOME );
 				transaction.setTransaction_date( CalendarUtils.getTodayAsLong() );
 				transaction.setRef_invoice( newInvoice.getId() );
+				transaction.setInvoice( newInvoice );
 				transaction.setAmount( newInvoice.getGrandTotalInvoiceAfterTaxes() - newInvoice.getCollected() );
 				transaction.setDescription( newInvoice.getTitle() );
 

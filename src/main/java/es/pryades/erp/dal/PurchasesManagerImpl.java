@@ -13,6 +13,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import es.pryades.erp.common.AppContext;
+import es.pryades.erp.common.Constants;
 import es.pryades.erp.common.Utils;
 import es.pryades.erp.dal.ibatis.PurchaseMapper;
 import es.pryades.erp.dto.Purchase;
@@ -29,8 +30,6 @@ public class PurchasesManagerImpl extends BaseManagerImpl implements PurchasesMa
 	private static final long serialVersionUID = -3882554937723336630L;
 	
 	private static final Logger LOG = Logger.getLogger( PurchasesManagerImpl.class );
-
-	public static final String moneyFormat = "0.00 [$€-C0A];[RED]-0.00 [$€-C0A]";
 
 	public static BaseManager build()
 	{
@@ -163,14 +162,14 @@ public class PurchasesManagerImpl extends BaseManagerImpl implements PurchasesMa
         Font fontCurrency = workbook.createFont();
         styleCurrency.setAlignment(CellStyle.ALIGN_RIGHT );
         styleCurrency.setFont( fontCurrency );
-        styleCurrency.setDataFormat( workbook.createDataFormat().getFormat( moneyFormat ) );
+        styleCurrency.setDataFormat( workbook.createDataFormat().getFormat( Constants.moneyFormat ) );
 
         CellStyle styleFooterCurrency = workbook.createCellStyle();
         Font fontFooterCurrency = workbook.createFont();
         fontFooterCurrency.setBoldweight( Font.BOLDWEIGHT_BOLD );
         styleFooterCurrency.setAlignment(CellStyle.ALIGN_RIGHT );
         styleFooterCurrency.setFont( fontFooter);
-        styleFooterCurrency.setDataFormat( workbook.createDataFormat().getFormat( moneyFormat ) );
+        styleFooterCurrency.setDataFormat( workbook.createDataFormat().getFormat( Constants.moneyFormat ) );
 
 		Cell cell = sheetRow.createCell( j++ );
         cell.setCellStyle(styleHeader);

@@ -43,4 +43,6 @@ public class Constants
 	public static final int TASK_CLAZZ_DATABASE_UPDATE				= 100;
 	public static final int TASK_CLAZZ_DATABASE_QUERY				= 101;
 	public static final int TASK_CLAZZ_QUOTATION_VALIDITY			= 102;
+	
+	public static final String moneyFormat = "0.00 [$€-C0A];[RED]-0.00 [$€-C0A]";
 }

@@ -508,3 +508,28 @@ create table accounts
 );
 alter table accounts OWNER TO pryades;
 
+create table transactions 
+(
+	id bigint not null,
+
+	transaction_date bigint not null,
+	transaction_type bigint not null,
+
+	amount real not null,
+  	balance	real not null,
+  	
+	description varchar(64),
+
+	ref_purchase bigint,			-- id de la compra
+	ref_invoice bigint,				-- id de la venta
+	ref_target bigint,				-- id de la cuenta asociada si es una transferencia
+
+  	ref_account bigint not null,
+
+  	constraint pk_transactions primary key( id ),
+  	constraint fk_transactions_purchase foreign key (ref_purchase) references purchases(id),
+  	constraint fk_transactions_invoice foreign key (ref_invoice) references invoices(id),
+  	constraint fk_transactions_target foreign key (ref_target) references accounts(id),
+  	constraint fk_transactions_account foreign key (ref_account) references accounts(id)
+);
+alter table transactions OWNER TO pryades;

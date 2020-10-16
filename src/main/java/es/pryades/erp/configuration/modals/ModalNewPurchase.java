@@ -1215,6 +1215,7 @@ public class ModalNewPurchase extends ModalWindowsCRUD implements ModalParent, R
 				transaction.setTransaction_type( Transaction.TYPE_PAYMENT );
 				transaction.setTransaction_date( CalendarUtils.getTodayAsLong() );
 				transaction.setRef_purchase( newPurchase.getId() );
+				transaction.setPurchase( newPurchase );
 				transaction.setAmount( newPurchase.getGrossPrice() - newPurchase.getPayed() );
 				transaction.setDescription( newPurchase.getTitle() );
 

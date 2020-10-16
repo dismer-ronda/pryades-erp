@@ -24,10 +24,12 @@ public class Account extends BaseDto
 	public static final int TYPE_BANK				= 1;
 	public static final int TYPE_CUSTOMER			= 2;
 	public static final int TYPE_PROVIDER			= 3;
+	public static final int TYPE_CREDIT				= 4;
 
 	private Integer account_type;
 	private String name;
   	private String number;
+  	private Double credit;
   	
   	private Long ref_company;
   	

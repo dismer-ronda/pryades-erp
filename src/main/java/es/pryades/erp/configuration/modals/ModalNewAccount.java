@@ -11,10 +11,11 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Window;
 
-import es.pryades.erp.application.SelectNumberDlg;
+import es.pryades.erp.application.SelectAccountInitializationDlg;
 import es.pryades.erp.common.AppContext;
 import es.pryades.erp.common.BaseException;
 import es.pryades.erp.common.CalendarUtils;
@@ -44,11 +45,12 @@ public class ModalNewAccount extends ModalWindowsCRUD
 
 	private List<Company> companies;
 
-	protected Account newCompany;
+	protected Account newAccount;
 
 	private ComboBox comboCompanies;
 	private ComboBox comboTypes;
 	private TextField editNumber;
+	private TextField editCredit;
 	private TextField editName;
 
 	/**
@@ -73,15 +75,16 @@ public class ModalNewAccount extends ModalWindowsCRUD
 
 		try
 		{
-			newCompany = (Account) Utils.clone( (Account) orgDto );
+			newAccount = (Account) Utils.clone( (Account) orgDto );
 		}
 		catch ( Throwable e1 )
 		{
-			newCompany = new Account();
-			newCompany.setAccount_type( Account.TYPE_BANK);
+			newAccount = new Account();
+			newAccount.setAccount_type( Account.TYPE_BANK);
+			newAccount.setTransactions( new ArrayList<Transaction>() );
 		}
 
-		bi = new BeanItem<BaseDto>( newCompany );
+		bi = new BeanItem<BaseDto>( newAccount );
 
 		comboTypes = new ComboBox(getContext().getString( "modalNewAccount.comboTypes" ));
 		comboTypes.setWidth( "100%" );
@@ -116,21 +119,34 @@ public class ModalNewAccount extends ModalWindowsCRUD
 		editNumber.setRequiredError( getContext().getString( "words.required" ) );
 		editNumber.setInvalidCommitted( true );
 		
-		Button btnInit = new Button();
-		btnInit.setCaption( getContext().getString( "modalNewAccount.btnInit" ) );
-		btnInit.addClickListener( new Button.ClickListener()
+		editCredit = new TextField( getContext().getString( "modalNewAccount.editCredit" ), bi.getItemProperty( "credit" ) );
+		editCredit.setWidth( "100%" );
+		editCredit.setNullRepresentation( "" );
+		editCredit.setRequired( true );
+		editCredit.setRequiredError( getContext().getString( "words.required" ) );
+		editCredit.setInvalidCommitted( true );
+		
+		if ( !getOperation().equals( OperationCRUD.OP_ADD ) )
 		{
-			private static final long serialVersionUID = 6009616552424331249L;
-
-			public void buttonClick( ClickEvent event )
+			if ( newAccount.getTransactions().size() == 0 )
 			{
-				onInitAccount();
+				Button btnInit = new Button();
+				btnInit.setCaption( getContext().getString( "modalNewAccount.btnInit" ) );
+				btnInit.addClickListener( new Button.ClickListener()
+				{
+					private static final long serialVersionUID = 6009616552424331249L;
+		
+					public void buttonClick( ClickEvent event )
+					{
+						onInitAccount();
+					}
+				} );
+		
+				getCustomOperationsRow().addComponentAsFirst( btnInit );
+				getCustomOperationsRow().setComponentAlignment( btnInit, Alignment.MIDDLE_LEFT );
 			}
-		} );
-
-		getDefaultOperationsRow().addComponentAsFirst( btnInit );
-		getDefaultOperationsRow().setComponentAlignment( btnInit, Alignment.MIDDLE_LEFT );
-
+		}
+		
 		HorizontalLayout row1 = new HorizontalLayout();
 		row1.setWidth( "100%" );
 		row1.setSpacing( true );
@@ -142,6 +158,7 @@ public class ModalNewAccount extends ModalWindowsCRUD
 		row2.setWidth( "100%" );
 		row2.setSpacing( true );
 		row2.addComponent( editNumber );
+		row2.addComponent( editCredit );
 
 		componentsContainer.addComponent( row1 );
 		componentsContainer.addComponent( row2 );
@@ -163,9 +180,9 @@ public class ModalNewAccount extends ModalWindowsCRUD
 	{
 		try
 		{
-			newCompany.setId( null );
+			newAccount.setId( null );
 
-			IOCManager._AccountsManager.setRow( getContext(), null, newCompany );
+			IOCManager._AccountsManager.setRow( getContext(), null, newAccount );
 			
 			return true;
 		}
@@ -182,7 +199,7 @@ public class ModalNewAccount extends ModalWindowsCRUD
 	{
 		try
 		{
-			IOCManager._AccountsManager.setRow( getContext(), (Account) orgDto, newCompany );
+			IOCManager._AccountsManager.setRow( getContext(), (Account) orgDto, newAccount );
 
 			return true;
 		}
@@ -199,7 +216,7 @@ public class ModalNewAccount extends ModalWindowsCRUD
 	{
 		try
 		{
-			IOCManager._AccountsManager.delRow( getContext(), newCompany );
+			IOCManager._AccountsManager.delRow( getContext(), newAccount );
 
 			return true;
 		}
@@ -213,7 +230,7 @@ public class ModalNewAccount extends ModalWindowsCRUD
 
 	private void fillComboTypes()
 	{
-		for ( int i = Account.TYPE_BANK; i <= Account.TYPE_PROVIDER; i++ )
+		for ( int i = Account.TYPE_BANK; i <= Account.TYPE_CREDIT; i++ )
 		{
 			comboTypes.addItem( i );
 			comboTypes.setItemCaption( i, getContext().getString( "account.type." + i ) );
@@ -265,7 +282,7 @@ public class ModalNewAccount extends ModalWindowsCRUD
 	
 	private void onInitAccount()
 	{
-		final SelectNumberDlg dlg = new SelectNumberDlg( getContext(), getContext().getString( "modalNewAccount.initialization" ) );
+		final SelectAccountInitializationDlg dlg = new SelectAccountInitializationDlg( getContext() );
 		dlg.addCloseListener
 		( 
 			new Window.CloseListener() 
@@ -275,18 +292,17 @@ public class ModalNewAccount extends ModalWindowsCRUD
 				@Override
 			    public void windowClose( CloseEvent e ) 
 			    {
-					String value = dlg.getValue();
-					
-					if ( value != null && !value.isEmpty() )
+					if ( dlg.isSuccess() )
 					{
+						Double balance = dlg.getAmount();
+					
 						try
 						{
-							Double balance = Utils.getDouble( value, 0 );
-							
 							Transaction transaction = new Transaction();
 							transaction.setTransaction_type( Transaction.TYPE_INIT );
-							transaction.setTransaction_date( CalendarUtils.getTodayAsLong() );
-							transaction.setRef_account( newCompany.getId() );
+							transaction.setTransaction_date( CalendarUtils.getDayAsLong( dlg.getDate() ) );
+							transaction.setRef_account( newAccount.getId() );
+							transaction.setAccount( newAccount );
 							transaction.setAmount( balance );
 							transaction.setBalance( balance );
 							transaction.setDescription( getContext().getString( "modalNewAccount.initialization" ) );
@@ -295,6 +311,11 @@ public class ModalNewAccount extends ModalWindowsCRUD
 									
 							Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
 							dashboard.refreshTransactionsTab();
+
+							String type = getContext().getString( "transaction.type." + transaction.getTransaction_type() );
+		        			String message = getContext().getString( "modalNewAccount.success" ).replaceAll( "%type%", type );
+		        			
+		    				Utils.showNotification( getContext(), transaction.getTransactionMessage( message ), Notification.Type.HUMANIZED_MESSAGE );
 						}
 						catch ( Throwable e1 )
 						{
@@ -306,4 +327,5 @@ public class ModalNewAccount extends ModalWindowsCRUD
 		);
 		getUI().addWindow( dlg );
 	}
+	
 }

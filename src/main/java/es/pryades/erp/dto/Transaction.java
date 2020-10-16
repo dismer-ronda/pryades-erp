@@ -2,6 +2,7 @@ package es.pryades.erp.dto;
 
 import org.apache.log4j.Logger;
 
+import es.pryades.erp.common.CalendarUtils;
 import es.pryades.erp.common.Utils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -37,13 +38,20 @@ public class Transaction extends BaseDto
 
 	private Long ref_purchase;
 	private Long ref_invoice;
-	private Long ref_source;
 	private Long ref_account;
+
+	private Long ref_target;			// Referencia a cuenta origen/destino de transacción
+	private Long transfer;				// Para identificar las dos transacciones de una transferencia
 
 	private Purchase purchase;
 	private Invoice invoice;
 	private Account account;
-	private Account source;
+	private Account target;
+	
+	public String getFormattedDate()
+	{
+		return CalendarUtils.getDateFromLongAsString( getTransaction_date(), "dd-MM-yyyy" );
+	}
 	
 	public String getAmountAsString()
 	{
@@ -53,5 +61,47 @@ public class Transaction extends BaseDto
 	public String getBalanceAsString()
 	{
 		return Utils.getFormattedCurrency( balance );
+	}
+	
+	public String getTransactedItem()
+	{
+		if ( transaction_type.equals( TYPE_PAYMENT ) && purchase != null )
+			return purchase.getFormattedNumber();
+
+		if ( transaction_type.equals( TYPE_INCOME ) && invoice != null )
+			return invoice.getFormattedNumber();
+
+		if ( transaction_type.equals( TYPE_TRANSFER_DST ) && transfer != null )
+			return transfer.toString().toUpperCase();
+		
+		if ( transaction_type.equals( TYPE_TRANSFER_SRC ) && transfer != null )
+			return transfer.toString().toUpperCase();
+		
+		return "";
+	}
+	
+	public String getTransactionMessage( String message )
+	{
+		if ( transaction_type.equals( TYPE_INIT ) && account != null )
+			return message.replaceAll( "%amount%", getAmountAsString() )
+					.replaceAll( "%account%", account.getName() );
+		
+		if ( transaction_type.equals( TYPE_PAYMENT ) && purchase != null )
+			return message.replaceAll( "%amount%", getAmountAsString() )
+					.replaceAll( "%invoice%", purchase.getFormattedNumber() );
+
+		if ( transaction_type.equals( TYPE_INCOME ) && invoice != null )
+			return message.replaceAll( "%amount%", getAmountAsString() )
+					.replaceAll( "%invoice%", invoice.getFormattedNumber() );
+
+		if ( transaction_type.equals( TYPE_TRANSFER_DST ) && transfer != null )
+			return message.replaceAll( "%amount%", getAmountAsString() )
+					.replaceAll( "%transfer%", transfer.toString().toUpperCase() );
+		
+		if ( transaction_type.equals( TYPE_TRANSFER_SRC ) && transfer != null )
+			return message.replaceAll( "%amount%", getAmountAsString() )
+					.replaceAll( "%transfer%", transfer.toString().toUpperCase() );
+		
+		return "";
 	}
 }

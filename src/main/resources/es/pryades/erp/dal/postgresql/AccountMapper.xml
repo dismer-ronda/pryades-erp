@@ -31,7 +31,8 @@
 			transactions.description, 
 			transactions.ref_purchase,
 			transactions.ref_invoice,
-			transactions.ref_source,
+			transactions.ref_target,
+			transactions.transfer,
 			transactions.ref_account
 			
 		from transactions
@@ -80,7 +81,8 @@
 		<result property="description" column="description"/>
 		<result property="ref_purchase" column="ref_purchase"/>
 		<result property="ref_invoice" column="ref_invoice"/>
-		<result property="ref_source" column="ref_source"/>
+		<result property="ref_target" column="ref_target"/>
+		<result property="transfer" column="transfer"/>
 		<result property="ref_account" column="ref_account"/>
 	</resultMap>
 
@@ -90,6 +92,7 @@
 		<result property="account_type" column="account_type"/>
 		<result property="name" column="name"/>
 		<result property="number" column="number"/>
+		<result property="credit" column="credit"/>
 		<result property="ref_company" column="ref_company"/>
 
 		<association property="company" javaType="es.pryades.erp.dto.Company" resultMap="mapCompany" columnPrefix="company_" />
@@ -100,9 +103,10 @@
 	<sql id="es.pryades.erp.dal.ibatis.AccountMapper.fields">
 		accounts.id,
 		
-		accounts.account_type,						
-		accounts.name,						
-		accounts.number,						
+		accounts.account_type,
+		accounts.name,
+		accounts.number,
+		accounts.credit,
 		
 		accounts.ref_company,
 		
@@ -228,6 +232,7 @@
 			account_type,						
 			name,
 			number,
+			credit,
 			
 			ref_company
 		)
@@ -238,6 +243,7 @@
 			#{account_type},						
 			#{name},
 			#{number},
+			#{credit},
 			
 			#{ref_company}
 		)
@@ -248,6 +254,7 @@
 			account_type=#{account_type},						
 			name=#{name},
 			number=#{number},
+			credit=#{credit},
 			ref_company=#{ref_company}
 		where id = #{id}
 	</update>

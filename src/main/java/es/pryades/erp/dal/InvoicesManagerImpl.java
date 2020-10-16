@@ -13,6 +13,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import es.pryades.erp.common.AppContext;
+import es.pryades.erp.common.Constants;
 import es.pryades.erp.common.Utils;
 import es.pryades.erp.dal.ibatis.InvoiceMapper;
 import es.pryades.erp.dto.Invoice;
@@ -30,8 +31,6 @@ public class InvoicesManagerImpl extends BaseManagerImpl implements InvoicesMana
 	private static final long serialVersionUID = 7316344102356022841L;
 	
 	private static final Logger LOG = Logger.getLogger( InvoicesManagerImpl.class );
-
-	public static final String moneyFormat = "0.00 [$€-C0A];[RED]-0.00 [$€-C0A]";
 
 	public static BaseManager build()
 	{
@@ -141,14 +140,14 @@ public class InvoicesManagerImpl extends BaseManagerImpl implements InvoicesMana
         Font fontCurrency = workbook.createFont();
         styleCurrency.setAlignment(CellStyle.ALIGN_RIGHT );
         styleCurrency.setFont( fontCurrency );
-        styleCurrency.setDataFormat( workbook.createDataFormat().getFormat( moneyFormat ) );
+        styleCurrency.setDataFormat( workbook.createDataFormat().getFormat( Constants.moneyFormat ) );
 
         CellStyle styleFooterCurrency = workbook.createCellStyle();
         Font fontFooterCurrency = workbook.createFont();
         fontFooterCurrency.setBoldweight( Font.BOLDWEIGHT_BOLD );
         styleFooterCurrency.setAlignment(CellStyle.ALIGN_RIGHT );
         styleFooterCurrency.setFont( fontFooter);
-        styleFooterCurrency.setDataFormat( workbook.createDataFormat().getFormat( moneyFormat ) );
+        styleFooterCurrency.setDataFormat( workbook.createDataFormat().getFormat( Constants.moneyFormat ) );
         
 		int j = 0;
         Cell cell = sheetRow.createCell( j++ );

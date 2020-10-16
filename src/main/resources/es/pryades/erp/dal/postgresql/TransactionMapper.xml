@@ -3,6 +3,21 @@
 
 <mapper namespace="es.pryades.erp.dal.ibatis.TransactionMapper">
 
+	<resultMap id="mapCompany" type="es.pryades.erp.dto.Company">
+		<id property="id" column="id"/>
+		
+		<result property="name" column="name"/>
+		<result property="alias" column="alias"/>
+		<result property="tax_id" column="tax_id"/>
+		<result property="address" column="address"/>
+		<result property="email" column="email"/>
+		<result property="phone" column="phone"/>
+		<result property="type_company" column="type_company"/>
+		<result property="taxable" column="taxable"/>
+		<result property="language" column="language"/>
+		<result property="signature" column="signature"/>
+	</resultMap>
+
 	<resultMap id="mapPurchase" type="es.pryades.erp.dto.Purchase">
 		<id property="id" column="id"/>
 		
@@ -26,6 +41,32 @@
 		<result property="ref_buyer" column="ref_buyer"/>
 		<result property="ref_provider" column="ref_provider"/>
 		<result property="ref_contact" column="ref_contact"/>
+		
+		<association property="provider" javaType="es.pryades.erp.dto.Company" resultMap="mapCompany" columnPrefix="provider_" />
+	</resultMap>
+	
+	<resultMap id="mapQuotation" type="es.pryades.erp.dto.Quotation">
+		<id property="id" column="quotation_id"/>
+		
+		<result property="number" column="number"/>
+		<result property="title" column="title"/>
+		<result property="quotation_date" column="quotation_date"/>
+		<result property="validity" column="validity"/>
+		<result property="ref_customer" column="ref_customer"/>
+		<result property="reference_request" column="reference_request"/>
+		<result property="reference_order" column="reference_order"/>
+		<result property="packaging" column="packaging"/>
+		<result property="delivery" column="delivery"/>
+		<result property="warranty" column="warranty"/>
+		<result property="payment_terms" column="payment_terms"/>
+		<result property="tax_rate" column="tax_rate"/>
+		<result property="status" column="status"/>
+		<result property="ref_contact" column="ref_contact"/>
+		<result property="ref_user" column="ref_user"/>
+		<result property="weight" column="weight"/>
+		<result property="volume" column="volume"/>
+
+		<association property="customer" javaType="es.pryades.erp.dto.Company" resultMap="mapCompany" columnPrefix="customer_" />
 	</resultMap>
 	
 	<resultMap id="mapInvoice" type="es.pryades.erp.dto.Invoice">
@@ -40,6 +81,8 @@
 		<result property="free_delivery" column="free_delivery"/>
 		<result property="payment_terms" column="payment_terms"/>
 		<result property="collected" column="collected"/>
+		
+		<association property="quotation" javaType="es.pryades.erp.dto.Quotation" resultMap="mapQuotation" columnPrefix="quotation_" />
 	</resultMap>
 	
 	<resultMap id="mapAccount" type="es.pryades.erp.dto.Account">
@@ -48,6 +91,7 @@
 		<result property="account_type" column="account_type"/>
 		<result property="name" column="name"/>
 		<result property="number" column="number"/>
+		<result property="credit" column="credit"/>
 		<result property="ref_company" column="ref_company"/>
 	</resultMap>
 	
@@ -61,12 +105,13 @@
 		<result property="description" column="description"/>
 		<result property="ref_purchase" column="ref_purchase"/>
 		<result property="ref_invoice" column="ref_invoice"/>
-		<result property="ref_source" column="ref_source"/>
+		<result property="ref_target" column="ref_target"/>
+		<result property="transfer" column="transfer"/>
 		<result property="ref_account" column="ref_account"/>
-		
+
 		<association property="purchase" javaType="es.pryades.erp.dto.Purchase" resultMap="mapPurchase" columnPrefix="purchase_" />
 		<association property="invoice" javaType="es.pryades.erp.dto.Invoice" resultMap="mapInvoice" columnPrefix="invoice_" />
-		<association property="source" javaType="es.pryades.erp.dto.Account" resultMap="mapAccount" columnPrefix="source_" />
+		<association property="target" javaType="es.pryades.erp.dto.Account" resultMap="mapAccount" columnPrefix="target_" />
 		<association property="account" javaType="es.pryades.erp.dto.Account" resultMap="mapAccount" columnPrefix="account_" />
 	</resultMap>
 
@@ -80,7 +125,8 @@
 		transactions.description, 
 		transactions.ref_purchase,
 		transactions.ref_invoice,
-		transactions.ref_source,
+		transactions.ref_target,
+		transactions.transfer,
 		transactions.ref_account,
 		
 		invoices.id						as invoice_id,
@@ -93,6 +139,37 @@
 		invoices.free_delivery			as invoice_free_delivery,
 		invoices.payment_terms			as invoice_payment_terms,
 		invoices.collected				as invoice_collected,
+		
+		quotations.id					as invoice_quotation_id,						
+		quotations.ref_customer			as invoice_quotation_ref_customer,
+		quotations.ref_contact			as invoice_quotation_ref_contact,
+		quotations.ref_user				as invoice_quotation_ref_user,
+		quotations.quotation_date		as invoice_quotation_quotation_date,
+		quotations.validity				as invoice_quotation_validity,
+		quotations.number				as invoice_quotation_number,						
+		quotations.title 				as invoice_quotation_title,						
+		quotations.reference_request 	as invoice_quotation_reference_request,
+		quotations.reference_order 		as invoice_quotation_reference_order,
+		quotations.packaging			as invoice_quotation_packaging,
+		quotations.delivery				as invoice_quotation_delivery,
+		quotations.warranty				as invoice_quotation_warranty,
+		quotations.payment_terms		as invoice_quotation_payment_terms,
+		quotations.tax_rate				as invoice_quotation_tax_rate,
+		quotations.status				as invoice_quotation_status,
+		quotations.weight				as invoice_quotation_weight,
+		quotations.volume				as invoice_quotation_volume,
+		
+		companies1.id					as invoice_quotation_customer_id,
+		companies1.name					as invoice_quotation_customer_name,
+		companies1.alias				as invoice_quotation_customer_alias,
+		companies1.tax_id				as invoice_quotation_customer_tax_id,
+		companies1.address				as invoice_quotation_customer_address,
+		companies1.email				as invoice_quotation_customer_email,
+		companies1.phone				as invoice_quotation_customer_phone,
+		companies1.type_company			as invoice_quotation_customer_type_company,
+		companies1.taxable				as invoice_quotation_customer_taxable,
+		companies1.language				as invoice_quotation_customer_language,
+		companies1.signature			as invoice_quotation_customer_signature,
 		
 		purchases.id					as purchase_id,
 		purchases.purchase_type			as purchase_purchase_type,
@@ -113,28 +190,51 @@
 		purchases.ref_provider			as purchase_ref_provider,
 		purchases.ref_contact			as purchase_ref_contact,
 		
-		accounts1.id					as source_id,
-		accounts1.account_type			as source_account_type,						
-		accounts1.name					as source_name,
-		accounts1.number				as source_number,						
-		accounts1.ref_company			as source_ref_company,
+		companies2.id					as purchase_provider_id,
+		companies2.name					as purchase_provider_name,
+		companies2.alias				as purchase_provider_alias,
+		companies2.tax_id				as purchase_provider_tax_id,
+		companies2.address				as purchase_provider_address,
+		companies2.email				as purchase_provider_email,
+		companies2.phone				as purchase_provider_phone,
+		companies2.type_company			as purchase_provider_type_company,
+		companies2.taxable				as purchase_provider_taxable,
+		companies2.language				as purchase_provider_language,
+		companies2.signature			as purchase_provider_signature,
+		
+		accounts1.id					as target_id,
+		accounts1.account_type			as target_account_type,						
+		accounts1.name					as target_name,
+		accounts1.number				as target_number,						
+		accounts1.credit				as target_credit,						
+		accounts1.ref_company			as target_ref_company,
 		
 		accounts2.id					as account_id,
 		accounts2.account_type			as account_account_type,						
 		accounts2.name					as account_name,
 		accounts2.number				as account_number,						
+		accounts2.credit				as account_credit,						
 		accounts2.ref_company			as account_ref_company
 	</sql>
 
 	<sql id="es.pryades.erp.dal.ibatis.TransactionMapper.joins">
+		left join invoices
+		on transactions.ref_invoice = invoices.id
+		
+		left join quotations
+		on invoices.ref_quotation = quotations.id
+
+		left join companies companies1
+		on quotations.ref_customer = companies1.id
+
 		left join purchases
 		on transactions.ref_purchase = purchases.id
 		
-		left join invoices
-		on transactions.ref_invoice = invoices.id
-
+		left join companies companies2
+		on purchases.ref_provider = companies2.id
+		
 		left join accounts accounts1
-		on transactions.ref_source = accounts1.id
+		on transactions.ref_target = accounts1.id
 
 		inner join accounts accounts2
 		on transactions.ref_account = accounts2.id
@@ -142,6 +242,12 @@
 
 	<sql id="es.pryades.erp.dal.ibatis.TransactionMapper.where">
 		<where>
+			<if test="from_date != null">
+				AND transactions.transaction_date &gt;= #{from_date}    
+	        </if>
+			<if test="to_date != null">
+				AND transactions.transaction_date &lt;= #{to_date}    
+	        </if>
 			<if test="ref_account != null">
 				AND transactions.ref_account = #{ref_account}    
 	        </if>
@@ -230,9 +336,7 @@
 			transactions
 		
 		<include refid="es.pryades.erp.dal.ibatis.TransactionMapper.joins" />
-		
-		where 
-			transactions.ref_account = #{ref_account}    
+		<include refid="es.pryades.erp.dal.ibatis.TransactionMapper.where" />
 		
 		order by transactions.id desc
 		
@@ -256,7 +360,8 @@
 			description,
 			ref_purchase, 
 			ref_invoice,
-			ref_source,
+			ref_target,
+			transfer,
 			ref_account
 		)
 		values
@@ -270,7 +375,8 @@
 			#{description},
 			#{ref_purchase}, 
 			#{ref_invoice},
-			#{ref_source},
+			#{ref_target},
+			#{transfer},
 			#{ref_account}
 		)
 	</insert>
@@ -284,7 +390,8 @@
 			description=#{description},
 			ref_purchase=#{ref_purchase}, 
 			ref_invoice#{ref_invoice},
-			ref_source=#{ref_source},
+			ref_target=#{ref_target},
+			transfer=#{transfer},
 			ref_account=#{ref_account}
 		where id = #{id}
 	</update>
