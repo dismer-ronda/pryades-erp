@@ -106,28 +106,31 @@ public class OperationsTabContent extends PagedContent implements ModalParent
 
 	public List<Component> getCustomOperations()
 	{
-		List<Component> ops = new ArrayList<Component>();
-		
+		return null;
+	}
+
+	@Override
+	public Component getTotalsComponent()
+	{
 		HorizontalLayout rowTotals = new HorizontalLayout();
 		rowTotals.setWidth( "100%" );
 		rowTotals.setSpacing( true );
-		rowTotals.setMargin( new MarginInfo( false, true, false, true ) );
+		rowTotals.setMargin( new MarginInfo( false, true, true, true ) );
 		
 		labelTotalCost = new Label();
-		labelTotalCost.setWidth( "300px" );
+		labelTotalCost.setStyleName( "centered border" );
+
 		labelTotalPrice = new Label();
-		labelTotalPrice.setWidth( "300px" );
-		labelTotalMargin = new Label();
-		labelTotalMargin.setWidth( "300px" );
-		labelTotalMargin.addStyleName( "green" );
+		labelTotalPrice.setStyleName( "centered border" );
 		
+		labelTotalMargin = new Label();
+		labelTotalMargin.setStyleName( "centered border bold" );
+
 		rowTotals.addComponent( labelTotalCost );
 		rowTotals.addComponent( labelTotalPrice );
 		rowTotals.addComponent( labelTotalMargin );
-
-		ops.add( rowTotals );
 		
-		return ops;
+		return rowTotals;
 	}
 
 	@Override

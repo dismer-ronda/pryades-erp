@@ -193,6 +193,11 @@
 			<if test="purchase_type != null">
 				AND purchases.purchase_type = #{purchase_type}    
 	        </if>
+			<if test="for_payment != null">
+				<if test="for_payment.booleanValue()">
+					AND (purchases.net_price + purchases.net_tax - purchases.net_retention) - purchases.payed > 0    
+	        	</if>
+	        </if>
 		</where>
 	</sql>
 	

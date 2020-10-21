@@ -285,9 +285,11 @@
 		<result property="tracking" column="tracking"/>
 		<result property="ref_consignee" column="ref_consignee"/>
 		<result property="ref_notify" column="ref_notify"/>
+		<result property="ref_transporter" column="ref_transporter"/>
 		
 		<association property="consignee" javaType="es.pryades.erp.dto.Company" resultMap="mapCompany" columnPrefix="consignee_" />
 		<association property="notify" javaType="es.pryades.erp.dto.Company" resultMap="mapCompany" columnPrefix="notify_" />
+		<association property="transporter" javaType="es.pryades.erp.dto.Company" resultMap="mapCompany" columnPrefix="transporter_" />
 	</resultMap>
 	
 	<resultMap id="mapInvoice" type="es.pryades.erp.dto.Invoice">
@@ -419,7 +421,19 @@
 		companies2.type_company		as shipment_notify_type_company,
 		companies2.taxable 			as shipment_notify_taxable,
 		companies2.language 		as shipment_notify_language,
-		companies2.signature		as shipment_notify_signature
+		companies2.signature		as shipment_notify_signature,
+
+		companies3.id				as transporter_notify_id,
+		companies3.name 			as transporter_notify_name,
+		companies3.alias 			as transporter_notify_alias,
+		companies3.tax_id 			as transporter_notify_tax_id,
+		companies3.address 			as transporter_notify_address,
+		companies3.email 			as transporter_notify_email,
+		companies3.phone 			as transporter_notify_phone,
+		companies3.type_company		as transporter_notify_type_company,
+		companies3.taxable 			as transporter_notify_taxable,
+		companies3.language 		as transporter_notify_language,
+		companies3.signature		as transporter_notify_signature
 
 	</sql>
 
@@ -427,7 +441,7 @@
 		inner join quotations
 		on invoices.ref_quotation = quotations.id
 		
-		inner join operations
+		left join operations
 		on operations.ref_quotation = quotations.id
 
 		inner join companies
@@ -447,6 +461,9 @@
 
 		left join companies companies2
 		on shipments.ref_notify = companies2.id
+		
+		left join companies companies3
+		on shipments.ref_transporter = companies3.id
 		
 		<if test="ref_user != null">
 			inner join users_companies

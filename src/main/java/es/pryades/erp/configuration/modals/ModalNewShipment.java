@@ -59,6 +59,8 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 	private List<CompanyContact> consignee_contacts;
 	private List<CompanyContact> notify_contacts;
 	private List<UserCompany> users;
+	private List<Company> transporters;
+	private List<CompanyContact> transporter_contacts;
 	
 	@Getter
 	protected Shipment newShipment;
@@ -68,9 +70,11 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 	
 	private ComboBox comboConsignee;
 	private ComboBox comboNotify;
+	private ComboBox comboTransporter;
 
 	private ComboBox comboConsigneeContacts;
 	private ComboBox comboNotifyContacts;
+	private ComboBox comboTransporterContacts;
 	
 	private ComboBox comboUsers;
 	
@@ -83,12 +87,13 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 	private TextField editTracking;
 	private ComboBox comboStatus;
 	
-	private UserDefault consignee;
-	private UserDefault notify;
-	private UserDefault incoterms;
-	private UserDefault departure_port;
-	private UserDefault arrival_port;
-	private UserDefault carrier;
+	private UserDefault default_consignee;
+	private UserDefault default_notify;
+	private UserDefault default_transporter;
+	private UserDefault default_incoterms;
+	private UserDefault default_departure_port;
+	private UserDefault default_arrival_port;
+	private UserDefault default_carrier;
 	
 	private Panel panelBoxes;
 	private ShipmentsBoxesConfig configBoxes;
@@ -125,16 +130,21 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 			newShipment.setShipment_date( CalendarUtils.getTodayAsLong() );
 			newShipment.setDeparture_date( CalendarUtils.getTodayAsLong() );
 
-			if ( Utils.getLong( consignee.getData_value(), 0 ) != 0)
-				newShipment.setRef_consignee( Utils.getLong( consignee.getData_value(), 0 ) );
-			if ( Utils.getLong( notify.getData_value(), 0 ) != 0)
-				newShipment.setRef_notify( Utils.getLong( notify.getData_value(), 0 ) );
-			newShipment.setIncoterms( incoterms.getData_value() );
-			newShipment.setDeparture_port( departure_port.getData_value() );
-			newShipment.setArrival_port( arrival_port.getData_value() );
-			newShipment.setCarrier( carrier.getData_value() );
+			newShipment.setIncoterms( default_incoterms.getData_value() );
+			newShipment.setDeparture_port( default_departure_port.getData_value() );
+			newShipment.setArrival_port( default_arrival_port.getData_value() );
+			newShipment.setCarrier( default_carrier.getData_value() );
 			newShipment.setStatus( Shipment.STATUS_CREATED );
 			newShipment.setRef_user( getContext().getUser().getId() );
+
+			if ( Utils.getLong( default_consignee.getData_value(), 0 ) != 0 )
+				newShipment.setRef_consignee( Utils.getLong( default_consignee.getData_value(), 0 ) );
+			
+			if ( Utils.getLong( default_notify.getData_value(), 0 ) != 0 )
+				newShipment.setRef_notify( Utils.getLong( default_notify.getData_value(), 0 ) );
+			
+			if ( Utils.getLong( default_transporter.getData_value(), 0 ) != 0 )
+				newShipment.setRef_transporter( Utils.getLong( default_transporter.getData_value(), 0 ) );
 		}
 
 		layout.setHeight( "-1px" );
@@ -163,6 +173,8 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 		comboConsignee.setRequired( true );
 		fillComboConsignees();
 		comboConsignee.setPropertyDataSource( bi.getItemProperty( "ref_consignee" ) );
+		comboConsignee.setRequiredError( getContext().getString( "words.required" ) );
+		comboConsignee.setInvalidCommitted( true );
 		comboConsignee.addValueChangeListener( new Property.ValueChangeListener() 
 		{
 			private static final long serialVersionUID = -545925109946070888L;
@@ -181,6 +193,8 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 		comboNotify.setRequired( true );
 		fillComboNotifies();
 		comboNotify.setPropertyDataSource( bi.getItemProperty( "ref_notify" ) );
+		comboNotify.setRequiredError( getContext().getString( "words.required" ) );
+		comboNotify.setInvalidCommitted( true );
 		comboNotify.addValueChangeListener( new Property.ValueChangeListener() 
 		{
 			private static final long serialVersionUID = -1531581759054257531L;
@@ -188,6 +202,28 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 			public void valueChange(ValueChangeEvent event) 
 		    {
 		        onSelectedNotify();
+		    }
+		});
+
+		loadTransporters();
+		
+		comboTransporter = new ComboBox(getContext().getString( "modalNewShipment.comboTransporter" ));
+		comboTransporter.setWidth( "100%" );
+		comboTransporter.setNullSelectionAllowed( false );
+		comboTransporter.setTextInputAllowed( true );
+		comboTransporter.setImmediate( true );
+		comboTransporter.setRequired( true );
+		fillComboTransporters();
+		comboTransporter.setPropertyDataSource( bi.getItemProperty( "ref_transporter" ) );
+		comboTransporter.setRequiredError( getContext().getString( "words.required" ) );
+		comboTransporter.setInvalidCommitted( true );
+		comboTransporter.addValueChangeListener( new Property.ValueChangeListener() 
+		{
+			private static final long serialVersionUID = -9103225128635080902L;
+
+			public void valueChange(ValueChangeEvent event) 
+		    {
+		        onSelectedTransporter();
 		    }
 		});
 		
@@ -200,6 +236,8 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 		comboConsigneeContacts.setRequired( true );
 		fillComboConsigneeContacts();
 		comboConsigneeContacts.setPropertyDataSource( bi.getItemProperty( "ref_consignee_contact" ) );
+		comboConsigneeContacts.setRequiredError( getContext().getString( "words.required" ) );
+		comboConsigneeContacts.setInvalidCommitted( true );
 
 		loadNotifyContacts();
 		comboNotifyContacts = new ComboBox(getContext().getString( "modalNewShipment.comboNotifyContact" ));
@@ -210,6 +248,18 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 		comboNotifyContacts.setRequired( true );
 		fillComboNotifyContacts();
 		comboNotifyContacts.setPropertyDataSource( bi.getItemProperty( "ref_notify_contact" ) );
+		comboNotifyContacts.setRequiredError( getContext().getString( "words.required" ) );
+		comboNotifyContacts.setInvalidCommitted( true );
+
+		loadTransporterContacts();
+		comboTransporterContacts = new ComboBox(getContext().getString( "modalNewShipment.comboTransporterContact" ));
+		comboTransporterContacts.setWidth( "100%" );
+		comboTransporterContacts.setNullSelectionAllowed( false );
+		comboTransporterContacts.setTextInputAllowed( true );
+		comboTransporterContacts.setImmediate( true );
+		comboTransporterContacts.setRequired( true );
+		fillComboTransporterContacts();
+		comboTransporterContacts.setPropertyDataSource( bi.getItemProperty( "ref_transporter_contact" ) );
 
 		loadUsers();
 		comboUsers = new ComboBox(getContext().getString( "modalNewShipment.comboUser" ));
@@ -300,14 +350,21 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 		row3.addComponent( editIncoterms );
 		row3.addComponent( editDeparture_port );
 		row3.addComponent( editArrival_port );
-		row3.addComponent( editCarrier );
-		row3.addComponent( editTracking );
+
+		HorizontalLayout row6 = new HorizontalLayout();
+		row6.setWidth( "100%" );
+		row6.setSpacing( true );
+		row6.addComponent( comboTransporter );
+		row6.addComponent( comboTransporterContacts );
+		row6.addComponent( editCarrier );
+		row6.addComponent( editTracking );
 
 		componentsContainer.addComponent( row1 );
 		componentsContainer.addComponent( row4 );
 		componentsContainer.addComponent( row5 );
 		componentsContainer.addComponent( row2 );
 		componentsContainer.addComponent( row3 );
+		componentsContainer.addComponent( row6 );
 		
 		if ( !getOperation().equals( OperationCRUD.OP_ADD ) )
 		{
@@ -548,6 +605,23 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
+	private void loadTransporters()
+	{
+		try
+		{
+			CompanyQuery query = new CompanyQuery();
+			query.setType_company( Company.TYPE_TRANSPORTER );
+
+			transporters = IOCManager._CompaniesManager.getRows( getContext(), query );
+		}
+		catch ( BaseException e )
+		{
+			e.printStackTrace();
+			transporters = new ArrayList<Company>();
+		}
+	}
+	
 	private void fillComboConsignees()
 	{
 		for ( Company company : customers )
@@ -563,6 +637,15 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 		{
 			comboNotify.addItem( company.getId() );
 			comboNotify.setItemCaption( company.getId(), company.getAlias() );
+		}
+	}
+
+	private void fillComboTransporters()
+	{
+		for ( Company company : transporters )
+		{
+			comboTransporter.addItem( company.getId() );
+			comboTransporter.setItemCaption( company.getId(), company.getAlias() );
 		}
 	}
 
@@ -603,22 +686,24 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 
 	private void loadUserDefaults()
 	{
-		consignee = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.SHIPMENT_CONSIGNEE );
-		notify = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.SHIPMENT_NOTIFY );
-		incoterms = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.SHIPMENT_INCOTERMS );
-		departure_port = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.SHIPMENT_DEPARTURE_PORT );
-		arrival_port = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.SHIPMENT_ARRIVAL_PORT );
-		carrier = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.SHIPMENT_CARRIER );
+		default_consignee = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.SHIPMENT_CONSIGNEE );
+		default_notify = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.SHIPMENT_NOTIFY );
+		default_transporter = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.SHIPMENT_TRANSPORTER );
+		default_incoterms = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.SHIPMENT_INCOTERMS );
+		default_departure_port = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.SHIPMENT_DEPARTURE_PORT );
+		default_arrival_port = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.SHIPMENT_ARRIVAL_PORT );
+		default_carrier = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.SHIPMENT_CARRIER );
 	}
 
 	private void saveUserDefaults()
 	{
-		IOCManager._UserDefaultsManager.setUserDefault( getContext(), consignee, newShipment.getRef_consignee().toString() );
-		IOCManager._UserDefaultsManager.setUserDefault( getContext(), notify, newShipment.getRef_notify().toString() );
-		IOCManager._UserDefaultsManager.setUserDefault( getContext(), incoterms, newShipment.getIncoterms() );
-		IOCManager._UserDefaultsManager.setUserDefault( getContext(), departure_port, newShipment.getDeparture_port() );
-		IOCManager._UserDefaultsManager.setUserDefault( getContext(), arrival_port, newShipment.getArrival_port() );
-		IOCManager._UserDefaultsManager.setUserDefault( getContext(), carrier, newShipment.getCarrier() );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_consignee, newShipment.getRef_consignee().toString() );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_notify, newShipment.getRef_notify().toString() );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_transporter, newShipment.getRef_transporter().toString() );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_incoterms, newShipment.getIncoterms() );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_departure_port, newShipment.getDeparture_port() );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_arrival_port, newShipment.getArrival_port() );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_carrier, newShipment.getCarrier() );
 	}
 	
 	@Override
@@ -691,7 +776,7 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 		}
 	}
 
-	public void onShowLabels( String pagesize, String format, Integer type, String fontsize )
+	public void onShowLabels( String pagesize, String format, Integer type, String fontsize, Integer copies )
 	{
 		if ( onModify() )
 		{
@@ -716,6 +801,7 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 								"&cols=" + parts[1] +
 								"&type=" + type +
 								"&fontsize=" + fontsize +
+								"&copies=" + copies +
 								"&url=" + getContext().getData( "Url" ) +
 								"&timeout=" + timeout;
 				
@@ -805,6 +891,34 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 	}
 
 	@SuppressWarnings("unchecked")
+	private void loadTransporterContacts()
+	{
+		try
+		{
+			CompanyContactQuery query = new CompanyContactQuery();
+			query.setRef_company( newShipment.getRef_transporter() );
+			
+			transporter_contacts = IOCManager._CompaniesContactsManager.getRows( getContext(), query );
+		}
+		catch ( BaseException e )
+		{
+			e.printStackTrace();
+			transporter_contacts = new ArrayList<CompanyContact>();
+		}
+	}
+	
+	private void fillComboTransporterContacts()
+	{
+		comboTransporterContacts.removeAllItems();
+		
+		for ( CompanyContact contact : transporter_contacts )
+		{
+			comboTransporterContacts.addItem( contact.getId() );
+			comboTransporterContacts.setItemCaption( contact.getId(), contact.getName() );
+		}
+	}
+
+	@SuppressWarnings("unchecked")
 	private void loadUsers()
 	{
 		try
@@ -850,6 +964,14 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 		fillComboNotifyContacts();
 	}
 
+
+	private void onSelectedTransporter()
+	{
+		newShipment.setRef_transporter_contact( null );
+		loadTransporterContacts();
+		fillComboTransporterContacts();
+	}
+
 	public void onGenerateLabels()
 	{
 		final SelectLabelsConfigurationDlg dlg = new SelectLabelsConfigurationDlg( getContext(), getContext().getString( "SelectLabelsConfigurationDlg.title" ) );
@@ -863,7 +985,7 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 			    public void windowClose( CloseEvent e ) 
 			    {
 					if ( dlg.isOk() )
-						onShowLabels( dlg.getPagesize(), dlg.getFormat(), dlg.getLabel_type(), dlg.getFontsize() );
+						onShowLabels( dlg.getPagesize(), dlg.getFormat(), dlg.getLabel_type(), dlg.getFontsize(), dlg.getCopies() );
 			    }
 			}
 		);

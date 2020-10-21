@@ -30,6 +30,7 @@ public class PurchaseVto extends GenericVto
 	private String net_tax;
 	private String gross_price;
 	private Label payed;
+	private Label for_payment;
 	
 	private String status;
 	

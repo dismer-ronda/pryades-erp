@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
@@ -17,6 +18,7 @@ import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
@@ -69,9 +71,15 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 	private ComboBox comboCustomers;
 	private TextField editReference_request;
 	private TextField editReference_order;
+	private CheckBox checkForCollect;
 	private Button bttnApply;
-	private Label labelTotalPrice;
-	
+
+	private Label labelTotalNetPrice;
+	private Label labelTotalTaxes;
+	private Label labelTotalGrossPrice;
+	private Label labelTotalPayed;
+	private Label labelTotalPending;
+
 	private List<Company> customers;
 	private List<Operation> operations;
 
@@ -106,7 +114,7 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 	@Override
 	public String[] getVisibleCols()
 	{
-		return new String[]{ "invoice_date", "number", "title", "customer_name", "quotation_number", "reference_order", "total_price", "total_taxes", "total_invoice", "collected" };
+		return new String[]{ "invoice_date", "number", "title", "customer_name", "quotation_number", "reference_order", "total_price", "total_taxes", "total_invoice", "collected", "for_collect" };
 	}
 
 	public String[] getSortableCols()
@@ -152,20 +160,39 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
         FileDownloader fileDownloaderZip = new FileDownloader( getZipResource() );
         fileDownloaderZip.extend( bttnZip );
 
+        return ops;
+	}
+	
+	@Override
+	public Component getTotalsComponent()
+	{
 		HorizontalLayout rowTotals = new HorizontalLayout();
 		rowTotals.setWidth( "100%" );
 		rowTotals.setSpacing( true );
-		rowTotals.setMargin( new MarginInfo( false, true, false, true ) );
+		rowTotals.setMargin( new MarginInfo( false, true, true, true ) );
 		
-		labelTotalPrice = new Label();
-		labelTotalPrice.setWidth( "300px" );
-		labelTotalPrice.addStyleName( "green" );
-		
-		rowTotals.addComponent( labelTotalPrice );
+		labelTotalNetPrice = new Label();
+		labelTotalNetPrice.setStyleName( "centered border" );
 
-		ops.add( rowTotals );
+		labelTotalTaxes = new Label();
+		labelTotalTaxes.setStyleName( "centered border" );
 		
-		return ops;
+		labelTotalGrossPrice = new Label();
+		labelTotalGrossPrice.setStyleName( "centered border" );
+
+		labelTotalPayed = new Label();
+		labelTotalPayed.setStyleName( "centered border" );
+
+		labelTotalPending = new Label();
+		labelTotalPending.setStyleName( "centered border" );
+
+		rowTotals.addComponent( labelTotalNetPrice );
+		rowTotals.addComponent( labelTotalTaxes );
+		rowTotals.addComponent( labelTotalGrossPrice );
+		rowTotals.addComponent( labelTotalPayed );
+		rowTotals.addComponent( labelTotalPending );
+		
+		return rowTotals;
 	}
 
 	@Override
@@ -230,6 +257,19 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 		editReference_order.setNullRepresentation( "" );
 		editReference_order.setValue( default_reference_order.getData_value() );
 		
+		checkForCollect = new CheckBox( getContext().getString( "invoicesConfig.checkForCollect" ) );
+		checkForCollect.setValue( false );
+		checkForCollect.addValueChangeListener( new ValueChangeListener()
+		{
+			private static final long serialVersionUID = 8388991193009696639L;
+
+			@Override
+			public void valueChange( ValueChangeEvent event )
+			{
+				refreshVisibleContent( true );
+			}
+		});
+		
 		bttnApply = new Button( getContext().getString( "words.search" ) );
 		bttnApply.setDescription( getContext().getString( "words.search" ) );
 		addButtonApplyFilterClickListener();
@@ -243,7 +283,10 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 		rowQuery.addComponent( comboCustomers );
 		rowQuery.addComponent( editReference_request );
 		rowQuery.addComponent( editReference_order );
+		rowQuery.addComponent( checkForCollect );
 		rowQuery.addComponent( bttnApply );
+		
+		rowQuery.setComponentAlignment( checkForCollect, Alignment.BOTTOM_LEFT );
 		rowQuery.setComponentAlignment( bttnApply, Alignment.BOTTOM_LEFT );
 		
 		return rowQuery;
@@ -268,6 +311,10 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 		
 		if ( comboOperations.getValue() != null )
 			query.setRef_operation( (Long)comboOperations.getValue() );
+		
+		if ( checkForCollect.getValue().booleanValue() )
+			query.setFor_collect( true );
+			
 		
 		query.setRef_user( getContext().getUser().getId() );
 		
@@ -309,18 +356,54 @@ public class InvoicesTabContent extends PagedContent implements ModalParent
 	@Override
 	public void preProcessRows( List<BaseDto> rows )
 	{
-		double totalPrice = 0;
+		double totalNetPrice = 0;
+		double totalTaxes = 0;
+		double totalGrossPrice = 0;
+		double totalPayed = 0;
+		double totalPending = 0;
 		
+		List<Invoice> deletes = new ArrayList<Invoice>();
+	
 		for ( BaseDto row : rows )
 		{
 			Invoice quotation = (Invoice)row;
 			
-			totalPrice += quotation.getGrandTotalInvoice();
+			boolean compute = true;
+			
+			if ( checkForCollect.getValue().booleanValue() )
+			{
+				if ( !(quotation.getForCollect() > 0) )
+				{
+					deletes.add( quotation );
+					compute = false;
+				}
+			}
+				
+			if ( compute )
+			{
+				totalNetPrice += quotation.getGrandTotalInvoice();
+				totalTaxes += quotation.getGrandTotalTaxes();
+				totalGrossPrice += quotation.getGrandTotalInvoiceAfterTaxes();
+				totalPayed += quotation.getCollected();
+				totalPending += quotation.getForCollect();
+			}
 		}
 		
-		labelTotalPrice.setValue(  getContext().getString( "invoicesConfig.totalPrice" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalPrice ) ) );
+		if ( deletes.size() > 0 )
+		{
+			for ( Invoice invoice : deletes )
+				rows.remove( invoice );
+		}
+		
+		labelTotalNetPrice.setValue( getContext().getString( "invoicesConfig.totalNetPrice" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalNetPrice ) ) );
+		labelTotalTaxes.setValue( getContext().getString( "invoicesConfig.totalTaxes" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalTaxes ) ) );
+		labelTotalGrossPrice.setValue( getContext().getString( "invoicesConfig.totalGrossPrice" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalGrossPrice ) ) );
+		labelTotalPayed.setValue( getContext().getString( "invoicesConfig.totalCollected" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalPayed ) ) );
+		labelTotalPending.setValue( getContext().getString( "invoicesConfig.totalPending" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalPending ) ) );
+
+		labelTotalPending.addStyleName( totalPending > 0 ? "red" : "green" );
 	}
-	
+
 	@Override
 	public boolean hasAddRight()
 	{

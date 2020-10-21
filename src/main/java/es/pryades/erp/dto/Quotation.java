@@ -277,10 +277,10 @@ public class Quotation extends BaseDto
 	
 	public String getFormattedNumber() 
 	{
-		int year = number / 10000;
-		int index = number % 10000;
+		int year = number / 100000;
+		int index = number % 100000;
 		
-		return Integer.toString( year ) + "-" + String.format("%04d", index );
+		return Integer.toString( year ) + "-" + String.format("%05d", index );
 	}
 	
 	public boolean pendingLinesForInvoice()

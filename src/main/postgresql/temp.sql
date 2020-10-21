@@ -1,7 +1,7 @@
-alter table transactions drop column ref_source;
+alter table shipments add ref_transporter bigint;
+alter table shipments add ref_transporter_contact bigint;
 
-alter table transactions add column ref_target bigint;
-alter table transactions add column transfer bigint;
-alter table transactions add constraint fk_transactions_target foreign key (ref_target) references accounts(id);
+alter table shipments add constraint fk_shipments_transporter foreign key (ref_transporter) references companies(id);
+alter table shipments add constraint fk_shipments_transporter_contact foreign key (ref_transporter_contact) references companies_contacts(id);
 
-alter table accounts add column credit real not null default 0;
+alter table shipments alter column ref_transporter set not null;

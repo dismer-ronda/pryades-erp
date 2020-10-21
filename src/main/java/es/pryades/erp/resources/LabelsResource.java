@@ -83,6 +83,7 @@ public class LabelsResource extends ServerResource
 	        final String cols = params.get( "cols" );
 	        final String type = params.get( "type" );
 	        final String fontsize = params.get( "fontsize" );
+	        final String copies = params.get( "copies" );
 	        long timeout = Utils.getLong( params.get( "timeout" ), 0 );
 	        
 			if ( Authorization.isValidRequest( token, ts+timeout, ts, password, timeout ) ) 
@@ -106,7 +107,7 @@ public class LabelsResource extends ServerResource
 							ctx1.addData( "Url", url );
 					    	ctx1.loadOwnerCompany();
 
-							PdfExportLabels export = new PdfExportLabels( shipment, rows, cols, type, fontsize );
+							PdfExportLabels export = new PdfExportLabels( shipment, rows, cols, type, fontsize, copies );
 							
 							export.setOrientation( "portrait" );
 							export.setPagesize( pagesize );

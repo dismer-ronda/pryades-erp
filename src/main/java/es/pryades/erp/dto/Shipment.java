@@ -54,17 +54,22 @@ public class Shipment extends BaseDto
 	
 	private Long ref_consignee;
 	private Long ref_notify;
+	private Long ref_transporter;
 
 	private Integer status;
 
 	private Long ref_consignee_contact;
 	private Long ref_notify_contact;
+	private Long ref_transporter_contact;
 
 	private Company consignee;
 	private CompanyContact consignee_contact;
 	
 	private Company notify;
 	private CompanyContact notify_contact;
+
+	private Company transporter;
+	private CompanyContact transporter_contact;
 
 	private Long ref_user;
 	private User user;
@@ -73,10 +78,10 @@ public class Shipment extends BaseDto
 
 	public String getFormattedNumber() 
 	{
-		int year = number / 10000;
-		int index = number % 10000;
+		int year = number / 100000;
+		int index = number % 100000;
 		
-		return Integer.toString( year ) + "-" + String.format("%04d", index );
+		return Integer.toString( year ) + "-" + String.format("%05d", index );
 	}
 	
 	public String getConsigneeAddressAsHtml()
@@ -359,25 +364,25 @@ public class Shipment extends BaseDto
 			box.countBoxes( ctx, totals );
 	}
 
-	public void generateDetailedLabels( AppContext ctx, ArrayList<String> detailed, HashMap<Integer, Integer> totals, HashMap<Integer, Integer> count )
+	public void generateDetailedLabels( AppContext ctx, ArrayList<String> detailed, HashMap<Integer, Integer> totals, HashMap<Integer, Integer> count, int copies, int colWidth )
 	{
 		for ( ShipmentBox box : boxes )
-			box.generateDetailedLabels( ctx, this, detailed, totals, count );
+			box.generateDetailedLabels( ctx, this, detailed, totals, count, copies, colWidth );
 	}
 
-	public void generateSimpleLabels( AppContext ctx, ArrayList<String> labels, HashMap<Integer, Integer> totals, HashMap<Integer, Integer> count )
+	public void generateSimpleLabels( AppContext ctx, ArrayList<String> labels, HashMap<Integer, Integer> totals, HashMap<Integer, Integer> count, int copies )
 	{
 		for ( ShipmentBox box : boxes )
-			box.generateSimpleLabels( ctx, this, labels, totals, count );
+			box.generateSimpleLabels( ctx, this, labels, totals, count, copies );
 	}
 
-	public void generateAllLabels( AppContext ctx, ArrayList<String> labels, HashMap<Integer, Integer> totals, HashMap<Integer, Integer> count )
+	public void generateAllLabels( AppContext ctx, ArrayList<String> labels, HashMap<Integer, Integer> totals, HashMap<Integer, Integer> count, int copies, int colWidth )
 	{
 		for ( ShipmentBox box : boxes )
-			box.generateAllLabels( ctx, this, labels, totals, count );
+			box.generateAllLabels( ctx, this, labels, totals, count, copies, colWidth );
 	}
 
-	public String getLabelsRows( AppContext ctx, String rows, String cols, String pagesize, String type )
+	public String getLabelsRows( AppContext ctx, String rows, String cols, String pagesize, String type, String copies )
 	{
 		try
 		{
@@ -401,18 +406,22 @@ public class Shipment extends BaseDto
 
 			countBoxes( ctx, totals );
 			
-			if ( Integer.toString( ShipmentBox.LABEL_DETAIL ).equals( type ) )
-				generateDetailedLabels( ctx, labels, totals, count );
-			else if ( Integer.toString( ShipmentBox.LABEL_SIMPLE ).equals( type ) )
-				generateSimpleLabels( ctx, labels, totals, count );
-			else if ( Integer.toString( ShipmentBox.LABEL_ALL ).equals( type ) )
-				generateAllLabels( ctx, labels, totals, count );
-			
 			int r = Utils.getInt( rows, 2 );
 			int c = Utils.getInt( cols, 2 );
 			
 			double pageHeight = Utils.getPageHeightInMilimeters( pagesize );
+			double pageWidth = Utils.getPageWidthInMilimeters( pagesize );
+			
 			double colHeight = pageHeight / r;
+			double colWidth = pageWidth / c;
+
+			if ( Integer.toString( ShipmentBox.LABEL_DETAIL ).equals( type ) )
+				generateDetailedLabels( ctx, labels, totals, count, Utils.getInt( copies, 1 ), (int)colWidth );
+			else if ( Integer.toString( ShipmentBox.LABEL_SIMPLE ).equals( type ) )
+				generateSimpleLabels( ctx, labels, totals, count, Utils.getInt( copies, 1 ) );
+			else if ( Integer.toString( ShipmentBox.LABEL_ALL ).equals( type ) )
+				generateAllLabels( ctx, labels, totals, count, Utils.getInt( copies, 1 ), (int)colWidth );
+			
 
 			int j = 0;
 			

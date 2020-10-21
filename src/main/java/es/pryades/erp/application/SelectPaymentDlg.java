@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.vaadin.data.Property;
+import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.shared.ui.datefield.Resolution;
@@ -12,6 +14,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.PopupDateField;
 import com.vaadin.ui.TextField;
@@ -39,6 +42,7 @@ public class SelectPaymentDlg extends Window
 	@Getter	private PopupDateField paymentDateField;
 	private ComboBox comboAccounts;
 	private TextField editAmount;
+	private Label labelBalance;
 	
 	@Getter
 	private AppContext context;
@@ -53,6 +57,7 @@ public class SelectPaymentDlg extends Window
 	private boolean success = false;
 
 	private UserDefault default_account;
+	private UserDefault default_date;
 	
 	public SelectPaymentDlg( AppContext ctx, String title, Transaction transaction )
 	{
@@ -69,9 +74,10 @@ public class SelectPaymentDlg extends Window
 		
 		bi = new BeanItem<Transaction>( transaction);
 		
-		default_account = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.TRANSACTION_ACCOUNT );
-
+		loadUserDefaults();
+		
 		transaction.setRef_account( getDefaultAccount() );
+		transaction.setTransaction_date( getDefaultDate() );
  
 		addComponents();
 		
@@ -104,6 +110,15 @@ public class SelectPaymentDlg extends Window
 		comboAccounts.setRequired( true );
 		comboAccounts.setRequiredError( getContext().getString( "words.required" ) );
 		comboAccounts.setInvalidCommitted( true );
+		comboAccounts.addValueChangeListener( new Property.ValueChangeListener() 
+		{
+			private static final long serialVersionUID = -2157047517750609170L;
+
+			public void valueChange(ValueChangeEvent event) 
+		    {
+		        onSelectedAccount();
+		    }
+		});
 		
 		editAmount = new TextField( getContext().getString( "selectTransactionDlg.editAmount" ), bi.getItemProperty( "amount" ) );
 		editAmount.setWidth( "100%" );
@@ -111,7 +126,12 @@ public class SelectPaymentDlg extends Window
 		editAmount.setRequiredError( getContext().getString( "words.required" ) );
 		editAmount.setNullRepresentation( "" );
 		editAmount.setInvalidCommitted( true );
-		
+
+		labelBalance = new Label();
+		labelBalance.setWidth( "100%" );
+		labelBalance.setValue( getSelectedAccountBalance() );
+		labelBalance.addStyleName( "centered" );
+
 		Button button1 = new Button( getContext().getString( "words.ok" ) );
 		button1.setClickShortcut( KeyCode.ENTER );
 		button1.addClickListener(new Button.ClickListener() 
@@ -142,6 +162,8 @@ public class SelectPaymentDlg extends Window
 		row1.addComponent( paymentDateField );
 		row1.addComponent( comboAccounts);
 		row1.addComponent( editAmount);
+		row1.addComponent( labelBalance );
+		row1.setComponentAlignment( labelBalance, Alignment.BOTTOM_LEFT );
 		
 		HorizontalLayout row4 = new HorizontalLayout();
 		row4.setSpacing( true );
@@ -201,15 +223,11 @@ public class SelectPaymentDlg extends Window
 			
 			try
 			{
-				if ( IOCManager._TransactionsManager.addTransaction( getContext(), transaction, getAccount() ) )
+				int result = IOCManager._TransactionsManager.addTransaction( getContext(), transaction, getAccount() );
+				
+				if ( result == Transaction.TRANSACTION_OK  )
 				{
 					success = true;
-
-					/*Notification n = new Notification(getContext().getString( "selectTransactionDlg.success" ), Notification.Type.HUMANIZED_MESSAGE);
-					n.setPosition(Position.MIDDLE_CENTER);
-					n.setDelayMsec(5000);
-					n.setStyleName("mystyle");
-					n.show(Page.getCurrent());*/
 
 					String type = getContext().getString( "transaction.type." + transaction.getTransaction_type() );
         			String message = getContext().getString( "selectTransactionDlg.success." + transaction.getTransaction_type() )
@@ -217,17 +235,19 @@ public class SelectPaymentDlg extends Window
         			
     				Utils.showNotification( getContext(), transaction.getTransactionMessage( message ), Notification.Type.HUMANIZED_MESSAGE );
 
-					IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_account, comboAccounts.getValue() != null ? comboAccounts.getValue().toString() : null );
+					saveUserDefaults();
 
 					close();
 				}
 				else
 				{
-					Utils.showNotification( getContext(), getContext().getString( "selectTransactionDlg.error" ), Notification.Type.ERROR_MESSAGE );
+					Utils.showNotification( getContext(), getContext().getString( "selectTransactionDlg.error." + result ), Notification.Type.ERROR_MESSAGE );
 				}
 			}
 			catch ( Throwable e )
 			{
+				Utils.showNotification( getContext(), getContext().getString( "selectTransactionDlg.error." + Transaction.TRANSACTION_ERROR_EXCEPTION ), Notification.Type.ERROR_MESSAGE );
+
 				e.printStackTrace();
 			}
 		}
@@ -273,7 +293,20 @@ public class SelectPaymentDlg extends Window
 		
 		return null;
 	}
-	
+
+	private Long getDefaultDate() 
+	{
+		try
+		{
+			return Long.parseLong( default_date.getData_value() );
+		}
+		catch ( Throwable e )
+		{
+		}
+		
+		return CalendarUtils.getDayAsLong( new Date() );
+	}
+
 	private Account getAccount()
 	{
 		if ( comboAccounts.getValue() != null )
@@ -286,4 +319,36 @@ public class SelectPaymentDlg extends Window
 		return null;
 	}
 
+	private void loadUserDefaults()
+	{
+		default_account = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.TRANSACTION_ACCOUNT );
+		default_date = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.TRANSACTION_DATE );
+
+	}
+
+	private void saveUserDefaults()
+	{
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_account, comboAccounts.getValue() != null ? comboAccounts.getValue().toString() : null );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_date, paymentDateField.getValue() != null ? Long.toString( CalendarUtils.getDayAsLong( paymentDateField.getValue() ) ) : null );
+	}
+
+	private String getSelectedAccountBalance()
+	{
+		Account account = getAccount();
+		
+		if ( account != null )
+		{
+			List<Transaction> transactions = account.getTransactions();
+			
+			if ( transactions.size() > 0 )
+				return getContext().getString( "selectTransactionDlg.labelBalance" ) + " " + Utils.getFormattedCurrency( transactions.get( 0 ).getBalance() );
+		}
+		
+		return "";
+	}
+	
+	private void onSelectedAccount()
+	{
+		labelBalance.setValue( getSelectedAccountBalance() );
+	}
 }

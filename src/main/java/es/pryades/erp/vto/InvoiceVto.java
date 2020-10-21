@@ -29,6 +29,7 @@ public class InvoiceVto extends GenericVto
 
 	private String month;
 	private Label collected;
+	private Label for_collect;
 	
 	private Double total_price;
 	private Double total_invoice;

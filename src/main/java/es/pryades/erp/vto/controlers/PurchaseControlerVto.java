@@ -63,6 +63,10 @@ public class PurchaseControlerVto extends GenericControlerVto
 				payed.setStyleName( purchase.isFullyPayed() ? "green" : "red" );
 				result.setPayed( payed );
 				
+				Label forPayment = new Label( purchase.getForPaymentAsString() );
+				forPayment.setStyleName( purchase.isFullyPayed() ? "green" : "red" );
+				result.setFor_payment( forPayment );
+				
 				result.setStatus( getContext().getString( "purchase.status." + purchase.getStatus() ) );
 			}
 			else

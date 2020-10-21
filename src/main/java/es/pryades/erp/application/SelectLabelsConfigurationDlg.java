@@ -11,7 +11,6 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
 import es.pryades.erp.common.AppContext;
-import es.pryades.erp.common.AppUtils;
 import es.pryades.erp.common.Utils;
 import es.pryades.erp.dto.ShipmentBox;
 import es.pryades.erp.dto.UserDefault;
@@ -31,6 +30,7 @@ public class SelectLabelsConfigurationDlg extends Window
 	private ComboBox comboPagesize;
 	private ComboBox comboFormat;
 	private ComboBox comboFontSize;
+	private ComboBox comboCopies;
 	
 	@Getter	private BeanItem<SelectLabelsConfigurationDlg> bi;
 
@@ -38,6 +38,7 @@ public class SelectLabelsConfigurationDlg extends Window
 	@Getter @Setter private String pagesize;
 	@Getter @Setter private String format;
 	@Getter @Setter private String fontsize;
+	@Getter @Setter private Integer copies;
 
 	@Getter private boolean ok = false;
 	
@@ -45,6 +46,7 @@ public class SelectLabelsConfigurationDlg extends Window
 	private UserDefault default_pagesize;
 	private UserDefault default_format;
 	private UserDefault default_fontsize;
+	private UserDefault default_copies;
 
 	public SelectLabelsConfigurationDlg( AppContext ctx, String title )
 	{
@@ -57,7 +59,7 @@ public class SelectLabelsConfigurationDlg extends Window
 		layout.setMargin( true );
 		layout.setSpacing( true );
 		
-		layout.setWidth( "480px" );
+		layout.setWidth( "640px" );
 		
 		addComponents();
 		
@@ -110,17 +112,35 @@ public class SelectLabelsConfigurationDlg extends Window
 		fillComboFontsize();
 		comboFontSize.setPropertyDataSource( bi.getItemProperty( "fontsize" ) );
 
-		Button button1 = AppUtils.createButton( context.getString( "words.ok" ), context.getString( "words.ok" ), "SelectLabelsConfigurationDlg.ok", layout );
+		comboCopies = new ComboBox(getContext().getString( "SelectLabelsConfigurationDlg.comboCopies" ));
+		comboCopies.setWidth( "100%" );
+		comboCopies.setNullSelectionAllowed( false );
+		comboCopies.setTextInputAllowed( false );
+		comboCopies.setImmediate( true );
+		comboCopies.setRequired( true );
+		fillComboCopies();
+		comboCopies.setPropertyDataSource( bi.getItemProperty( "copies" ) );
+
+		Button button1 = new Button( getContext().getString( "words.ok" ) );
 		button1.setClickShortcut( KeyCode.ENTER );
 		button1.addClickListener(new Button.ClickListener() 
 		{
-			private static final long serialVersionUID = 31563218448960611L;
+			private static final long serialVersionUID = 9154772696786741535L;
 
 			public void buttonClick(ClickEvent event) 
             {
-				ok = true;
-				
-				onOk();
+				onOk(); 
+            }
+        });
+		
+		Button button2 = new Button( getContext().getString( "words.cancel" ) );
+		button2.addClickListener(new Button.ClickListener() 
+		{
+			private static final long serialVersionUID = -5671452975867076669L;
+
+			public void buttonClick(ClickEvent event) 
+            {
+				close();
             }
         });
 		
@@ -129,27 +149,32 @@ public class SelectLabelsConfigurationDlg extends Window
 		row1.setSpacing( true );
 		row1.addComponent( comboLabelTypes );
 		row1.addComponent( comboPagesize );
+		row1.addComponent( comboCopies );
 		
 		HorizontalLayout row2 = new HorizontalLayout();
 		row2.setWidth( "100%" );
 		row2.setSpacing( true );
 		row2.addComponent( comboFormat );
 		row2.addComponent( comboFontSize );
+		row2.addComponent( new HorizontalLayout() );
 		
-		HorizontalLayout row3 = new HorizontalLayout();
-		row3.setWidth( "100%" );
-		row3.addComponent( button1 );
-		row3.setComponentAlignment( button1, Alignment.BOTTOM_RIGHT );
+		HorizontalLayout row4 = new HorizontalLayout();
+		row4.setSpacing( true );
+		row4.addComponent( button1 );
+		row4.addComponent( button2 );
 
 		layout.addComponent( row1 );
 		layout.addComponent( row2 );
-		layout.addComponent( row3 );
-        
+		layout.addComponent( row4 );
+		layout.setComponentAlignment( row4, Alignment.BOTTOM_RIGHT );
+
         comboPagesize.focus();
 	}
 
 	private void onOk()
 	{
+		ok = true;
+		
 		saveUserDefaults();
 		
 		close();
@@ -202,6 +227,20 @@ public class SelectLabelsConfigurationDlg extends Window
 		comboFontSize.setItemCaption( "18px", getContext().getString( "SelectLabelsConfigurationDlg.fontsize.18px" ) );
 	}
 
+	private void fillComboCopies()
+	{
+		comboCopies.addItem( new Integer(1) );
+		comboCopies.setItemCaption( new Integer(1), "1" );
+
+		comboCopies.addItem( new Integer(2) );
+		comboCopies.setItemCaption( new Integer(2), "2" );
+
+		comboCopies.addItem( new Integer(3) );
+		comboCopies.setItemCaption( new Integer(3), "3" );
+
+		comboCopies.addItem( new Integer(4) );
+		comboCopies.setItemCaption( new Integer(4), "4" );
+	}
 
 	private void loadUserDefaults()
 	{
@@ -209,11 +248,13 @@ public class SelectLabelsConfigurationDlg extends Window
 		default_pagesize = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.LABELS_PAGESIZE );
 		default_format = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.LABELS_FORMAT );
 		default_fontsize = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.LABELS_FONTSIZE );
+		default_copies = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.LABELS_COPIES );
 		
 		label_type = Utils.getInt( default_type.getData_value(), ShipmentBox.LABEL_DETAIL );
 		pagesize = default_pagesize.getData_value();
 		format = default_format.getData_value();
 		fontsize = default_fontsize.getData_value();
+		copies = Utils.getInt( default_copies.getData_value(), 1 );
 	}
 
 	private void saveUserDefaults()
@@ -222,5 +263,6 @@ public class SelectLabelsConfigurationDlg extends Window
 		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_pagesize, pagesize );
 		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_format, format );
 		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_fontsize, fontsize );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_copies, copies.toString() );
 	}
 }

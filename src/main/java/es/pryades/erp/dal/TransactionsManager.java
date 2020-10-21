@@ -14,7 +14,7 @@ public interface TransactionsManager extends BaseManager
 {
 	byte[] exportListXls( AppContext ctx, TransactionQuery query ) throws Throwable;
 	
-	boolean addTransaction( AppContext ctx, Transaction transaction, Account account ) throws Throwable;
+	int addTransaction( AppContext ctx, Transaction transaction, Account account ) throws Throwable;
 	void addTransferTransaction( AppContext ctx, Transaction source, Transaction dest ) throws Throwable;
 
 	Transaction rollbackTransaction( AppContext ctx, Long account ) throws Throwable;

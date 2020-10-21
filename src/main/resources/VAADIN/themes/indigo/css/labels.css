@@ -188,3 +188,10 @@
 .tooltip:hover .tooltiptext {
     visibility: visible;
 }
+
+.v-label-border {
+	border-style: solid;
+	border-color: black;
+    border-width: 1px;
+}
+

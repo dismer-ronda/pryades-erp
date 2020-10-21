@@ -97,7 +97,7 @@ public class TransactionsTabContent extends PagedContent implements ModalParent
 
 	public String[] getSortableCols()
 	{
-		return new String[]{ "transaction_date", "transaction_type", "account_name" };
+		return null;
 	}
 	
 	@Override
@@ -110,7 +110,7 @@ public class TransactionsTabContent extends PagedContent implements ModalParent
 	{
 		List<Component> ops = new ArrayList<Component>();
 		
-		Button bttnPdf = new Button();
+		/*Button bttnPdf = new Button();
 		bttnPdf.setCaption( getContext().getString( "transactionsTab.list.pdf" ) );
 		bttnPdf.addClickListener( new Button.ClickListener()
 		{
@@ -121,7 +121,7 @@ public class TransactionsTabContent extends PagedContent implements ModalParent
 				onShowListPdf();
 			}
 		} );
-		ops.add( bttnPdf );
+		ops.add( bttnPdf );*/
 
 		Button bttnXls = new Button();
 		bttnXls.setCaption( getContext().getString( "transactionsTab.list.xls" ) );
@@ -473,6 +473,12 @@ public class TransactionsTabContent extends PagedContent implements ModalParent
 			comboAccounts.addItem( account.getId() );
 			comboAccounts.setItemCaption( account.getId(), account.getName() );
 		}
+	}
+
+	public void refreshAccounts()
+	{
+		loadAccounts();
+		fillCombosAccounts();
 	}
 }
 

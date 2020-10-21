@@ -258,12 +258,14 @@
 	</sql>
 	
 	<sql id="es.pryades.erp.dal.ibatis.TransactionMapper.orderby">
+		ref_account 
+		
 		<choose>
 			<when test="orderby.equals( 'transaction_date' )">
-				transactions.transaction_date
+				, transactions.transaction_date
 			</when>
 			<otherwise>
-				transactions.id
+				, transactions.id
 			</otherwise>
 		</choose>
 

@@ -4,13 +4,13 @@ alter sequence gendat OWNER TO pryades;
 CREATE SEQUENCE gencfg START 1000;
 alter sequence gencfg OWNER TO pryades;
 
-CREATE SEQUENCE seq_quotations 	START 2020001;
+CREATE SEQUENCE seq_quotations 	START 200001;
 alter sequence seq_quotations OWNER TO pryades;
 
-CREATE SEQUENCE seq_invoices START 2020001;
+CREATE SEQUENCE seq_invoices START 200001;
 alter sequence seq_invoices OWNER TO pryades;
 
-CREATE SEQUENCE seq_shipments START 2020001;
+CREATE SEQUENCE seq_shipments START 20001;
 alter sequence seq_shipments OWNER TO pryades;
 
 CREATE SEQUENCE seq_purchases START 202000001;
@@ -307,11 +307,13 @@ create table shipments
 	
 	ref_consignee bigint not null,
 	ref_notify bigint not null,
+	ref_transporter bigint not null,
 
 	status int not null default 0,
 	
-	ref_consignee_contact bigint,
-	ref_notify_contact bigint,
+	ref_consignee_contact bigint not null,
+	ref_notify_contact bigint not null,
+	ref_transporter_contact bigint not null,
 
 	ref_user bigint,
 
@@ -321,6 +323,8 @@ create table shipments
   	constraint fk_shipments_notify foreign key (ref_notify) references companies(id),
 	constraint fk_shipments_consignee_contact foreign key (ref_consignee_contact) references companies_contacts(id),
 	constraint fk_shipments_notify_contact foreign key (ref_notify_contact) references companies_contacts(id),
+  	constraint fk_shipments_transporter foreign key (ref_transporter) references companies(id),
+	constraint fk_shipments_transporter_contact foreign key (ref_transporter_contact) references companies_contacts(id),
 	constraint fk_shipments_user foreign key (ref_user) references users(id)
 );
 alter table shipments OWNER TO pryades;

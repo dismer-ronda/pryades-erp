@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.vaadin.dialogs.ConfirmDialog;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -22,6 +23,7 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.PopupDateField;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 
 import es.pryades.erp.application.SelectPaymentDlg;
@@ -39,11 +41,13 @@ import es.pryades.erp.dashboard.Dashboard;
 import es.pryades.erp.dto.BaseDto;
 import es.pryades.erp.dto.Invoice;
 import es.pryades.erp.dto.InvoiceLine;
+import es.pryades.erp.dto.Operation;
 import es.pryades.erp.dto.Quotation;
 import es.pryades.erp.dto.QuotationLine;
 import es.pryades.erp.dto.Shipment;
 import es.pryades.erp.dto.Transaction;
 import es.pryades.erp.dto.query.InvoiceQuery;
+import es.pryades.erp.dto.query.OperationQuery;
 import es.pryades.erp.dto.query.QuotationQuery;
 import es.pryades.erp.dto.query.ShipmentQuery;
 import es.pryades.erp.ioc.IOCManager;
@@ -374,38 +378,59 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 	@Override
 	protected boolean onAdd()
 	{
-		if ( !checkMaxQuantities() )
-			return false;
+		Operation operation = getSelectedOperation();
 		
-		if ( !checkMinQuantities() )
-			return false;
-		
-		if ( !checkMaxTransportCost() )
-			return false;
-
-		try
+		if ( operation == null )
 		{
-			newInvoice.setId( null );
-			newInvoice.setInvoice_date( CalendarUtils.getDayAsLong( fromDateField.getValue() ) );
-			newInvoice.setFree_delivery( checkFree_delivery.getValue().booleanValue() ? Boolean.TRUE : Boolean.FALSE );
-			
-			IOCManager._InvoicesManager.setRow( getContext(), null, newInvoice );
-			
-			saveUserDefaults();
+			ConfirmDialog.show( (UI)getContext().getData( "Application" ), getContext().getString( "modalNewQuotationLine.operationNotFound" ),
+		        new ConfirmDialog.Listener() 
+				{
+					private static final long serialVersionUID = 8965420096699876003L;
 
-			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
-			dashboard.refreshShipmentsTab();
-			dashboard.refreshOperationsTab();
-
-			return true;
+					public void onClose(ConfirmDialog dialog) 
+		            {
+		                if ( dialog.isConfirmed() ) 
+							createOperation();
+		            }
+		        });
+			
+			return false;
 		}
-		catch ( Throwable e )
+		else
 		{
-			e.printStackTrace();
-			showErrorMessage( e );
+			if ( !checkMaxQuantities() )
+				return false;
+			
+			if ( !checkMinQuantities() )
+				return false;
+			
+			if ( !checkMaxTransportCost() )
+				return false;
+	
+			try
+			{
+				newInvoice.setId( null );
+				newInvoice.setInvoice_date( CalendarUtils.getDayAsLong( fromDateField.getValue() ) );
+				newInvoice.setFree_delivery( checkFree_delivery.getValue().booleanValue() ? Boolean.TRUE : Boolean.FALSE );
+				
+				IOCManager._InvoicesManager.setRow( getContext(), null, newInvoice );
+				
+				saveUserDefaults();
+	
+				Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+				dashboard.refreshShipmentsTab();
+				dashboard.refreshOperationsTab();
+	
+				return true;
+			}
+			catch ( Throwable e )
+			{
+				e.printStackTrace();
+				showErrorMessage( e );
+			}
+	
+			return false;
 		}
-
-		return false;
 	}
 	
 	private boolean checkMaxQuantities()
@@ -700,24 +725,24 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 	{
 		try
 		{
-			QuotationQuery queryQuotation = new QuotationQuery();
-			queryQuotation.setId( (Long)comboQuotations.getValue() );
-	
-			Quotation quotation = (Quotation)IOCManager._QuotationsManager.getRow( getContext(), queryQuotation );
-		
-			newInvoice.setTransport_cost( quotation.getPendingTansportCost() );
-			newInvoice.setPayment_terms( quotation.getPayment_terms() );
-			newInvoice.setQuotation( quotation );
+			Quotation quotation = getSelectedQuotation();
 			
-			editTransport_cost.markAsDirty();
-			editPayment_terms.markAsDirty();
+			if ( quotation != null )
+			{
+				newInvoice.setTransport_cost( quotation.getPendingTansportCost() );
+				newInvoice.setPayment_terms( quotation.getPayment_terms() );
+				newInvoice.setQuotation( quotation );
+				
+				editTransport_cost.markAsDirty();
+				editPayment_terms.markAsDirty();
+			}
 		}
 		catch ( Throwable e )
 		{
 			Utils.logException( e, LOG );
 		}
 	}
-	
+
 	private boolean selectedToAdd( QuotationLine quotationLine )
 	{
 		for ( CheckBox check : checksLines )
@@ -883,7 +908,6 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 			{
 				final Transaction transaction = new Transaction();
 				transaction.setTransaction_type( Transaction.TYPE_INCOME );
-				transaction.setTransaction_date( CalendarUtils.getTodayAsLong() );
 				transaction.setRef_invoice( newInvoice.getId() );
 				transaction.setInvoice( newInvoice );
 				transaction.setAmount( newInvoice.getGrandTotalInvoiceAfterTaxes() - newInvoice.getCollected() );
@@ -921,6 +945,69 @@ public class ModalNewInvoice extends ModalWindowsCRUD implements ModalParent
 	
 				Utils.showNotification( getContext(), getContext().getString( "modalNewInvoice.payError" ), Notification.Type.ERROR_MESSAGE );
 			}
+		}
+	}
+
+	private Operation getSelectedOperation()
+	{
+		try
+		{
+			OperationQuery query = new OperationQuery();
+			query.setRef_quotation( (Long)comboQuotations.getValue() );
+			
+			return (Operation)IOCManager._OperationsManager.getRow( getContext(), query );
+		}
+		catch ( Throwable e )
+		{
+			Utils.logException( e, LOG );
+		}
+		
+		return null;
+	}
+	
+	private Quotation getSelectedQuotation()
+	{
+		try
+		{
+			QuotationQuery queryQuotation = new QuotationQuery();
+			queryQuotation.setId( (Long)comboQuotations.getValue() );
+	
+			return (Quotation)IOCManager._QuotationsManager.getRow( getContext(), queryQuotation );
+		}
+		catch ( Throwable e )
+		{
+			Utils.logException( e, LOG );
+		}
+		
+		return null;
+	}	
+	
+	private void createOperation()
+	{
+		try
+		{
+			Operation operation = new Operation();
+
+			Quotation quotation = getSelectedQuotation();
+			
+			if ( quotation != null )
+			{
+				operation.setRef_quotation( quotation.getId() );
+				operation.setTitle( quotation.getTitle() );
+				operation.setStatus( Operation.STATUS_EXCECUTION );
+	
+				IOCManager._OperationsManager.setRow( getContext(), null, operation );
+	
+				Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+				dashboard.refreshOperationsTab();
+				dashboard.refreshOperations();
+			}
+		}
+		catch ( Throwable e )
+		{
+			showErrorMessage( e );
+
+			Utils.logException( e, LOG );
 		}
 	}
 }

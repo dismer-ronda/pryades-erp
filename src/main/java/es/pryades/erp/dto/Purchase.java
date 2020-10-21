@@ -151,4 +151,14 @@ public class Purchase extends BaseDto
 	{
 		return Math.abs( Utils.roundDouble( getGrossPrice(), 2 ) - Utils.roundDouble( payed, 2 ) ) > 0;
 	}
+	
+	public Double getForPayment()
+	{
+		return Math.abs( Utils.roundDouble( getGrossPrice(), 2 ) - Utils.roundDouble( payed, 2 ) );
+	}
+	
+	public String getForPaymentAsString() 
+	{
+		return Utils.getFormattedCurrency( getForPayment() );
+	}
 }

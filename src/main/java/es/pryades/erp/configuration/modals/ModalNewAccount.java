@@ -184,6 +184,9 @@ public class ModalNewAccount extends ModalWindowsCRUD
 
 			IOCManager._AccountsManager.setRow( getContext(), null, newAccount );
 			
+			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+			dashboard.refreshAccounts();
+			
 			return true;
 		}
 		catch ( Throwable e )
@@ -201,6 +204,9 @@ public class ModalNewAccount extends ModalWindowsCRUD
 		{
 			IOCManager._AccountsManager.setRow( getContext(), (Account) orgDto, newAccount );
 
+			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+			dashboard.refreshAccounts();
+
 			return true;
 		}
 		catch ( Throwable e )
@@ -217,6 +223,9 @@ public class ModalNewAccount extends ModalWindowsCRUD
 		try
 		{
 			IOCManager._AccountsManager.delRow( getContext(), newAccount );
+
+			Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+			dashboard.refreshAccounts();
 
 			return true;
 		}

@@ -77,8 +77,9 @@ public class Invoice extends BaseDto
 		
 		if ( getQuotation().getCustomer().getTaxable().booleanValue() )
 		{
-			for ( InvoiceLine line : getLines() )
-				total_taxes += line.getTotalTaxes();
+			if ( getLines() != null )
+				for ( InvoiceLine line : getLines() )
+					total_taxes += line.getTotalTaxes();
 		}		 
 		
 		return Utils.roundDouble( total_taxes, 2 );
@@ -182,10 +183,10 @@ public class Invoice extends BaseDto
 	
 	public String getFormattedNumber() 
 	{
-		int year = number / 10000;
-		int index = number % 10000;
+		int year = number / 100000;
+		int index = number % 100000;
 		
-		return Integer.toString( year ) + "-" + String.format("%04d", index );
+		return Integer.toString( year ) + "-" + String.format("%05d", index );
 	}
 	
 	public Integer getLineQuantity( QuotationLine quotationLine )
@@ -264,5 +265,15 @@ public class Invoice extends BaseDto
 	public boolean isFullyCollected()
 	{
 		return Utils.roundDouble( getGrandTotalInvoiceAfterTaxes(), 2 ) - Utils.roundDouble( collected, 2 ) == 0;
+	}
+	
+	public Double getForCollect()
+	{
+		return Utils.roundDouble( getGrandTotalInvoiceAfterTaxes(), 2 ) - Utils.roundDouble( collected, 2 );
+	}
+	
+	public String getForCollectAsString()
+	{
+		return Utils.getFormattedCurrency( getForCollect() ); 
 	}
 }

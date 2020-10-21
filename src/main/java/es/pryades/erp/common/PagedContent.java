@@ -327,6 +327,11 @@ public abstract class PagedContent extends VerticalLayout implements Property.Va
 		}
 	}
 	
+	public Component getTotalsComponent()
+	{
+		return null;
+	}
+	
 	public void initializeComponent()
 	{
 		if ( !isInitialized )
@@ -335,6 +340,7 @@ public abstract class PagedContent extends VerticalLayout implements Property.Va
 			
 			Component queryComponent = getQueryComponent();
 			Component tableComponent = getTableComponent();
+			Component totalsComponent = getTotalsComponent();
 			Component operationsComponent = getOperationsComponent();
 
 			if ( queryComponent != null )
@@ -359,6 +365,9 @@ public abstract class PagedContent extends VerticalLayout implements Property.Va
 			
 			if ( tableComponent != null )
 				addComponent( tableComponent );
+			
+			if ( totalsComponent != null )
+				addComponent( totalsComponent );
 
 			if ( operationsComponent != null )
 				addComponent( operationsComponent );

@@ -27,6 +27,8 @@ public class InvoiceQuery extends Invoice
 	private Long ref_customer;
 	private Long ref_user;
 	
+	private Boolean for_collect;
+	
 	public String getPeriodToString()
 	{
 		String ret = "";

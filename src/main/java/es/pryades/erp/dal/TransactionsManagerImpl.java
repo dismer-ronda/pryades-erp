@@ -60,13 +60,13 @@ public class TransactionsManagerImpl extends BaseManagerImpl implements Transact
 	{
 		double sign = ( transaction.getTransaction_type().equals( Transaction.TYPE_PAYMENT ) || transaction.getTransaction_type().equals( Transaction.TYPE_TRANSFER_SRC ) ) ? -1 : 1 ;
 		
-		double balance = last.getBalance() + sign * transaction.getAmount();
+		double balance = Utils.roundDouble( last.getBalance() + sign * transaction.getAmount(), 2 );
 		
 		return balance < -1 * account.getCredit();
 	}
 
 	@Override
-	public boolean addTransaction( AppContext ctx, Transaction transaction, Account account ) throws Throwable
+	public int addTransaction( AppContext ctx, Transaction transaction, Account account ) throws Throwable
 	{
 		TransactionQuery query = new TransactionQuery();
 		query.setRef_account( transaction.getRef_account() );
@@ -75,7 +75,10 @@ public class TransactionsManagerImpl extends BaseManagerImpl implements Transact
 		if ( last != null )
 		{
 			if ( creditExceeded( account, last, transaction ) )
-				return false;
+				return Transaction.TRANSACTION_ERROR_CREDIT_LIMIT;
+			
+			if ( transaction.getTransaction_date() < last.getTransaction_date() )
+				return Transaction.TRANSACTION_ERROR_DATE_BEFORE;
 			
 			if ( transaction.getTransaction_type().equals( Transaction.TYPE_PAYMENT ) )
 				transaction.setAmount( -1 * transaction.getAmount() );
@@ -87,10 +90,10 @@ public class TransactionsManagerImpl extends BaseManagerImpl implements Transact
 			if ( transaction.getTransaction_type().equals( Transaction.TYPE_PAYMENT ) )
 				transaction.setAmount( -1 * transaction.getAmount() );
 
-			return true;
+			return Transaction.TRANSACTION_OK;
 		}
 		
-		return false;
+		return Transaction.TRANSACTION_ERROR_NOT_INITIALIZED;
 	}
 
 	private void deleteInitTransaction( AppContext ctx, Transaction transaction ) throws Throwable
@@ -319,6 +322,191 @@ public class TransactionsManagerImpl extends BaseManagerImpl implements Transact
 		}
 	}
 
+	public void exportAccountXls( AppContext ctx, Workbook workbook, Sheet sheet, Account account, Long from_date, Long to_date ) throws Throwable
+	{
+		TransactionQuery query = new TransactionQuery();
+		query.setRef_account( account.getId() );
+		query.setFrom_date( from_date );
+		query.setTo_date( to_date );
+		query.setOrder( "desc");
+		query.setOrderby( "id");
+		
+		@SuppressWarnings("unchecked")
+		List<Transaction> transactions = IOCManager._TransactionsManager.getRows( ctx, query );
+		
+		if ( transactions.size() > 0 )
+		{
+	        CellStyle styleHeader = workbook.createCellStyle();
+	        Font fontHeader = workbook.createFont();
+	        fontHeader.setBoldweight( Font.BOLDWEIGHT_BOLD );
+	        styleHeader.setAlignment(CellStyle.ALIGN_CENTER );
+	        styleHeader.setFont( fontHeader );
+	
+	        CellStyle styleFooter = workbook.createCellStyle();
+	        Font fontFooter = workbook.createFont();
+	        fontFooter.setBoldweight( Font.BOLDWEIGHT_BOLD );
+	        styleFooter.setAlignment(CellStyle.ALIGN_RIGHT );
+	        styleFooter.setFont( fontFooter);
+	
+	        CellStyle styleCurrency = workbook.createCellStyle();
+	        Font fontCurrency = workbook.createFont();
+	        styleCurrency.setAlignment(CellStyle.ALIGN_RIGHT );
+	        styleCurrency.setFont( fontCurrency );
+	        styleCurrency.setDataFormat( workbook.createDataFormat().getFormat( Constants.moneyFormat ) );
+	
+	        CellStyle styleFooterCurrency = workbook.createCellStyle();
+	        Font fontFooterCurrency = workbook.createFont();
+	        fontFooterCurrency.setBoldweight( Font.BOLDWEIGHT_BOLD );
+	        styleFooterCurrency.setAlignment(CellStyle.ALIGN_RIGHT );
+	        styleFooterCurrency.setFont( fontFooter);
+	        styleFooterCurrency.setDataFormat( workbook.createDataFormat().getFormat( Constants.moneyFormat ) );
+	
+			String company = ctx.getOwner().getName() + " - " + ctx.getOwner().getTax_id();
+			
+			if ( account.getAccount_type().equals( Account.TYPE_PROVIDER ) )
+				company = account.getCompany().getName() + " - " + account.getCompany().getTax_id();
+	
+			int i = sheet.getLastRowNum() + 1;
+			
+	        Row sheetRow = sheet.createRow( i++ );
+	        Cell cell = sheetRow.createCell( 0 );
+	        cell.setCellStyle(styleHeader);
+			cell.setCellValue( ctx.getString( "template.list.transactions.company" ) );
+			cell = sheetRow.createCell( 1 );
+			cell.setCellValue( company );
+			sheet.addMergedRegion( new CellRangeAddress( i-1, i-1, 1, 7 ) );
+	
+			sheetRow = sheet.createRow( i++ );
+			cell = sheetRow.createCell( 0 );
+	        cell.setCellStyle(styleHeader);
+			cell.setCellValue( ctx.getString( "template.list.transactions.account" ) );
+			cell = sheetRow.createCell( 1 );
+			cell.setCellValue( account != null ? account.getName() + " - " + account.getNumber() : "" );
+			sheet.addMergedRegion( new CellRangeAddress( i-1, i-1, 1, 7 ) );
+	
+			//sheet.createRow( i++ );
+			
+			sheetRow = sheet.createRow( i++ );
+			int j = 0;
+			cell = sheetRow.createCell( j++ );
+	        cell.setCellStyle(styleHeader);
+			cell.setCellValue( ctx.getString( "template.list.transactions.date" ) );
+	
+			cell = sheetRow.createCell( j++ );
+	        cell.setCellStyle(styleHeader);
+			cell.setCellValue( ctx.getString( "template.list.transactions.type" ) );
+			
+			cell = sheetRow.createCell( j++ );
+	        cell.setCellStyle(styleHeader);
+			cell.setCellValue( ctx.getString( "template.list.transactions.amount" ) );
+	
+			cell = sheetRow.createCell( j++ );
+	        cell.setCellStyle(styleHeader);
+			cell.setCellValue( ctx.getString( "template.list.transactions.balance" ) );
+	
+			cell = sheetRow.createCell( j++ );
+	        cell.setCellStyle(styleHeader);
+			
+			cell = sheetRow.createCell( j++ );
+	        cell.setCellStyle(styleHeader);
+			cell.setCellValue( ctx.getString( "template.list.transactions.concept" ) );
+			
+			cell = sheetRow.createCell( j++ );
+	        cell.setCellStyle(styleHeader);
+			cell.setCellValue( ctx.getString( "template.list.transactions.customer.provider" ) );
+			
+			cell = sheetRow.createCell( j++ );
+	        cell.setCellStyle(styleHeader);
+			cell.setCellValue( ctx.getString( "template.list.transactions.purchase" ) );
+			
+			cell = sheetRow.createCell( j++ );
+	        cell.setCellStyle(styleHeader);
+			cell.setCellValue( ctx.getString( "template.list.transactions.invoice" ) );
+			
+			cell = sheetRow.createCell( j++ );
+	        cell.setCellStyle(styleHeader);
+			cell.setCellValue( ctx.getString( "template.list.transactions.target" ) );
+			
+			cell = sheetRow.createCell( j++ );
+	        cell.setCellStyle(styleHeader);
+			cell.setCellValue( ctx.getString( "template.list.transactions.transfer" ) );
+			
+	    	for ( Transaction transaction : transactions )
+	    	{
+				sheetRow = sheet.createRow( i++ );
+				
+				j = 0;
+				cell = sheetRow.createCell( j++ );
+				cell.setCellValue( transaction.getFormattedDate() );
+	
+				cell = sheetRow.createCell( j++ );
+				cell.setCellValue( ctx.getString( "transaction.type." + transaction.getTransaction_type() ) );
+				
+				cell = sheetRow.createCell( j++ );
+		        cell.setCellStyle(styleCurrency);
+	
+				cell.setCellValue( transaction.getAmount() );
+	
+				cell = sheetRow.createCell( j++ );
+		        cell.setCellStyle(styleCurrency);
+				cell.setCellValue( transaction.getBalance() );
+				
+				cell = sheetRow.createCell( j++ );
+		        cell.setCellStyle(styleHeader);
+				
+				switch ( transaction.getTransaction_type() )
+				{
+					case Transaction.TYPE_PAYMENT:
+						cell = sheetRow.createCell( j++ );
+						cell.setCellValue( transaction.getPurchase() != null ? transaction.getPurchase().getTitle() : "" );
+					break;
+	
+					case Transaction.TYPE_INCOME:
+						cell = sheetRow.createCell( j++ );
+						cell.setCellValue( transaction.getInvoice() != null ? transaction.getInvoice().getTitle() : "" );
+					break;
+	
+					default:
+						cell = sheetRow.createCell( j++ );
+						cell.setCellValue( transaction.getDescription() );
+				}
+	
+				switch ( transaction.getTransaction_type() )
+				{
+					case Transaction.TYPE_PAYMENT:
+						cell = sheetRow.createCell( j++ );
+						cell.setCellValue( transaction.getPurchase() != null ? transaction.getPurchase().getProvider().getName() : "" );
+					break;
+	
+					case Transaction.TYPE_INCOME:
+						cell = sheetRow.createCell( j++ );
+						cell.setCellValue( transaction.getInvoice() != null ? transaction.getInvoice().getQuotation().getCustomer().getName() : "" );
+					break;
+	
+					default:
+						cell = sheetRow.createCell( j++ );
+						cell.setCellValue( "" );
+				}
+	
+				cell = sheetRow.createCell( j++ );
+				cell.setCellValue( transaction.getPurchase() != null ? transaction.getPurchase().getFormattedNumber(): "" );
+				
+				cell = sheetRow.createCell( j++ );
+				cell.setCellValue( transaction.getInvoice() != null ? transaction.getInvoice().getFormattedNumber() : "" );
+				
+				cell = sheetRow.createCell( j++ );
+				cell.setCellValue( transaction.getTarget() != null ? transaction.getTarget().getName() : "" );
+				
+				cell = sheetRow.createCell( j++ );
+				cell.setCellValue( transaction.getTarget() != null ? transaction.getTransfer().toString().toUpperCase() : "" );
+			}
+	
+			for ( int col = 0; col < j; col++ )
+				sheet.autoSizeColumn( col );
+			
+			sheet.createRow( i++ );
+		}
+	}
 
 	@Override
 	public byte[] exportListXls( AppContext ctx, TransactionQuery query ) throws Throwable
@@ -331,21 +519,6 @@ public class TransactionsManagerImpl extends BaseManagerImpl implements Transact
 		
 		Sheet sheet = workbook.createSheet();
 		
-		int i = 0;
-		
-		@SuppressWarnings("unchecked")
-		List<Transaction> transactions = IOCManager._TransactionsManager.getRows( ctx, query );
-		
-		Account account = null;
-		
-		if ( query.getRef_account() != null )
-		{
-			Account queryAccount = new Account();
-			queryAccount.setId( query.getRef_account() );
-			
-			account = (Account)IOCManager._AccountsManager.getRow( ctx, queryAccount );
-		}
-	
         CellStyle styleHeader = workbook.createCellStyle();
         Font fontHeader = workbook.createFont();
         fontHeader.setBoldweight( Font.BOLDWEIGHT_BOLD );
@@ -371,6 +544,8 @@ public class TransactionsManagerImpl extends BaseManagerImpl implements Transact
         styleFooterCurrency.setFont( fontFooter);
         styleFooterCurrency.setDataFormat( workbook.createDataFormat().getFormat( Constants.moneyFormat ) );
 
+		int i = 0;
+		
 		Row sheetRow = sheet.createRow( i++ );
 		Cell cell = sheetRow.createCell( 0 );
         cell.setCellStyle(styleHeader);
@@ -387,150 +562,23 @@ public class TransactionsManagerImpl extends BaseManagerImpl implements Transact
 		cell.setCellValue( query.getPeriodToString() );
 		sheet.addMergedRegion( new CellRangeAddress( i-1, i-1, 1, 7 ) );
 
-		String company = ctx.getOwner().getName() + " - " + ctx.getOwner().getTax_id();
-		
-		if ( account != null )
+		if ( query.getRef_account() != null )
 		{
-			if ( account.getAccount_type().equals( Account.TYPE_PROVIDER ) )
-				company = account.getCompany().getName() + " - " + account.getCompany().getTax_id();
+			Account queryAccount = new Account();
+			queryAccount.setId( query.getRef_account() );
+			Account account = (Account)IOCManager._AccountsManager.getRow( ctx, queryAccount );
+			
+			exportAccountXls( ctx, workbook, sheet, account, query.getFrom_date(), query.getTo_date() );
+		}
+		else
+		{
+			@SuppressWarnings("unchecked")
+			List<Account> accounts = IOCManager._AccountsManager.getRows( ctx, new Account() );
+			
+			for ( Account account : accounts )
+				exportAccountXls( ctx, workbook, sheet, account, query.getFrom_date(), query.getTo_date() );
 		}
 		
-		sheetRow = sheet.createRow( i++ );
-		cell = sheetRow.createCell( 0 );
-        cell.setCellStyle(styleHeader);
-		cell.setCellValue( ctx.getString( "template.list.transactions.company" ) );
-		cell = sheetRow.createCell( 1 );
-		cell.setCellValue( company );
-		sheet.addMergedRegion( new CellRangeAddress( i-1, i-1, 1, 7 ) );
-
-		sheetRow = sheet.createRow( i++ );
-		cell = sheetRow.createCell( 0 );
-        cell.setCellStyle(styleHeader);
-		cell.setCellValue( ctx.getString( "template.list.transactions.account" ) );
-		cell = sheetRow.createCell( 1 );
-		cell.setCellValue( account != null ? account.getName() + " - " + account.getNumber() : "" );
-		sheet.addMergedRegion( new CellRangeAddress( i-1, i-1, 1, 7 ) );
-
-		sheet.createRow( i++ );
-		
-		sheetRow = sheet.createRow( i++ );
-		int j = 0;
-		cell = sheetRow.createCell( j++ );
-        cell.setCellStyle(styleHeader);
-		cell.setCellValue( ctx.getString( "template.list.transactions.date" ) );
-
-		cell = sheetRow.createCell( j++ );
-        cell.setCellStyle(styleHeader);
-		cell.setCellValue( ctx.getString( "template.list.transactions.type" ) );
-		
-		cell = sheetRow.createCell( j++ );
-        cell.setCellStyle(styleHeader);
-		cell.setCellValue( ctx.getString( "template.list.transactions.amount" ) );
-
-		cell = sheetRow.createCell( j++ );
-        cell.setCellStyle(styleHeader);
-		cell.setCellValue( ctx.getString( "template.list.transactions.balance" ) );
-
-		cell = sheetRow.createCell( j++ );
-        cell.setCellStyle(styleHeader);
-		
-		cell = sheetRow.createCell( j++ );
-        cell.setCellStyle(styleHeader);
-		cell.setCellValue( ctx.getString( "template.list.transactions.concept" ) );
-		
-		cell = sheetRow.createCell( j++ );
-        cell.setCellStyle(styleHeader);
-		cell.setCellValue( ctx.getString( "template.list.transactions.customer.provider" ) );
-		
-		cell = sheetRow.createCell( j++ );
-        cell.setCellStyle(styleHeader);
-		cell.setCellValue( ctx.getString( "template.list.transactions.purchase" ) );
-		
-		cell = sheetRow.createCell( j++ );
-        cell.setCellStyle(styleHeader);
-		cell.setCellValue( ctx.getString( "template.list.transactions.invoice" ) );
-		
-		cell = sheetRow.createCell( j++ );
-        cell.setCellStyle(styleHeader);
-		cell.setCellValue( ctx.getString( "template.list.transactions.target" ) );
-		
-		cell = sheetRow.createCell( j++ );
-        cell.setCellStyle(styleHeader);
-		cell.setCellValue( ctx.getString( "template.list.transactions.transfer" ) );
-		
-    	for ( Transaction transaction : transactions )
-    	{
-			sheetRow = sheet.createRow( i++ );
-			
-			j = 0;
-			cell = sheetRow.createCell( j++ );
-			cell.setCellValue( transaction.getFormattedDate() );
-
-			cell = sheetRow.createCell( j++ );
-			cell.setCellValue( ctx.getString( "transaction.type." + transaction.getTransaction_type() ) );
-			
-			cell = sheetRow.createCell( j++ );
-	        cell.setCellStyle(styleCurrency);
-
-			cell.setCellValue( transaction.getAmount() );
-
-			cell = sheetRow.createCell( j++ );
-	        cell.setCellStyle(styleCurrency);
-			cell.setCellValue( transaction.getBalance() );
-			
-			cell = sheetRow.createCell( j++ );
-	        cell.setCellStyle(styleHeader);
-			
-			switch ( transaction.getTransaction_type() )
-			{
-				case Transaction.TYPE_PAYMENT:
-					cell = sheetRow.createCell( j++ );
-					cell.setCellValue( transaction.getPurchase() != null ? transaction.getPurchase().getTitle() : "" );
-				break;
-
-				case Transaction.TYPE_INCOME:
-					cell = sheetRow.createCell( j++ );
-					cell.setCellValue( transaction.getInvoice() != null ? transaction.getInvoice().getTitle() : "" );
-				break;
-
-				default:
-					cell = sheetRow.createCell( j++ );
-					cell.setCellValue( transaction.getDescription() );
-			}
-
-			switch ( transaction.getTransaction_type() )
-			{
-				case Transaction.TYPE_PAYMENT:
-					cell = sheetRow.createCell( j++ );
-					cell.setCellValue( transaction.getPurchase() != null ? transaction.getPurchase().getProvider().getName() : "" );
-				break;
-
-				case Transaction.TYPE_INCOME:
-					cell = sheetRow.createCell( j++ );
-					cell.setCellValue( transaction.getInvoice() != null ? transaction.getInvoice().getQuotation().getCustomer().getName() : "" );
-				break;
-
-				default:
-					cell = sheetRow.createCell( j++ );
-					cell.setCellValue( "" );
-			}
-
-			cell = sheetRow.createCell( j++ );
-			cell.setCellValue( transaction.getPurchase() != null ? transaction.getPurchase().getFormattedNumber(): "" );
-			
-			cell = sheetRow.createCell( j++ );
-			cell.setCellValue( transaction.getInvoice() != null ? transaction.getInvoice().getFormattedNumber() : "" );
-			
-			cell = sheetRow.createCell( j++ );
-			cell.setCellValue( transaction.getTarget() != null ? transaction.getTarget().getName() : "" );
-			
-			cell = sheetRow.createCell( j++ );
-			cell.setCellValue( transaction.getTarget() != null ? transaction.getTransfer().toString().toUpperCase() : "" );
-		}
-		
-		for ( int col = 0; col < j; col++ )
-			sheet.autoSizeColumn( col );
-
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		workbook.write( os );
 		

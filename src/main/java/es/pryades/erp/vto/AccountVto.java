@@ -1,5 +1,7 @@
 package es.pryades.erp.vto;
 
+import com.vaadin.ui.Label;
+
 import es.pryades.erp.common.GenericVto;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,7 +20,7 @@ public class AccountVto extends GenericVto
 	private String account_type;						
 	private String name;						
 	private String number;						
-	private String balance;
+	private Label balance;
 	private String company_name;						
 	
 	public AccountVto()

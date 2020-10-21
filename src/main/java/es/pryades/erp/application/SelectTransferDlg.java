@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.vaadin.data.Property;
+import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.shared.ui.datefield.Resolution;
@@ -14,6 +16,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.PopupDateField;
 import com.vaadin.ui.TextField;
@@ -27,6 +30,7 @@ import es.pryades.erp.common.Utils;
 import es.pryades.erp.dashboard.Dashboard;
 import es.pryades.erp.dto.Account;
 import es.pryades.erp.dto.Transaction;
+import es.pryades.erp.dto.UserDefault;
 import es.pryades.erp.ioc.IOCManager;
 import lombok.Getter;
 import lombok.Setter;
@@ -48,6 +52,9 @@ public class SelectTransferDlg extends Window
 	private TextField editAmount;
 	private TextField editDescription;
 	
+	private Label labelSrcBalance;
+	private Label labelDstBalance;
+
 	@Getter
 	private AppContext context;
 	
@@ -61,9 +68,12 @@ public class SelectTransferDlg extends Window
 	@Getter @Setter private String description;
 	@Getter @Setter private Long ref_source;
 	@Getter @Setter private Long ref_dest;
-	
+		
 	@SuppressWarnings("rawtypes")
 	private BeanItem bi = new BeanItem<SelectTransferDlg>( this );
+
+	private UserDefault default_from_date;
+	private UserDefault default_to_date;
 
 	public SelectTransferDlg( AppContext ctx )
 	{
@@ -77,6 +87,8 @@ public class SelectTransferDlg extends Window
 		layout.setSpacing( true );
 		layout.setSizeUndefined();
 		
+		loadUserDefaults();
+		
 		addComponents();
 		
 		center();
@@ -89,27 +101,27 @@ public class SelectTransferDlg extends Window
 	private void addComponents() 
 	{
 		srcDateField = new PopupDateField(getContext().getString( "selectTransferDlg.srcDateField" ));
+		srcDateField.setWidth( "160px" );
 		srcDateField.setResolution( Resolution.DAY );
 		srcDateField.setDateFormat( "dd-MM-yyyy" );
-		srcDateField.setWidth( "160px" );
 		srcDateField.setRequired( true );
 		srcDateField.setRequiredError( getContext().getString( "words.required" ) );
-		srcDateField.setValue( new Date() );
+		srcDateField.setValue( getDefaultFromDate() );
 		srcDateField.setInvalidCommitted( true );
 		
 		dstDateField = new PopupDateField(getContext().getString( "selectTransferDlg.dstDateField" ));
+		dstDateField.setWidth( "160px" );
 		dstDateField.setResolution( Resolution.DAY );
 		dstDateField.setDateFormat( "dd-MM-yyyy" );
-		dstDateField.setWidth( "160px" );
 		dstDateField.setRequired( true );
 		dstDateField.setRequiredError( getContext().getString( "words.required" ) );
-		dstDateField.setValue( new Date() );
+		dstDateField.setValue( getDefaultToDate() );
 		dstDateField.setInvalidCommitted( true );
 		
 		loadAccounts();
 
 		srcComboAccounts = new ComboBox(getContext().getString( "selectTransferDlg.srcComboAccounts" ));
-		srcComboAccounts.setWidth( "100%" );
+		srcComboAccounts.setWidth( "320px" );
 		srcComboAccounts.setNullSelectionAllowed( false );
 		srcComboAccounts.setTextInputAllowed( true );
 		srcComboAccounts.setImmediate( true );
@@ -117,9 +129,18 @@ public class SelectTransferDlg extends Window
 		srcComboAccounts.setRequiredError( getContext().getString( "words.required" ) );
 		srcComboAccounts.setInvalidCommitted( true );
 		srcComboAccounts.setPropertyDataSource( bi.getItemProperty( "ref_source" ) );
+		srcComboAccounts.addValueChangeListener( new Property.ValueChangeListener() 
+		{
+			private static final long serialVersionUID = 1724286312489796801L;
+
+			public void valueChange(ValueChangeEvent event) 
+		    {
+		        onSelectedSrcAccount();
+		    }
+		});
 
 		dstComboAccounts = new ComboBox(getContext().getString( "selectTransferDlg.dstComboAccounts" ));
-		dstComboAccounts.setWidth( "100%" );
+		dstComboAccounts.setWidth( "320px" );
 		dstComboAccounts.setNullSelectionAllowed( false );
 		dstComboAccounts.setTextInputAllowed( true );
 		dstComboAccounts.setImmediate( true );
@@ -127,9 +148,22 @@ public class SelectTransferDlg extends Window
 		dstComboAccounts.setRequiredError( getContext().getString( "words.required" ) );
 		dstComboAccounts.setInvalidCommitted( true );
 		dstComboAccounts.setPropertyDataSource( bi.getItemProperty( "ref_dest" ) );
+		dstComboAccounts.addValueChangeListener( new Property.ValueChangeListener() 
+		{
+			private static final long serialVersionUID = 7794937955321613757L;
+
+			public void valueChange(ValueChangeEvent event) 
+		    {
+		        onSelectedDstAccount();
+		    }
+		});
 
 		fillCombosAccounts();
 
+		editDescription = new TextField( getContext().getString( "selectTransferDlg.editDescription" ), bi.getItemProperty( "description" ) );
+		editDescription.setWidth( "100%" );
+		editDescription.setNullRepresentation( "" );
+		
 		editAmount = new TextField( getContext().getString( "selectTransferDlg.editAmount" ), bi.getItemProperty( "amount" ) );
 		editAmount.setWidth( "160px" );
 		editAmount.setRequired( true );
@@ -137,10 +171,13 @@ public class SelectTransferDlg extends Window
 		editAmount.setNullRepresentation( "" );
 		editAmount.setInvalidCommitted( true );
 		
-		editDescription = new TextField( getContext().getString( "selectTransferDlg.editDescription" ), bi.getItemProperty( "description" ) );
-		editDescription.setWidth( "100%" );
-		editDescription.setRequired( true );
-		editDescription.setNullRepresentation( "" );
+		labelSrcBalance = new Label();
+		labelSrcBalance.setWidth( "100%" );
+		labelSrcBalance.setValue( getSelectedAccountBalance( srcComboAccounts ) );
+
+		labelDstBalance = new Label();
+		labelDstBalance.setWidth( "100%" );
+		labelDstBalance.setValue( getSelectedAccountBalance( dstComboAccounts ) );
 		
 		Button button1 = new Button( getContext().getString( "words.ok" ) );
 		button1.setClickShortcut( KeyCode.ENTER );
@@ -170,14 +207,18 @@ public class SelectTransferDlg extends Window
 		row1.setSpacing( true );
 		row1.addComponent( srcDateField );
 		row1.addComponent( srcComboAccounts );
-		row1.setExpandRatio( srcComboAccounts, 1.0f );
+		row1.addComponent( labelSrcBalance );
+		row1.setComponentAlignment( labelSrcBalance, Alignment.BOTTOM_LEFT );
+		row1.setExpandRatio( labelSrcBalance, 1.0f );
 
 		HorizontalLayout row2 = new HorizontalLayout();
 		row2.setWidth( "100%" );
 		row2.setSpacing( true );
 		row2.addComponent( dstDateField );
 		row2.addComponent( dstComboAccounts );
-		row2.setExpandRatio( dstComboAccounts, 1.0f );
+		row2.addComponent( labelDstBalance );
+		row2.setComponentAlignment( labelDstBalance, Alignment.BOTTOM_LEFT );
+		row2.setExpandRatio( labelDstBalance, 1.0f );
 
 		HorizontalLayout row3 = new HorizontalLayout();
 		row3.setWidth( "100%" );
@@ -305,6 +346,8 @@ public class SelectTransferDlg extends Window
     			
 				Utils.showNotification( getContext(), source.getTransactionMessage( message ), Notification.Type.HUMANIZED_MESSAGE );
 
+				saveUserDefaults();
+
 				close();
 			}
 			catch ( Throwable e )
@@ -357,5 +400,69 @@ public class SelectTransferDlg extends Window
 		}
 		
 		return null;
+	}
+
+	private void loadUserDefaults()
+	{
+		default_from_date = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.TRANSFER_FROM_DATE );
+		default_to_date = IOCManager._UserDefaultsManager.getUserDefault( getContext(), UserDefault.TRANSFER_TO_DATE );
+
+	}
+
+	private void saveUserDefaults()
+	{
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_from_date, srcDateField.getValue() != null ? Long.toString( CalendarUtils.getDayAsLong( srcDateField.getValue() ) ) : null );
+		IOCManager._UserDefaultsManager.setUserDefault( getContext(), default_to_date, dstDateField.getValue() != null ? Long.toString( CalendarUtils.getDayAsLong( dstDateField.getValue() ) ) : null );
+	}
+	
+	private Date getDefaultFromDate() 
+	{
+		try
+		{
+			return CalendarUtils.getDateFromString( default_from_date.getData_value(), "yyyyMMddHHmmss" );
+		}
+		catch ( Throwable e )
+		{
+		}
+		
+		return new Date();
+	}
+
+	private Date getDefaultToDate() 
+	{
+		try
+		{
+			return CalendarUtils.getDateFromString( default_to_date.getData_value(), "yyyyMMddHHmmss" );
+		}
+		catch ( Throwable e )
+		{
+		}
+		
+		return new Date();
+	}
+	
+	private String getSelectedAccountBalance( ComboBox combo )
+	{
+		Account account = getAccount( combo );
+		
+		if ( account != null )
+		{
+			List<Transaction> transactions = account.getTransactions();
+			
+			if ( transactions.size() > 0 )
+				return getContext().getString( "selectTransferDlg.labelBalance" ) + " " + Utils.getFormattedCurrency( transactions.get( 0 ).getBalance() );
+		}
+		
+		return "";
+	}
+	
+	private void onSelectedSrcAccount()
+	{
+		labelSrcBalance.setValue( getSelectedAccountBalance( srcComboAccounts ) );
+	}
+
+	private void onSelectedDstAccount()
+	{
+		labelDstBalance.setValue( getSelectedAccountBalance( dstComboAccounts ) );
 	}
 }

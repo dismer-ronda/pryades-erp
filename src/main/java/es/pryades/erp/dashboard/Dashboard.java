@@ -312,4 +312,12 @@ public class Dashboard extends VerticalLayout implements SelectedTabChangeListen
 		if ( content3 != null )
 			content3.refreshOperations();
 	}
+	
+	public void refreshAccounts()
+	{
+		TransactionsTabContent content = transactionsTab.getTransactionsTable();
+		if ( content != null )
+			content.refreshAccounts();
+	}
+
 }

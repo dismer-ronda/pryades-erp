@@ -2,7 +2,7 @@ div.v-Notification {
 	border: 1px solid transparent;
 	border-radius: 10px;
 	box-shadow: 0 0 10px #666; 
-	max-width: 80%;
+	max-width: 50%;
 	background-image: none;
 	color: white;
 	font-size: 16px;

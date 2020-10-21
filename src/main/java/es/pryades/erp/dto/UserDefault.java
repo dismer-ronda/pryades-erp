@@ -48,6 +48,7 @@ public class UserDefault extends BaseDto
 	public static final String SHIPMENT_DEPARTURE_PORT  = "shipment.departure.port";
 	public static final String SHIPMENT_ARRIVAL_PORT  = "shipment.arrival.port";
 	public static final String SHIPMENT_CARRIER = "shipment.carrier";
+	public static final String SHIPMENT_TRANSPORTER = "shipment.transporter";
 
 	public static final String SHIPMENT_BOX_TYPE = "shipment.box.type";
 	public static final String SHIPMENT_BOX_LENGTH = "shipment.box.length";
@@ -58,6 +59,7 @@ public class UserDefault extends BaseDto
 	public static final String LABELS_FORMAT = "labels.format";
 	public static final String LABELS_TYPE = "labels.type";
 	public static final String LABELS_FONTSIZE = "labels.fontsize";
+	public static final String LABELS_COPIES = "labels.copies";
 
 	public static final String QUOTATIONS_FROM = "quotations.from";
 	public static final String QUOTATIONS_TO = "quotations.to";
@@ -94,6 +96,10 @@ public class UserDefault extends BaseDto
 	public static final String TRANSACTIONS_TO = "transactions.to";
 
 	public static final String TRANSACTION_ACCOUNT = "transaction.account";
+	public static final String TRANSACTION_DATE = "transaction.date";
+
+	public static final String TRANSFER_FROM_DATE = "transfer.from.date";
+	public static final String TRANSFER_TO_DATE = "transfer.to.date";
 
 	private String data_key;
 	private String data_value;

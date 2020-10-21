@@ -58,11 +58,13 @@ public class InvoiceControlerVto extends GenericControlerVto
 				result.setTotal_invoice( Utils.roundDouble( invoice.getGrandTotalInvoiceAfterTaxes(), 2 ) );
 				result.setTotal_taxes( Utils.roundDouble( invoice.getTotalTaxes(), 2 ) );
 
-				Double collected = ((Invoice) dtoObj).getCollected();
-				Label labelCollected = new Label();
-				labelCollected.setValue( Double.toString( Utils.roundDouble( collected,  2 ) ) );
+				Label labelCollected = new Label( invoice.getCollectedAsString() );
 				labelCollected.setStyleName( invoice.isFullyCollected() ? "green" : "red" );
 				result.setCollected( labelCollected );
+
+				Label labelForCollect = new Label( invoice.getForCollectAsString() );
+				labelForCollect.setStyleName( invoice.isFullyCollected() ? "green" : "red" );
+				result.setFor_collect( labelForCollect);
 			}
 			else
 			{

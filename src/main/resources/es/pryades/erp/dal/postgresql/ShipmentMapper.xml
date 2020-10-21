@@ -247,14 +247,18 @@
 		<result property="ref_notify" column="ref_notify"/>
 		<result property="ref_consignee_contact" column="ref_consignee_contact"/>
 		<result property="ref_notify_contact" column="ref_notify_contact"/>
+		<result property="ref_transporter" column="ref_transporter"/>
+		<result property="ref_transporter_contact" column="ref_transporter_contact"/>
 		<result property="status" column="status"/>
 		<result property="ref_user" column="ref_user"/>
 		
 		<association property="consignee" javaType="es.pryades.erp.dto.Company" resultMap="mapCompany" columnPrefix="consignee_" />
 		<association property="notify" javaType="es.pryades.erp.dto.Company" resultMap="mapCompany" columnPrefix="notify_" />
+		<association property="transporter" javaType="es.pryades.erp.dto.Company" resultMap="mapCompany" columnPrefix="transporter_" />
 
 		<association property="consignee_contact" javaType="es.pryades.erp.dto.CompanyContact" resultMap="mapCompanyContact" columnPrefix="consignee_contact_" />
 		<association property="notify_contact" javaType="es.pryades.erp.dto.CompanyContact" resultMap="mapCompanyContact" columnPrefix="notify_contact_" />
+		<association property="transporter_contact" javaType="es.pryades.erp.dto.CompanyContact" resultMap="mapCompanyContact" columnPrefix="transporter_contact_" />
 		
 		<association property="user" javaType="es.pryades.erp.dto.User" resultMap="mapUser" columnPrefix="user_" />
 
@@ -281,9 +285,11 @@
 	
 		shipments.ref_consignee,
 		shipments.ref_notify,
+		shipments.ref_transporter,
 		
 		shipments.ref_consignee_contact,
 		shipments.ref_notify_contact,
+		shipments.ref_transporter_contact,
 		
 		shipments.status,
 		
@@ -313,6 +319,18 @@
 		companies2.language 		as notify_language,
 		companies2.signature		as notify_signature,
 		
+		companies3.id				as transporter_id,
+		companies3.name 			as transporter_name,
+		companies3.alias 			as transporter_alias,
+		companies3.tax_id 			as transporter_tax_id,
+		companies3.address 			as transporter_address,
+		companies3.email 			as transporter_email,
+		companies3.phone 			as transporter_phone,
+		companies3.type_company		as transporter_type_company,
+		companies3.taxable 			as transporter_taxable,
+		companies3.language 		as transporter_language,
+		companies3.signature		as transporter_signature,
+		
 		contacts1.id				as consignee_contact_id,
 		contacts1.ref_company		as consignee_contact_ref_company,
 		contacts1.name				as consignee_contact_name,
@@ -324,6 +342,12 @@
 		contacts2.name				as notify_contact_name,
 		contacts2.email				as notify_contact_email,
 		contacts2.phone				as notify_contact_phone,
+		
+		contacts3.id				as transporter_contact_id,
+		contacts3.ref_company		as transporter_contact_ref_company,
+		contacts3.name				as transporter_contact_name,
+		contacts3.email				as transporter_contact_email,
+		contacts3.phone				as transporter_contact_phone,
 		
 		users.id					as user_id,
 		users.name					as user_name,
@@ -343,11 +367,17 @@
 		inner join companies companies2
 		on shipments.ref_notify = companies2.id
 		
+		inner join companies companies3
+		on shipments.ref_transporter = companies3.id
+		
 		inner join companies_contacts contacts1
 		on shipments.ref_consignee_contact = contacts1.id
 
 		inner join companies_contacts contacts2
 		on shipments.ref_notify_contact = contacts2.id
+		
+		inner join companies_contacts contacts3
+		on shipments.ref_transporter_contact = contacts3.id
 		
 		inner join users
 		on shipments.ref_user = users.id
@@ -499,9 +529,11 @@
 			
 			ref_consignee,
 			ref_notify,
+			ref_transporter,
 		
 			ref_consignee_contact,
 			ref_notify_contact,
+			ref_transporter_contact,
 
 			ref_user,
 
@@ -529,9 +561,11 @@
 			
 			#{ref_consignee},
 			#{ref_notify},
+			#{ref_transporter},
 		
 			#{ref_consignee_contact},
 			#{ref_notify_contact},
+			#{ref_transporter_contact},
 
 			#{ref_user},
 		
@@ -557,9 +591,11 @@
 			
 			ref_consignee = #{ref_consignee},
 			ref_notify = #{ref_notify},
+			ref_transporter = #{ref_transporter},
 		
 			ref_consignee_contact = #{ref_consignee_contact},
 			ref_notify_contact = #{ref_notify_contact},
+			ref_transporter_contact = #{ref_transporter_contact},
 		
 			ref_user = #{ref_user},
 			

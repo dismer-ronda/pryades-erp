@@ -27,7 +27,13 @@ public class Transaction extends BaseDto
 	public static final int TYPE_TRANSFER_SRC		= 3;
 	public static final int TYPE_TRANSFER_DST		= 4;
 	public static final int TYPE_LOAN				= 5;
-
+	
+	public static final int TRANSACTION_OK 						= 0;
+	public static final int TRANSACTION_ERROR_NOT_INITIALIZED	= 1;
+	public static final int TRANSACTION_ERROR_CREDIT_LIMIT		= 2;
+	public static final int TRANSACTION_ERROR_DATE_BEFORE		= 3;
+	public static final int TRANSACTION_ERROR_EXCEPTION			= 4;
+		
 	private Long transaction_date;
 	private Integer transaction_type;
 

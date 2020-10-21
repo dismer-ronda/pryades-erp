@@ -195,12 +195,14 @@ public class ShipmentBox extends BaseDto
 			box.countBoxes( ctx, totals );
 	}
 
-	public void generateDetailedLabels( AppContext ctx, Shipment shipment, ArrayList<String> labels, HashMap<Integer, Integer> totals, HashMap<Integer, Integer> count )
+	public void generateDetailedLabels( AppContext ctx, Shipment shipment, ArrayList<String> labels, HashMap<Integer, Integer> totals, HashMap<Integer, Integer> count, int copies, int colWidth )
 	{	
 		count.put( getBox_type(), count.get( getBox_type() ) + 1 );
 
 		if ( getLabel_type().equals( LABEL_DETAIL ) )
 		{
+			String logo = XmlUtils.getDiv( "", "<img src=\"" + ctx.getLogoUrl() + "\" width=\"" + colWidth / 2 + "mm\"> </img>" ) ;
+
 			String from = XmlUtils.getBlockDivWithClass( "text_left indent", 
 					XmlUtils.getDiv( "", ctx.getString( "words.from" ) + ":&nbsp;" ) +
 					XmlUtils.getDiv( "", ctx.getOwner().getName() ) );
@@ -227,21 +229,25 @@ public class ShipmentBox extends BaseDto
 			
 			String weight = XmlUtils.getDiv( "text_left indent", ctx.getString( "template.shipment.labels.weight" ) + ":" );
 
-			labels.add( 
-				from + 
-				to + 
-				notify +
-				phone + "<br/>" + 
-				references + "<br/>" + 
-				weight + "<br/>" + 
-				number );
+			for ( int i = 0; i < copies; i++ )
+			{
+				labels.add( 
+					logo + "<br/>" + 
+					from + 
+					to + 
+					notify +
+					phone + "<br/>" + 
+					references + "<br/>" + 
+					weight + "<br/>" + 
+					number );
+			}
 		}
 			
 		for ( ShipmentBox box : sub_boxes )
-			box.generateDetailedLabels( ctx, shipment, labels, totals, count );
+			box.generateDetailedLabels( ctx, shipment, labels, totals, count, copies, colWidth );
 	}
 	
-	public void generateSimpleLabels( AppContext ctx, Shipment shipment, ArrayList<String> labels, HashMap<Integer, Integer> totals, HashMap<Integer, Integer> count )
+	public void generateSimpleLabels( AppContext ctx, Shipment shipment, ArrayList<String> labels, HashMap<Integer, Integer> totals, HashMap<Integer, Integer> count, int copies )
 	{	
 		count.put( getBox_type(), count.get( getBox_type() ) + 1 );
 
@@ -259,19 +265,22 @@ public class ShipmentBox extends BaseDto
 					XmlUtils.getDiv( "", ctx.getString( "shipment.box.type." + getBox_type() ) + "&nbsp;" + count.get( getBox_type() ) + "&nbsp;/&nbsp;" ) +
 					XmlUtils.getDiv( "", "" + totals.get( getBox_type() ) ) );
 
-			labels.add( contents + weight + "<br/><br/>" + number);
+			for ( int i = 0; i < copies; i++ )
+				labels.add( contents + weight + "<br/><br/>" + number);
 		}
 			
 		for ( ShipmentBox box : sub_boxes )
-			box.generateSimpleLabels( ctx, shipment, labels, totals, count );
+			box.generateSimpleLabels( ctx, shipment, labels, totals, count, copies );
 	}
 
-	public void generateAllLabels( AppContext ctx, Shipment shipment, ArrayList<String> labels, HashMap<Integer, Integer> totals, HashMap<Integer, Integer> count )
+	public void generateAllLabels( AppContext ctx, Shipment shipment, ArrayList<String> labels, HashMap<Integer, Integer> totals, HashMap<Integer, Integer> count, int copies, int colWidth )
 	{	
 		count.put( getBox_type(), count.get( getBox_type() ) + 1 );
 
 		if ( getLabel_type().equals( LABEL_DETAIL ) )
 		{
+			String logo = XmlUtils.getDiv( "", "<img src=\"" + ctx.getLogoUrl() + "\" width=\"" + colWidth / 2  + "mm\"> </img>" ) ;
+
 			String from = XmlUtils.getBlockDivWithClass( "text_left indent", 
 					XmlUtils.getDiv( "", ctx.getString( "words.from" ) + ":&nbsp;" ) +
 					XmlUtils.getDiv( "", ctx.getOwner().getName() ) );
@@ -298,14 +307,18 @@ public class ShipmentBox extends BaseDto
 			
 			String weight = XmlUtils.getDiv( "text_left indent", ctx.getString( "template.shipment.labels.weight" ) + ":" );
 
-			labels.add( 
-				from + 
-				to + 
-				notify +
-				phone + "<br/>" + 
-				references + "<br/>" + 
-				weight + "<br/>" + 
-				number );
+			for ( int i = 0; i < copies; i++ )
+			{
+				labels.add( 
+					logo + "<br/>" + 
+					from + 
+					to + 
+					notify +
+					phone + "<br/>" + 
+					references + "<br/>" + 
+					weight + "<br/>" + 
+					number );
+			}
 		}
 		else if ( getLabel_type().equals( LABEL_SIMPLE ) )
 		{
@@ -321,11 +334,12 @@ public class ShipmentBox extends BaseDto
 					XmlUtils.getDiv( "", ctx.getString( "shipment.box.type." + getBox_type() ) + "&nbsp;" + count.get( getBox_type() ) + "&nbsp;/&nbsp;" ) +
 					XmlUtils.getDiv( "", "" + totals.get( getBox_type() ) ) );
 
-			labels.add( contents + weight + "<br/><br/>" + number);
+			for ( int i = 0; i < copies; i++ )
+				labels.add( contents + weight + "<br/><br/>" + number);
 		}
 			
 		for ( ShipmentBox box : sub_boxes )
-			box.generateAllLabels( ctx, shipment, labels, totals, count );
+			box.generateAllLabels( ctx, shipment, labels, totals, count, copies, colWidth );
 	}
 	
 }

@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
@@ -17,6 +18,7 @@ import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
@@ -72,12 +74,14 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 	private ComboBox comboStatus;
 	private ComboBox comboBuyer;
 	private ComboBox comboType;
-
+	private CheckBox checkForPayment;
 	private Button bttnApply;
 	
 	private Label labelTotalNetPrice;
 	private Label labelTotalTaxes;
 	private Label labelTotalGrossPrice;
+	private Label labelTotalPayed;
+	private Label labelTotalPending;
 
 	private List<Operation> operations;
 	private List<Company> providers;
@@ -115,12 +119,12 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 	@Override
 	public String[] getVisibleCols()
 	{
-		return new String[]{ "purchase_date", "register_date", "number", "title", "operation_title", "provider_name", "invoice_number", "status", "net_price", "net_tax", "gross_price", "payed" };
+		return new String[]{ "purchase_date", "number", "title", "operation_title", "provider_name", "invoice_number", "status", "net_price", "net_tax", "for_payment" };
 	}
 
 	public String[] getSortableCols()
 	{
-		return new String[]{ "purchase_date", "register_date", "number", "title", "operation_title", "invoice_number", "provider_name", "status" };
+		return new String[]{ "purchase_date", "number", "title", "operation_title", "invoice_number", "provider_name", "status" };
 	}
 	
 	@Override
@@ -202,26 +206,40 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 
         FileDownloader fileDownloaderZip = new FileDownloader( getZipResource() );
         fileDownloaderZip.extend( bttnZip );
-
-        HorizontalLayout rowTotals = new HorizontalLayout();
+		
+		return ops;
+	}
+	
+	@Override
+	public Component getTotalsComponent()
+	{
+		HorizontalLayout rowTotals = new HorizontalLayout();
 		rowTotals.setWidth( "100%" );
 		rowTotals.setSpacing( true );
-		rowTotals.setMargin( new MarginInfo( false, true, false, true ) );
+		rowTotals.setMargin( new MarginInfo( false, true, true, true ) );
 		
 		labelTotalNetPrice = new Label();
-		labelTotalNetPrice.setWidth( "300px" );
+		labelTotalNetPrice.setStyleName( "centered border" );
+
 		labelTotalTaxes = new Label();
-		labelTotalTaxes.setWidth( "300px" );
-		labelTotalGrossPrice = new Label();
-		labelTotalGrossPrice.setWidth( "300px" );
+		labelTotalTaxes.setStyleName( "centered border" );
 		
+		labelTotalGrossPrice = new Label();
+		labelTotalGrossPrice.setStyleName( "centered border" );
+
+		labelTotalPayed = new Label();
+		labelTotalPayed.setStyleName( "centered border" );
+
+		labelTotalPending = new Label();
+		labelTotalPending.setStyleName( "centered border" );
+
 		rowTotals.addComponent( labelTotalNetPrice );
 		rowTotals.addComponent( labelTotalTaxes );
 		rowTotals.addComponent( labelTotalGrossPrice );
+		rowTotals.addComponent( labelTotalPayed );
+		rowTotals.addComponent( labelTotalPending );
 		
-		ops.add( rowTotals );
-		
-		return ops;
+		return rowTotals;
 	}
 
 	@Override
@@ -311,7 +329,7 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 		    }
 		});
 		
-		comboType = new ComboBox(getContext().getString( "modalNewPurchase.comboType" ));
+		comboType = new ComboBox( getContext().getString( "modalNewPurchase.comboType" ) );
 		comboType.setWidth( "200px" );
 		comboType.setNullSelectionAllowed( true );
 		comboType.setTextInputAllowed( true );
@@ -328,6 +346,19 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 		    }
 		});
 		
+		checkForPayment = new CheckBox( getContext().getString( "purchasesTab.checkForPayment" ) );
+		checkForPayment.setValue( false );
+		checkForPayment.addValueChangeListener( new ValueChangeListener()
+		{
+			private static final long serialVersionUID = 5861836221760229703L;
+
+			@Override
+			public void valueChange( ValueChangeEvent event )
+			{
+				refreshVisibleContent( true );
+			}
+		});
+		
 		bttnApply = new Button( getContext().getString( "words.search" ) );
 		bttnApply.setDescription( getContext().getString( "words.search" ) );
 		addButtonApplyFilterClickListener();
@@ -342,7 +373,10 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 		rowQuery.addComponent( comboProviders );
 		rowQuery.addComponent( comboStatus );
 		rowQuery.addComponent( comboType );
+		rowQuery.addComponent( checkForPayment );
 		rowQuery.addComponent( bttnApply );
+
+		rowQuery.setComponentAlignment( checkForPayment, Alignment.BOTTOM_LEFT );
 		rowQuery.setComponentAlignment( bttnApply, Alignment.BOTTOM_LEFT );
 		
 		return rowQuery;
@@ -370,7 +404,10 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 
 		if ( comboType.getValue() != null )
 			query.setPurchase_type( (Integer)comboType.getValue() );
-
+		
+		if ( checkForPayment.getValue().booleanValue()  )
+			query.setFor_payment( true );
+			
 		saveUserDefaults();
 		
 		return query;
@@ -412,6 +449,8 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 		double totalNetPrice = 0;
 		double totalTaxes = 0;
 		double totalGrossPrice = 0;
+		double totalPayed = 0;
+		double totalPending = 0;
 		
 		for ( BaseDto row : rows )
 		{
@@ -420,11 +459,17 @@ public class PurchasesTabContent extends PagedContent implements ModalParent
 			totalNetPrice += quotation.getNet_price();
 			totalTaxes += quotation.getNet_tax();
 			totalGrossPrice += quotation.getGrossPrice();
+			totalPayed += quotation.getPayed();
+			totalPending += quotation.getForPayment();
 		}
 		
-		labelTotalNetPrice.setValue(  getContext().getString( "purchasesTab.totalNetPrice" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalNetPrice ) ) );
-		labelTotalTaxes.setValue(  getContext().getString( "purchasesTab.totalTaxes" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalTaxes ) ) );
-		labelTotalGrossPrice.setValue(  getContext().getString( "purchasesTab.totalGrossPrice" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalGrossPrice ) ) );
+		labelTotalNetPrice.setValue( getContext().getString( "purchasesTab.totalNetPrice" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalNetPrice ) ) );
+		labelTotalTaxes.setValue( getContext().getString( "purchasesTab.totalTaxes" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalTaxes ) ) );
+		labelTotalGrossPrice.setValue( getContext().getString( "purchasesTab.totalGrossPrice" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalGrossPrice ) ) );
+		labelTotalPayed.setValue( getContext().getString( "purchasesTab.totalPayed" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalPayed ) ) );
+		labelTotalPending.setValue( getContext().getString( "purchasesTab.totalPending" ).replaceAll( "%total%" , Utils.getFormattedCurrency( totalPending ) ) );
+
+		labelTotalPending.addStyleName( totalPending > 0 ? "red" : "green" );
 	}
 	
 	@Override

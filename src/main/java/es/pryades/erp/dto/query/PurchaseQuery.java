@@ -19,6 +19,7 @@ public class PurchaseQuery extends Purchase
 	
 	private Long from_date;						
 	private Long to_date;
+	private Boolean for_payment;
 
 	public String getPeriodToString()
 	{

@@ -1,5 +1,7 @@
 package es.pryades.erp.vto.controlers;
 
+import com.vaadin.ui.Label;
+
 import es.pryades.erp.common.AppContext;
 import es.pryades.erp.common.BaseException;
 import es.pryades.erp.common.GenericControlerVto;
@@ -47,8 +49,12 @@ public class AccountControlerVto extends GenericControlerVto
 				result.setAccount_type( getContext().getString( "account.type." + account.getAccount_type() ) );
 				result.setName( account.getName() );
 				result.setNumber( account.getNumber() );
-				result.setBalance( first != null ? Utils.getFormattedCurrency( first.getBalance() ) : "" ); 
-				result.setCompany_name( account.getCompany() != null ? account.getCompany().getAlias() : "" ); 
+				result.setCompany_name( account.getCompany() != null ? account.getCompany().getAlias() : "" );
+				
+				boolean neggativeBalance = first != null ? first.getBalance() < 0 : false;
+				Label balance = new Label( first != null ? Utils.getFormattedCurrency( first.getBalance() ) : "" );
+				balance.setStyleName( neggativeBalance ? "red" : "green" );
+				result.setBalance( balance );
 			}
 			else
 			{
