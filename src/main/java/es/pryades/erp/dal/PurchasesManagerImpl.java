@@ -181,6 +181,10 @@ public class PurchasesManagerImpl extends BaseManagerImpl implements PurchasesMa
 		
 		cell = sheetRow.createCell( j++ );
         cell.setCellStyle(styleHeader);
+		cell.setCellValue( ctx.getString( "template.list.purchases.type" ) );
+
+		cell = sheetRow.createCell( j++ );
+        cell.setCellStyle(styleHeader);
 		cell.setCellValue( ctx.getString( "template.list.purchases.title" ) );
 
 		cell = sheetRow.createCell( j++ );
@@ -235,6 +239,9 @@ public class PurchasesManagerImpl extends BaseManagerImpl implements PurchasesMa
 			cell.setCellValue( purchase.getFormattedNumber() );
 			
 			cell = sheetRow.createCell( j++ );
+			cell.setCellValue( ctx.getString( "purchase.type." + purchase.getPurchase_type() ) );
+
+			cell = sheetRow.createCell( j++ );
 			cell.setCellValue( purchase.getTitle() );
 
 			cell = sheetRow.createCell( j++ );
@@ -281,6 +288,7 @@ public class PurchasesManagerImpl extends BaseManagerImpl implements PurchasesMa
 		sheetRow = sheet.createRow( i++ );
 		
 		j = 0;
+		cell = sheetRow.createCell( j++ );
 		cell = sheetRow.createCell( j++ );
 		cell = sheetRow.createCell( j++ );
 		cell = sheetRow.createCell( j++ );

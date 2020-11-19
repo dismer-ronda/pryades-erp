@@ -114,24 +114,24 @@ public class Purchase extends BaseDto
 		return Utils.getFormattedCurrency( getGrossPrice() );
 	}
 
-	public int getTaxRate()
+	public double getTaxRate()
   	{
-  		return (int)((net_tax / net_price) * 100);
+  		return Utils.roundClosestInt( ((net_tax / net_price) * 100.0) );
   	}
   	
 	public String getTaxRateAsString()
 	{
-		return Integer.toString( getTaxRate() );
+		return Double.toString( getTaxRate() );
 	}
 
-	public int getRetentionRate()
+	public double getRetentionRate()
   	{
-  		return (int)((net_retention / net_price) * 100);
+  		return Utils.roundDouble( ((net_retention / net_price) * 100.0), 2 );
   	}
   	
 	public String getRetentionRateAsString()
 	{
-		return Integer.toString( getRetentionRate() );
+		return Double.toString( getRetentionRate() );
 	}
 
 	public String getFormattedNumber() 

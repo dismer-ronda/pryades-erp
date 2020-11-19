@@ -911,6 +911,17 @@ public class Utils
 		return bd.doubleValue();
 	}
 
+	public static double roundClosestInt( double value )
+	{
+		double ceil = Math.ceil( value );
+		double floor = Math.floor( value );
+		
+		if ( ceil - value < value - floor )
+			return ceil;
+		
+		return floor;
+	}
+
 	public static double roundToNext( double value )
 	{
 		BigDecimal bd = new BigDecimal( value );
