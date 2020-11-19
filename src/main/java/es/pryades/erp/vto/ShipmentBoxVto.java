@@ -20,6 +20,7 @@ public class ShipmentBoxVto extends GenericVto
 	private Double width;						
 	private Double length;
 	private Double height;
+	private Double gross_weight;
     
 	public ShipmentBoxVto()
 	{

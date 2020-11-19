@@ -157,6 +157,7 @@ CREATE TABLE companies
 	language varchar(16) not null,
 	signature boolean not null default false, 	
 	type_company integer not null default 1,			-- 1: provider, 2: customer, 3:transporter, 4: insurer, 5: bank 	
+	logo bytea,
 
   	constraint pk_companies primary key( id ),
 
@@ -411,6 +412,7 @@ create table shipments_boxes_lines
 );
 alter table shipments_boxes_lines OWNER TO pryades;
 
+
 create table users_companies 
 (
 	id bigint not null,
@@ -503,7 +505,7 @@ create table accounts
 	account_type int not null,
   	name varchar(128) not null,
   	number varchar(128),
-  	balance real not null default 0,
+  	credit real not null,
 
 	ref_company bigint not null,
 	
@@ -527,6 +529,7 @@ create table transactions
 	ref_purchase bigint,			-- id de la compra
 	ref_invoice bigint,				-- id de la venta
 	ref_target bigint,				-- id de la cuenta asociada si es una transferencia
+	transfer bigint,				-- id de la transaccion  
 
   	ref_account bigint not null,
 
@@ -537,3 +540,19 @@ create table transactions
   	constraint fk_transactions_account foreign key (ref_account) references accounts(id)
 );
 alter table transactions OWNER TO pryades;
+
+create table shipments_attachments 
+(
+	id bigint not null,
+
+	ref_shipment bigint not null,
+
+	title varchar(64),
+	
+	data bytea,
+	
+  	constraint pk_shipments_attachments primary key( id ),
+
+  	constraint fk_shipments_attachments_shipment foreign key (ref_shipment) references shipments(id) on delete cascade
+);
+alter table shipments_attachments OWNER TO pryades;

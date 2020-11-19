@@ -134,6 +134,21 @@
 		order by companies_contacts.id asc
 	</select>
 
+	<select id="selectShipmentAttachments" parameterType="long" resultMap="mapShipmentAttachment">
+		select 
+			shipments_attachments.id,
+
+			shipments_attachments.ref_shipment,
+			shipments_attachments.title
+		
+		from shipments_attachments
+		 		
+		where 
+			shipments_attachments.ref_shipment = #{id}
+			
+		order by shipments_attachments.id asc
+	</select>
+	
 	<resultMap id="mapQuotationLine" type="es.pryades.erp.dto.QuotationLine">
 		<id property="id" column="id"/>
 		
@@ -230,6 +245,15 @@
 		<result property="status" column="status"/>
 	</resultMap>
 	
+	<resultMap id="mapShipmentAttachment" type="es.pryades.erp.dto.ShipmentAttachment">
+		<id property="id" column="id"/>
+		
+		<result property="ref_shipment" column="ref_shipment"/>
+		
+		<result property="title" column="title"/>
+	</resultMap>
+
+	
 	<resultMap id="mapShipment" type="es.pryades.erp.dto.Shipment">
 		<id property="id" column="id"/>
 		
@@ -263,6 +287,7 @@
 		<association property="user" javaType="es.pryades.erp.dto.User" resultMap="mapUser" columnPrefix="user_" />
 
 		<collection property="boxes" column="id" ofType="mapShipmentBox" select="selectShipmentBoxes"> </collection>
+		<collection property="attachments" column="id" ofType="mapShipmentAttachment" select="selectShipmentAttachments"> </collection>
 	</resultMap>
 
 	<sql id="es.pryades.erp.dal.ibatis.ShipmentMapper.fields">

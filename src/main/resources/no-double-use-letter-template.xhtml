@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
-	<title>$context.getString( "template.shipment.packing" ) $shipment.getFormattedNumber()</title>
+	<title>$context.getString( "template.ndbu.letter.title" ) $shipment.getFormattedNumber()</title>
 		
 	<meta name="author" content="pryades" />
 
@@ -33,7 +33,7 @@
 			}
 
 			*.text_regular_size {
-				font-size: 11px;
+				font-size: 14px;
 			}
 
 			*.text_left {
@@ -46,6 +46,15 @@
 
 			*.text_right {
 				text-align: right;
+			}
+
+			*.text_justified {
+				text-align: justify;
+  				text-align-last:initial;
+			}
+			
+			*.text_double_space {
+				line-height: 1.6;
 			}
 			
 			*.text_bold {
@@ -179,83 +188,36 @@
 			<td class="text_left">
 				<img src="$context.getLogoUrl()" width="256px"> </img> 
 			</td>
-			<td>
-				<div class="text_right titulo1">$context.getString( "template.shipment.packing" ).toUpperCase()</div>
-			</td>
 		</tr>
 	</table>
 
-	<table width="100%">
-		<tr>
-			<td width="50%" class="text_left vtop">
-				<div class="text_regular_size text_bold">$context.getString( "template.shipment.packing.issued" ):</div>
-				<div class="text_regular_size sangria">
-					$context.getCompanyDataAsHtml( $shipment.getUser() )
-				</div>
-			</td>
-			
-			<td width="50%" class="text_left vtop">
-				<div class="text_regular_size text_bold">$context.getString( "template.shipment.packing.send_to" ):</div>
-				<div class="text_regular_size sangria">
-					$shipment.getCustomerDataAsHtml( $context )
-				</div>
-			</td>
-		</tr>
-	</table>
+	<br/>
+	<br/>
+	<div class="text_regular_size text_right">$context.getString( "template.ndbu.letter.header") – $shipment.getDeparture_port()</div> 
+	<br/>
+	<br/>
+	<div class="text_regular_size text_left">$context.getString( "template.ndbu.letter.ref" )</div> 
+	<br/>
+	<br/>
 
-	<table width="100%" class="border_no_spacing">
+	<div class="text_regular_size text_left">$context.getString( "template.ndbu.letter.greetings" )</div> 
+	<br/>
 
-		<tr>
-			<td width="" class="vtop borde">
-				<div class="padding_all text_regular_size">
-					<span style="font-weight:bold">$context.getString( "template.shipment.packing.number" ):</span>
-					$shipment.getFormattedNumber()
-				</div>
-			</td>
-			
-			<td width="141px" class="vtop borde">
-				<div class="padding_all text_regular_size ">
-					<span style="font-weight:bold">$context.getString( "template.shipment.packing.date" ): </span>
-					$shipment.getFormattedDate()
-				</div>
-			</td>
-			
-			<td width="176px" class="vtop borde">
-				<div class="padding_all text_regular_size">
-					<span style="font-weight:bold">$context.getString( "template.shipment.packing.shipment_date" ): </span>
-					$shipment.getFormattedDepartureDate()
-				</div>
-			</td>
-		</tr>
-	</table>
-
-	<table width="100%" class="border_no_spacing">
-		<tr>
-			<td width="50%" class="vtop borde">
-				<div class="padding_all text_regular_size">
-					<span style="font-weight:bold">$context.getString( "template.shipment.packing.consigned" ):</span>
-					$shipment.getConsignee().getName()
-				</div>
-			</td>
-			
-			<td width="50%" class="vtop borde">
-				<div class="padding_all text_regular_size">
-					<span style="font-weight:bold">$context.getString( "template.shipment.packing.tracking" ):</span>
-					$shipment.getCarrier() - $shipment.getTracking()
-				</div>
-			</td>
-		</tr>
-	</table>
-	
-	$shipment.getPackingTable( $context )	
-	
 	<table class="" width="100%">
 		<tr>
-			<td class="text_center">
-				<img src="$context.getSignatureUrl( $shipment.getUser() )" width="4cm"> </img> 
+			<td class="text_left">
+				<div class="text_regular_size text_justified text_double_space">
+					$report.getLetterBody() 
+				</div>
 			</td>
 		</tr>
 	</table>
+
+	<img src="$context.getSignatureUrl( $shipment.getUser() )" width="4cm"> </img> 
+
+	<div class="text_regular_size text_left">
+		$context.getCompanyDataAsHtml( $shipment.getUser() )
+	</div>
 
 </body>
 

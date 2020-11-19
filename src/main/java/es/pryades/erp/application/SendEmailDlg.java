@@ -121,10 +121,10 @@ public class SendEmailDlg extends Window
 
 		checksLines = new ArrayList<CheckBox>();
 
-		for ( Attachment customer: attachments )
+		for ( Attachment att : attachments )
 		{
-			CheckBox checkLine = new CheckBox( customer.getName() );
-			checkLine.setData( customer );
+			CheckBox checkLine = new CheckBox( att.getName() );
+			checkLine.setData( att );
 			checkLine.setValue( true ); 
 
 			col.addComponent( checkLine );

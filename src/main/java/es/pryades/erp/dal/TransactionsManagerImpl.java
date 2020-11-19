@@ -514,7 +514,6 @@ public class TransactionsManagerImpl extends BaseManagerImpl implements Transact
 		query.setOrderby( "id" );
 		query.setOrder( "desc" );
 
-		@SuppressWarnings("resource")
 		Workbook workbook = new XSSFWorkbook();
 		
 		Sheet sheet = workbook.createSheet();

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="es.pryades.erp.dal.ibatis.ShipmentAttachmentMapper">
+
+	<sql id="es.pryades.erp.dal.ibatis.ShipmentAttachmentMapper.fields">
+		shipments_attachments.id,
+		
+		shipments_attachments.ref_shipment,
+
+		shipments_attachments.title
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.ShipmentAttachmentMapper.joins">
+	</sql>
+
+	<sql id="es.pryades.erp.dal.ibatis.ShipmentAttachmentMapper.where">
+		<where>
+			<if test="ref_shipment != null">
+				AND shipments_attachments.ref_shipment = #{ref_shipment}
+			</if>
+		</where>
+	</sql>
+	
+	<sql id="es.pryades.erp.dal.ibatis.ShipmentAttachmentMapper.orderby">
+		shipments_attachments.id
+
+		<choose>
+			<when test="order.equalsIgnoreCase( 'asc' )">
+				asc
+			</when>
+			<otherwise>
+				desc
+			</otherwise>
+		</choose>
+	</sql>
+	
+	<select id="getNumberOfRows" parameterType="es.pryades.erp.dto.Query" resultType="long">
+		select 
+			count(1) 
+		from 
+			shipments_attachments
+
+    	<include refid="es.pryades.erp.dal.ibatis.ShipmentAttachmentMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.ShipmentAttachmentMapper.where" />
+	</select>
+
+	<select id="getPage" parameterType="es.pryades.erp.dto.Query" resultType="es.pryades.erp.dto.ShipmentAttachment">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.ShipmentAttachmentMapper.fields" />
+		
+		from
+			shipments_attachments
+		
+   		<include refid="es.pryades.erp.dal.ibatis.ShipmentAttachmentMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.ShipmentAttachmentMapper.where" />
+
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.ShipmentAttachmentMapper.orderby" />
+
+		LIMIT #{pageSize} OFFSET (#{pageSize} * (#{pageNumber} - 1))
+	</select>
+
+	<select id="getRows" parameterType="es.pryades.erp.dto.Query" resultType="es.pryades.erp.dto.ShipmentAttachment">
+		select 
+			<include refid="es.pryades.erp.dal.ibatis.ShipmentAttachmentMapper.fields" />
+		
+		from
+			shipments_attachments
+		
+    	<include refid="es.pryades.erp.dal.ibatis.ShipmentAttachmentMapper.joins" />
+		<include refid="es.pryades.erp.dal.ibatis.ShipmentAttachmentMapper.where" />
+		
+		order by 
+			<include refid="es.pryades.erp.dal.ibatis.ShipmentAttachmentMapper.orderby" />
+	</select>
+
+	<select id="getRow" parameterType="es.pryades.erp.dto.ShipmentAttachment" resultType="es.pryades.erp.dto.ShipmentAttachment">
+		select
+			<include refid="es.pryades.erp.dal.ibatis.ShipmentAttachmentMapper.fields" />
+			, 
+			shipments_attachments.data
+		
+		from
+			shipments_attachments
+		
+		<include refid="es.pryades.erp.dal.ibatis.ShipmentAttachmentMapper.joins" />
+		
+		where shipments_attachments.id = #{id}
+	</select>
+
+	<insert id="addRow" parameterType="es.pryades.erp.dto.ShipmentAttachment">
+
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			SELECT nextval('gendat');
+		</selectKey>
+
+		insert into shipments_attachments
+		(
+			id,
+
+			ref_shipment,
+			
+			title,
+			data
+		)
+		values
+		(
+			#{id},
+			
+			#{ref_shipment},
+			#{title},
+		
+			#{data}
+		)
+	</insert>
+
+	<update id="setRow" parameterType="es.pryades.erp.dto.ShipmentAttachment">
+		update shipments_attachments set
+			<if test="data != null">
+				data=#{data}, 
+	        </if>
+			ref_shipment=#{ref_shipment},
+			title=#{title}
+		where id = #{id}
+	</update>
+
+	<update id="delRow" parameterType="es.pryades.erp.dto.ShipmentAttachment">
+		delete from shipments_attachments where id = #{id}
+	</update>
+
+</mapper>

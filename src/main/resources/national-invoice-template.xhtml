@@ -54,7 +54,7 @@
 
 			*.text_red {
 				color: red;
-			}rows
+			}
 			
 			*.vtop {
 				vertical-align: top;
@@ -92,6 +92,23 @@
 			*.padding_top {
 				padding-top: 5px;
 			}
+
+			*.padding_all {
+				padding-right: 6px;
+				padding-left: 6px;
+				padding-bottom: 6px;
+				padding-top: 6px;
+			}
+
+			*.padding_h {
+				padding-right: 6px;
+				padding-left: 6px;
+			}
+			
+			*.padding_v {
+				padding-bottom: 6px;
+				padding-top: 6px;
+			}
 				
 			*.borde {
 				border: 0.5px solid black;
@@ -105,14 +122,6 @@
 				border-spacing: 0px;
 				padding: 0px;
 				border-collapse: collapse;
-			}
-
-			*.block {
-				display: inline-block;
-			}
-			
-			#block_container > div {
-   				display: inline-block;
 			}
 
 			@page {
@@ -161,9 +170,9 @@
 			<td>
 			</td>
 			<td class="text_right">
-				<div id="block_container">
-					<div class="text_regular_size padding_bottom text_bold">$context.getString( "template.invoice.order.reference" ): </div>
-					<div class="text_regular_size padding_bottom">$invoice.getQuotation().getReference_order()</div>
+				<div class="text_regular_size padding_bottom">
+					<span style="font-weight:bold">$context.getString( "template.invoice.order.reference" ): </span>
+					$invoice.getQuotation().getReference_order()
 				</div>
 			</td>
 		</tr>
@@ -191,16 +200,16 @@
 
 		<tr>
 			<td width="50%" class="vtop">
-				<div id="block_container">
-					<div class="text_regular_size padding_bottom text_bold">$context.getString( "template.invoice.date" ): </div>
-					<div class="text_regular_size padding_bottom">$invoice.getFormattedDate()</div>
+				<div class="text_regular_size padding_bottom">
+					<span style="font-weight:bold">$context.getString( "template.invoice.date" ): </span>
+					$invoice.getFormattedDate()
 				</div>
 			</td>
 			
 			<td width="50%" class="vtop">
-				<div id="block_container">
-					<div class="text_regular_size padding_bottom text_bold">$context.getString( "template.invoice.number" ): </div>
-					<div class="text_regular_size padding_bottom">$invoice.getFormattedNumber()</div>
+				<div class="text_regular_size padding_bottom">
+					<span style="font-weight:bold">$context.getString( "template.invoice.number" ): </span>
+					$invoice.getFormattedNumber()
 				</div>
 			</td>
 		</tr>
@@ -247,9 +256,9 @@
 					<div class="text_regular_size text_bold padding_left padding_bottom">$line.getQuotation_line().getTitleAsHtml()</div>
 					<div class="text_regular_size sangria padding_bottom">$line.getQuotation_line().getDescriptionAsHtml()</div>
 					#if( !$line.getQuotation_line().getOrigin().isEmpty() )
-					<div class="padding_left" id="block_container">
-						<div class="text_regular_size padding_bottom text_bold">$context.getString( "template.invoice.origin" ): </div>
-						<div class="text_regular_size padding_bottom">$line.getQuotation_line().getOrigin()</div>
+					<div class="text_regular_size padding_bottom padding_left">
+						<span style="font-weight:bold">$context.getString( "template.invoice.origin" ): </span> 
+						$line.getQuotation_line().getOrigin()
 					</div>
 					#end
 				</td>

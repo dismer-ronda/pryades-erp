@@ -67,7 +67,7 @@ public class ShipmentsBoxesConfig extends PagedContent implements ModalParent
 	@Override
 	public String[] getVisibleCols()
 	{
-		return new String[]{ "label", "box_type", "length", "width", "height" };
+		return new String[]{ "label", "box_type", "length", "width", "height", "gross_weight" };
 	}
 
 	public String[] getSortableCols()

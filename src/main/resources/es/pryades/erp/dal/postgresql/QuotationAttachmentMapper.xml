@@ -24,7 +24,7 @@
 	</sql>
 	
 	<sql id="es.pryades.erp.dal.ibatis.QuotationAttachmentMapper.orderby">
-		quotations_attachments.line_order
+		quotations_attachments.id
 
 		<choose>
 			<when test="order.equalsIgnoreCase( 'asc' )">

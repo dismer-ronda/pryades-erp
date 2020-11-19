@@ -109,8 +109,7 @@
 				padding-bottom: 6px;
 				padding-top: 6px;
 			}
-			
-				
+
 			*.borde {
 				border: 0.5px solid black;
 				border-spacing: 0px;
@@ -123,14 +122,6 @@
 				border-spacing: 0px;
 				padding: 0px;
 				border-collapse: collapse;
-			}
-
-			*.block {
-				display: inline-block;
-			}
-			
-			#block_container > div {
-   				display: inline-block;
 			}
 
 			@page {
@@ -180,9 +171,9 @@
 			<td>
 			</td>
 			<td class="text_right">
-				<div id="block_container">
-					<div class="text_regular_size padding_bottom text_bold">$context.getString( "template.quotation.request.reference" ): </div>
-					<div class="text_regular_size padding_bottom">$quotation.getReference_request()</div>
+				<div class="text_regular_size padding_bottom">
+					<span style="font-weight:bold">$context.getString( "template.quotation.request.reference" ): </span>
+					$quotation.getReference_request()
 				</div>
 			</td>
 		</tr>
@@ -199,8 +190,7 @@
 			</td>
 			
 			<td width="50%" class="text_left vtop">
-
-				<div class="text_regular_size text_bold">$context.getString( "template.quotation.to" ):</div>
+				<div class="ttrueext_regular_size text_bold">$context.getString( "template.quotation.to" ):</div>
 				<div class="text_regular_size sangria">
 					$quotation.getCustomerDataAsHtml( $context )
 				</div>
@@ -211,16 +201,16 @@
 
 		<tr>
 			<td width="50%" class="vtop">
-				<div id="block_container">
-					<div class="text_regular_size padding_bottom text_bold">$context.getString( "template.quotation.date" ): </div>
-					<div class="text_regular_size padding_bottom">$quotation.getFormattedDate()</div>
+				<div class="text_regular_size padding_bottom">
+					<span style="font-weight:bold">$context.getString( "template.quotation.date" ): </span>
+					$quotation.getFormattedDate()
 				</div>
 			</td>
 			
 			<td width="50%" class="vtop">
-				<div id="block_container">
-					<div class="text_regular_size padding_bottom text_bold">$context.getString( "template.quotation.number" ): </div>
-					<div class="text_regular_size padding_bottom">$quotation.getFormattedNumber()</div>
+				<div class="text_regular_size padding_bottom">
+					<span style="font-weight:bold">$context.getString( "template.quotation.number" ): </span>
+					$quotation.getFormattedNumber()
 				</div>
 			</td>
 		</tr>

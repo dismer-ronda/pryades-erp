@@ -40,7 +40,7 @@
 		where 
 			quotations_attachments.ref_quotation = #{id}
 			
-		order by quotations_attachments.title asc
+		order by quotations_attachments.id asc
 	</select>
 
 	<select id="selectQuotationLines" parameterType="long" resultMap="mapQuotationLine">

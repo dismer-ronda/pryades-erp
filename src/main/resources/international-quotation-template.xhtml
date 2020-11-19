@@ -111,7 +111,7 @@
 			}
 
 			*.borde {
-				border: 0.5px solid black;
+				border: 1px solid black;
 				border-spacing: 0px;
 				border-collapse: collapse;
 				padding: 0px;
@@ -122,14 +122,6 @@
 				border-spacing: 0px;
 				padding: 0px;
 				border-collapse: collapse;
-			}
-
-			*.block {
-				display: inline-block;
-			}
-			
-			#block_container > div {
-   				display: inline-block;
 			}
 
 			@page {
@@ -179,9 +171,9 @@
 			<td>
 			</td>
 			<td class="text_right">
-				<div id="block_container">
-					<div class="text_regular_size padding_bottom text_bold">$context.getString( "template.quotation.request.reference" ): </div>
-					<div class="text_regular_size padding_bottom">$quotation.getReference_request()</div>
+				<div class="text_regular_size padding_bottom">
+					<span style="font-weight:bold">$context.getString( "template.quotation.request.reference" ): </span>
+					$quotation.getReference_request()
 				</div>
 			</td>
 		</tr>
@@ -198,7 +190,6 @@
 			</td>
 			
 			<td width="50%" class="text_left vtop">
-
 				<div class="ttrueext_regular_size text_bold">$context.getString( "template.quotation.to" ):</div>
 				<div class="text_regular_size sangria">
 					$quotation.getCustomerDataAsHtml( $context )
@@ -210,16 +201,16 @@
 
 		<tr>
 			<td width="50%" class="vtop">
-				<div id="block_container">
-					<div class="text_regular_size padding_bottom text_bold">$context.getString( "template.quotation.date" ): </div>
-					<div class="text_regular_size padding_bottom">$quotation.getFormattedDate()</div>
+				<div class="text_regular_size padding_bottom">
+					<span style="font-weight:bold">$context.getString( "template.quotation.date" ): </span>
+					$quotation.getFormattedDate()
 				</div>
 			</td>
 			
 			<td width="50%" class="vtop">
-				<div id="block_container">
-					<div class="text_regular_size padding_bottom text_bold">$context.getString( "template.quotation.number" ): </div>
-					<div class="text_regular_size padding_bottom">$quotation.getFormattedNumber()</div>
+				<div class="text_regular_size padding_bottom">
+					<span style="font-weight:bold">$context.getString( "template.quotation.number" ): </span>
+					$quotation.getFormattedNumber()
 				</div>
 			</td>
 		</tr>
@@ -268,9 +259,9 @@
 					<div class="text_regular_size text_bold padding_left padding_top">$line.getTitleAsHtml()</div>
 					<div class="text_regular_size sangria padding_bottom">$line.getDescriptionAsHtml()</div>
 					#if( !$line.getOrigin().isEmpty() )
-					<div class="padding_left" id="block_container">
-						<div class="text_regular_size padding_bottom text_bold">$context.getString( "template.quotation.origin" ): </div>
-						<div class="text_regular_size padding_bottom">$line.getOrigin()</div>
+					<div class="text_regular_size padding_bottom">
+						<span style="font-weight:bold">$context.getString( "template.quotation.origin" ): </span>
+						$line.getOrigin()
 					</div>
 					#end
 				</td>

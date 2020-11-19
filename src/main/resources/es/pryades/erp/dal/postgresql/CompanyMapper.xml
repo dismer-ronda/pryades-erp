@@ -110,7 +110,7 @@
 	<sql id="es.pryades.erp.dal.ibatis.CompanyMapper.where">
 		<where>
 			<if test="alias != null">
-				AND ( companies.alias like #{alias} OR companies.name like #{alias} ) 
+				AND ( LOWER(companies.alias) like LOWER(#{alias}) OR LOWER(companies.name) like LOWER(#{alias}) ) 
 			</if>
 			<if test="tax_id != null">
 				AND companies.tax_id = #{tax_id}

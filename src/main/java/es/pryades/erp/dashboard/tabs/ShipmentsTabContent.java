@@ -296,17 +296,11 @@ public class ShipmentsTabContent extends PagedContent implements ModalParent
 
 	private void fillComboStatus()
 	{
-		comboStatus.addItem( Shipment.STATUS_CREATED );
-		comboStatus.setItemCaption( Shipment.STATUS_CREATED, getContext().getString( "shipment.status." + Shipment.STATUS_CREATED ) );
-
-		comboStatus.addItem( Shipment.STATUS_SENT );
-		comboStatus.setItemCaption( Shipment.STATUS_SENT, getContext().getString( "shipment.status." + Shipment.STATUS_SENT ) );
-
-		comboStatus.addItem( Shipment.STATUS_TRANSIT );
-		comboStatus.setItemCaption( Shipment.STATUS_TRANSIT, getContext().getString( "shipment.status." + Shipment.STATUS_TRANSIT ) );
-
-		comboStatus.addItem( Shipment.STATUS_DELIVERED );
-		comboStatus.setItemCaption( Shipment.STATUS_DELIVERED, getContext().getString( "shipment.status." + Shipment.STATUS_DELIVERED ) );
+		for ( int i = Shipment.STATUS_CREATED; i <= Shipment.STATUS_DELIVERED; i++ )
+		{
+			comboStatus.addItem( i );
+			comboStatus.setItemCaption( i, getContext().getString( "shipment.status." + i ) );
+		}
 	}
 
 	public void refreshCustomers()

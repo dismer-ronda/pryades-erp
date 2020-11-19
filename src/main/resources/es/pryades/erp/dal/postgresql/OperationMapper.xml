@@ -605,7 +605,7 @@
 				AND users_companies.ref_user = #{ref_user}    
 	        </if>
 			<if test="title != null">
-				AND operations.title like #{title}    
+				AND LOWER(operations.title) like LOWER(#{title})    
 	        </if>
 			<if test="id != null">
 				AND operations.id = #{id}    

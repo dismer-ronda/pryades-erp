@@ -51,6 +51,7 @@ public class ShipmentBoxControlerVto extends GenericControlerVto
 				result.setLength( ((ShipmentBox) dtoObj).getLength());
 				result.setWidth( ((ShipmentBox) dtoObj).getWidth());
 				result.setHeight( ((ShipmentBox) dtoObj).getHeight());
+				result.setGross_weight( ((ShipmentBox) dtoObj).getGrossWeight() );
 			}
 			else
 			{

@@ -120,7 +120,7 @@
     		}
 				
 			*.borde {
-				border: 0.1px solid black;
+				border: 0.5px solid black;
 				border-spacing: 0px;
 				border-collapse: collapse;
 				padding: 0px;
@@ -195,7 +195,6 @@
 			</td>
 			
 			<td width="50%" class="text_left vtop">
-
 				<div class="text_regular_size text_bold">$context.getString( "template.shipment.packing.send_to" ):</div>
 				<div class="text_regular_size sangria">
 					$shipment.getCustomerDataAsHtml( $context )
@@ -208,30 +207,30 @@
 
 		<tr>
 			<td width="" class="vtop borde">
-				<div id="block_container">
-					<div class="padding_all text_regular_size text_bold">$context.getString( "template.shipment.packing.number" ): </div>
-					<div class="padding_all text_regular_size">$shipment.getFormattedNumber()</div>
+				<div class="padding_all text_regular_size">
+					<span style="font-weight:bold">$context.getString( "template.shipment.packing.number" ):</span>
+					$shipment.getFormattedNumber()
 				</div>
 			</td>
 			
 			<td width="" class="vtop borde">
-				<div id="block_container">
-					<div class="padding_all text_regular_size text_bold">$context.getString( "template.shipment.packing.incoterms" ): </div>
-					<div class="padding_all text_regular_size">$shipment.getIncoterms()</div>
+				<div class="padding_all text_regular_size">
+					<span style="font-weight:bold">$context.getString( "template.shipment.packing.incoterms" ):</span>
+					$shipment.getIncoterms()
 				</div>
 			</td>
 
 			<td width="141px" class="vtop borde">
-				<div id="block_container">
-					<div class="padding_all text_regular_size text_bold">$context.getString( "template.shipment.packing.date" ): </div>
-					<div class="padding_all text_regular_size ">$shipment.getFormattedDate()</div>
+				<div class="padding_all text_regular_size ">
+					<span style="font-weight:bold">$context.getString( "template.shipment.packing.date" ): </span>
+					$shipment.getFormattedDate()
 				</div>
 			</td>
 			
 			<td width="176px" class="vtop borde">
-				<div id="block_container">
-					<div class="padding_all text_regular_size text_bold">$context.getString( "template.shipment.packing.shipment_date" ): </div>
-					<div class="padding_all text_regular_size">$shipment.getFormattedDepartureDate()</div>
+				<div class="padding_all text_regular_size">
+					<span style="font-weight:bold">$context.getString( "template.shipment.packing.shipment_date" ): </span>
+					$shipment.getFormattedDepartureDate()
 				</div>
 			</td>
 		</tr>
@@ -239,17 +238,17 @@
 
 	<table width="100%" class="border_no_spacing">
 		<tr>
-			<td width="" class="vtop borde">
-				<div id="block_container">
-					<div class="padding_all text_regular_size text_bold">$context.getString( "template.shipment.packing.consigned" ): </div>
-					<div class="padding_all text_regular_size">$shipment.getConsignee().getName()</div>
+			<td width="50%" class="vtop borde">
+				<div class="padding_all text_regular_size">
+					<span style="font-weight:bold">$context.getString( "template.shipment.packing.consigned" ):</span>
+					$shipment.getConsignee().getName()
 				</div>
 			</td>
 			
-			<td width="317px" class="vtop borde">
-				<div id="block_container">
-					<div class="padding_all text_regular_size text_bold">$context.getString( "template.shipment.packing.tracking" ): </div>
-					<div class="padding_all text_regular_size">$shipment.getCarrier() - $shipment.getTracking()</div>
+			<td width="50%" class="vtop borde">
+				<div class="padding_all text_regular_size">
+					<span style="font-weight:bold">$context.getString( "template.shipment.packing.tracking" ):</span>
+					$shipment.getCarrier() - $shipment.getTracking()
 				</div>
 			</td>
 		</tr>

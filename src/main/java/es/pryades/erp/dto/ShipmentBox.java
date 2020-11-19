@@ -201,33 +201,14 @@ public class ShipmentBox extends BaseDto
 
 		if ( getLabel_type().equals( LABEL_DETAIL ) )
 		{
-			String logo = XmlUtils.getDiv( "", "<img src=\"" + ctx.getLogoUrl() + "\" width=\"" + colWidth / 2 + "mm\"> </img>" ) ;
-
-			String from = XmlUtils.getBlockDivWithClass( "text_left indent", 
-					XmlUtils.getDiv( "", ctx.getString( "words.from" ) + ":&nbsp;" ) +
-					XmlUtils.getDiv( "", ctx.getOwner().getName() ) );
-
-			String to = XmlUtils.getBlockDivWithClass( "text_left indent", 
-					XmlUtils.getDiv( "", ctx.getString( "words.to" ) + ":&nbsp;" ) +
-					XmlUtils.getDiv( "", shipment.getConsignee().getName() ) );
-
-			String notify = XmlUtils.getBlockDivWithClass( "text_left indent", 
-					XmlUtils.getDiv( "", ctx.getString( "template.shipment.labels.notify" ) + ":&nbsp;" ) +
-					XmlUtils.getDiv( "", shipment.getNotify_contact().getName() ) );
-
-			String phone = XmlUtils.getBlockDivWithClass( "text_left indent", 
-					XmlUtils.getDiv( "", ctx.getString( "template.shipment.labels.phone" ) + ":&nbsp;" ) +
-					XmlUtils.getDiv( "", shipment.getNotify_contact().getPhone() ) );
-
-			String number = XmlUtils.getBlockDiv( 
-					XmlUtils.getDiv( "", ctx.getString( "shipment.box.type." + getBox_type() ) + " " + count.get( getBox_type() ) + "&nbsp;/&nbsp;" ) +
-					XmlUtils.getDiv( "", "" + totals.get( getBox_type() ) ) );
-
-			String references = XmlUtils.getBlockDivWithClass( "text_left indent",  
-					XmlUtils.getDiv( "", ctx.getString( "template.shipment.labels.reference" ) + ":&nbsp;" ) +
-					XmlUtils.getDiv( "", shipment.getOrders( ctx ) ) );
-			
-			String weight = XmlUtils.getDiv( "text_left indent", ctx.getString( "template.shipment.labels.weight" ) + ":" );
+			String logo 		= XmlUtils.getDiv( "", "<img src=\"" + ctx.getLogoUrl() + "\" width=\"" + colWidth / 2  + "mm\"> </img>" ) ;
+			String from 		= XmlUtils.getDiv( "text_left indent", ctx.getString( "words.from" ) + ": " + ctx.getOwner().getName() );
+			String to 			= XmlUtils.getDiv( "text_left indent", ctx.getString( "words.to" ) + ": " + shipment.getConsignee().getName() );
+			String notify 		= XmlUtils.getDiv( "text_left indent", ctx.getString( "template.shipment.labels.notify" ) + ": " + shipment.getNotify_contact().getName() );
+			String phone 		= XmlUtils.getDiv( "text_left indent", ctx.getString( "template.shipment.labels.phone" ) + ": " + shipment.getNotify_contact().getPhone() );
+			String references 	= XmlUtils.getDiv( "text_left indent", ctx.getString( "template.shipment.labels.reference" ) + ": " + shipment.getOrders( ctx ) );
+			String weight 		= XmlUtils.getDiv( "text_left indent", ctx.getString( "template.shipment.labels.weight" ) + ":" );
+			String number 		= XmlUtils.getDiv( "", ctx.getString( "shipment.box.type." + getBox_type() ) + count.get( getBox_type() ) + "&nbsp;/&nbsp;" + totals.get( getBox_type() ) );
 
 			for ( int i = 0; i < copies; i++ )
 			{
@@ -253,18 +234,10 @@ public class ShipmentBox extends BaseDto
 
 		if ( getLabel_type().equals( LABEL_SIMPLE ) )
 		{
-			String contents = !getLabel().isEmpty() ? XmlUtils.getBlockDiv( 
-					XmlUtils.getDiv( "", ctx.getString( "template.shipment.labels.contents" ) + ":&nbsp;" ) +
-					XmlUtils.getDiv( "", "" + getLabel() ) ) : "";
-
-			String weight = XmlUtils.getBlockDiv( 
-					XmlUtils.getDiv( "", ctx.getString( "template.shipment.labels.weight" ) + ":&nbsp;" ) +
-					XmlUtils.getDiv( "", "" + getGrossWeight() + "&nbsp;kg" ) );
-
-			String number = XmlUtils.getBlockDiv( 
-					XmlUtils.getDiv( "", ctx.getString( "shipment.box.type." + getBox_type() ) + "&nbsp;" + count.get( getBox_type() ) + "&nbsp;/&nbsp;" ) +
-					XmlUtils.getDiv( "", "" + totals.get( getBox_type() ) ) );
-
+			String contents = !getLabel().isEmpty() ? XmlUtils.getDiv( "", ctx.getString( "template.shipment.labels.contents" ) + ":&nbsp" + getLabel() ) : "";
+			String weight = XmlUtils.getDiv( "", ctx.getString( "template.shipment.labels.weight" ) + ":&nbsp;" + getGrossWeight() + "&nbsp;kg" );
+			String number = XmlUtils.getDiv( "", ctx.getString( "shipment.box.type." + getBox_type() ) + "&nbsp;" + count.get( getBox_type() ) + "&nbsp;/&nbsp;" + totals.get( getBox_type() ) );
+			
 			for ( int i = 0; i < copies; i++ )
 				labels.add( contents + weight + "<br/><br/>" + number);
 		}
@@ -279,33 +252,14 @@ public class ShipmentBox extends BaseDto
 
 		if ( getLabel_type().equals( LABEL_DETAIL ) )
 		{
-			String logo = XmlUtils.getDiv( "", "<img src=\"" + ctx.getLogoUrl() + "\" width=\"" + colWidth / 2  + "mm\"> </img>" ) ;
-
-			String from = XmlUtils.getBlockDivWithClass( "text_left indent", 
-					XmlUtils.getDiv( "", ctx.getString( "words.from" ) + ":&nbsp;" ) +
-					XmlUtils.getDiv( "", ctx.getOwner().getName() ) );
-
-			String to = XmlUtils.getBlockDivWithClass( "text_left indent", 
-					XmlUtils.getDiv( "", ctx.getString( "words.to" ) + ":&nbsp;" ) +
-					XmlUtils.getDiv( "", shipment.getConsignee().getName() ) );
-
-			String notify = XmlUtils.getBlockDivWithClass( "text_left indent", 
-					XmlUtils.getDiv( "", ctx.getString( "template.shipment.labels.notify" ) + ":&nbsp;" ) +
-					XmlUtils.getDiv( "", shipment.getNotify_contact().getName() ) );
-
-			String phone = XmlUtils.getBlockDivWithClass( "text_left indent", 
-					XmlUtils.getDiv( "", ctx.getString( "template.shipment.labels.phone" ) + ":&nbsp;" ) +
-					XmlUtils.getDiv( "", shipment.getNotify_contact().getPhone() ) );
-
-			String number = XmlUtils.getBlockDiv( 
-					XmlUtils.getDiv( "", ctx.getString( "shipment.box.type." + getBox_type() ) + " " + count.get( getBox_type() ) + "&nbsp;/&nbsp;" ) +
-					XmlUtils.getDiv( "", "" + totals.get( getBox_type() ) ) );
-
-			String references = XmlUtils.getBlockDivWithClass( "text_left indent",  
-					XmlUtils.getDiv( "", ctx.getString( "template.shipment.labels.reference" ) + ":&nbsp;" ) +
-					XmlUtils.getDiv( "", shipment.getOrders( ctx ) ) );
-			
-			String weight = XmlUtils.getDiv( "text_left indent", ctx.getString( "template.shipment.labels.weight" ) + ":" );
+			String logo 		= XmlUtils.getDiv( "", "<img src=\"" + ctx.getLogoUrl() + "\" width=\"" + colWidth / 2  + "mm\"> </img>" ) ;
+			String from 		= XmlUtils.getDiv( "text_left indent", ctx.getString( "words.from" ) + ": " + ctx.getOwner().getName() );
+			String to 			= XmlUtils.getDiv( "text_left indent", ctx.getString( "words.to" ) + ": " + shipment.getConsignee().getName() );
+			String notify 		= XmlUtils.getDiv( "text_left indent", ctx.getString( "template.shipment.labels.notify" ) + ": " + shipment.getNotify_contact().getName() );
+			String phone 		= XmlUtils.getDiv( "text_left indent", ctx.getString( "template.shipment.labels.phone" ) + ": " + shipment.getNotify_contact().getPhone() );
+			String references 	= XmlUtils.getDiv( "text_left indent", ctx.getString( "template.shipment.labels.reference" ) + ": " + shipment.getOrders( ctx ) );
+			String weight 		= XmlUtils.getDiv( "text_left indent", ctx.getString( "template.shipment.labels.weight" ) + ":" );
+			String number 		= XmlUtils.getDiv( "", ctx.getString( "shipment.box.type." + getBox_type() ) + count.get( getBox_type() ) + "&nbsp;/&nbsp;" + totals.get( getBox_type() ) );
 
 			for ( int i = 0; i < copies; i++ )
 			{
@@ -322,17 +276,9 @@ public class ShipmentBox extends BaseDto
 		}
 		else if ( getLabel_type().equals( LABEL_SIMPLE ) )
 		{
-			String contents = !getLabel().isEmpty() ? XmlUtils.getBlockDiv( 
-					XmlUtils.getDiv( "", ctx.getString( "template.shipment.labels.contents" ) + ":&nbsp;" ) +
-					XmlUtils.getDiv( "", "" + getLabel() ) ) : "";
-
-			String weight = XmlUtils.getBlockDiv( 
-					XmlUtils.getDiv( "", ctx.getString( "template.shipment.labels.weight" ) + ":&nbsp;" ) +
-					XmlUtils.getDiv( "", "" + getGrossWeight() + "&nbsp;kg" ) );
-
-			String number = XmlUtils.getBlockDiv( 
-					XmlUtils.getDiv( "", ctx.getString( "shipment.box.type." + getBox_type() ) + "&nbsp;" + count.get( getBox_type() ) + "&nbsp;/&nbsp;" ) +
-					XmlUtils.getDiv( "", "" + totals.get( getBox_type() ) ) );
+			String contents = !getLabel().isEmpty() ? XmlUtils.getDiv( "", ctx.getString( "template.shipment.labels.contents" ) + ":&nbsp" + getLabel() ) : "";
+			String weight = XmlUtils.getDiv( "", ctx.getString( "template.shipment.labels.weight" ) + ":&nbsp;" + getGrossWeight() + "&nbsp;kg" );
+			String number = XmlUtils.getDiv( "", ctx.getString( "shipment.box.type." + getBox_type() ) + "&nbsp;" + count.get( getBox_type() ) + "&nbsp;/&nbsp;" + totals.get( getBox_type() ) );
 
 			for ( int i = 0; i < copies; i++ )
 				labels.add( contents + weight + "<br/><br/>" + number);

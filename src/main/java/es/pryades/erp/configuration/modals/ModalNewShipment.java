@@ -14,6 +14,8 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.PopupDateField;
 import com.vaadin.ui.TextArea;
@@ -21,8 +23,10 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.Window;
 
 import es.pryades.erp.application.SelectLabelsConfigurationDlg;
+import es.pryades.erp.application.SendEmailDlg;
 import es.pryades.erp.application.ShowExternalUrlDlg;
 import es.pryades.erp.common.AppContext;
+import es.pryades.erp.common.Attachment;
 import es.pryades.erp.common.Authorization;
 import es.pryades.erp.common.BaseException;
 import es.pryades.erp.common.CalendarUtils;
@@ -35,6 +39,7 @@ import es.pryades.erp.dto.BaseDto;
 import es.pryades.erp.dto.Company;
 import es.pryades.erp.dto.CompanyContact;
 import es.pryades.erp.dto.Shipment;
+import es.pryades.erp.dto.ShipmentAttachment;
 import es.pryades.erp.dto.UserCompany;
 import es.pryades.erp.dto.UserDefault;
 import es.pryades.erp.dto.query.CompanyContactQuery;
@@ -86,6 +91,8 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 	private TextField editCarrier;
 	private TextField editTracking;
 	private ComboBox comboStatus;
+	
+	private HorizontalLayout rowAttachments;
 	
 	private UserDefault default_consignee;
 	private UserDefault default_notify;
@@ -332,12 +339,8 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 		row4.setSpacing( true );
 		row4.addComponent( comboConsignee );
 		row4.addComponent( comboConsigneeContacts );
-
-		HorizontalLayout row5 = new HorizontalLayout();
-		row5.setWidth( "100%" );
-		row5.setSpacing( true );
-		row5.addComponent( comboNotify );
-		row5.addComponent( comboNotifyContacts );
+		row4.addComponent( comboNotify );
+		row4.addComponent( comboNotifyContacts );
 
 		HorizontalLayout row2 = new HorizontalLayout();
 		row2.setWidth( "100%" );
@@ -361,13 +364,18 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 
 		componentsContainer.addComponent( row1 );
 		componentsContainer.addComponent( row4 );
-		componentsContainer.addComponent( row5 );
 		componentsContainer.addComponent( row2 );
 		componentsContainer.addComponent( row3 );
 		componentsContainer.addComponent( row6 );
 		
 		if ( !getOperation().equals( OperationCRUD.OP_ADD ) )
 		{
+			rowAttachments = new HorizontalLayout();
+			rowAttachments.setSpacing( true );
+			
+			showShipmentAttachments();
+			componentsContainer.addComponent( rowAttachments );
+
 			showShipmentBoxes();
 			componentsContainer.addComponent( panelBoxes );
 			
@@ -383,8 +391,8 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 				}
 			} );
 			
-			getDefaultOperationsRow().addComponentAsFirst( btnPackig );
-			getDefaultOperationsRow().setComponentAlignment( btnPackig, Alignment.MIDDLE_LEFT );
+			getCustomOperationsRow().addComponentAsFirst( btnPackig );
+			getCustomOperationsRow().setComponentAlignment( btnPackig, Alignment.MIDDLE_LEFT );
 			
 			Button btnLabels = new Button();
 			btnLabels.setCaption( getContext().getString( "modalNewShipment.labels" ) );
@@ -398,9 +406,92 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 				}
 			} );
 			
-			getDefaultOperationsRow().addComponentAsFirst( btnLabels );
-			getDefaultOperationsRow().setComponentAlignment( btnLabels, Alignment.MIDDLE_LEFT );
+			getCustomOperationsRow().addComponentAsFirst( btnLabels );
+			getCustomOperationsRow().setComponentAlignment( btnLabels, Alignment.MIDDLE_LEFT );
+			
+			Button btnEmailNotification = new Button();
+			btnEmailNotification.setCaption( getContext().getString( "modalNewShipment.email" ) );
+			btnEmailNotification.addClickListener( new Button.ClickListener()
+			{
+				private static final long serialVersionUID = 8366445806178480507L;
+
+				public void buttonClick( ClickEvent event )
+				{
+					onEmailCustomerNotification();
+				}
+			} );
+
+			getCustomOperationsRow().addComponentAsFirst( btnEmailNotification );
+			getCustomOperationsRow().setComponentAlignment( btnEmailNotification, Alignment.MIDDLE_LEFT );
+
+			Button btnEmailRequest = new Button();
+			btnEmailRequest.setCaption( getContext().getString( "modalNewShipment.emailRequest" ) );
+			btnEmailRequest.addClickListener( new Button.ClickListener()
+			{
+				private static final long serialVersionUID = 4681649653209480755L;
+
+				public void buttonClick( ClickEvent event )
+				{
+					onEmailTransporterRequest();
+				}
+			} );
+
+			getCustomOperationsRow().addComponentAsFirst( btnEmailRequest );
+			getCustomOperationsRow().setComponentAlignment( btnEmailRequest, Alignment.MIDDLE_LEFT );
 		}
+	}
+	
+	private void showShipmentAttachments()
+	{
+		rowAttachments.removeAllComponents();
+		
+		List<ShipmentAttachment> attachments = newShipment.getAttachments();
+		
+		Label labelAttachments = new Label( getContext().getString( "modalNewShipment.attachments" ) );
+		rowAttachments.addComponent( labelAttachments );
+		rowAttachments.setComponentAlignment( labelAttachments, Alignment.MIDDLE_CENTER );
+		
+		if ( attachments != null )
+		{
+			for ( ShipmentAttachment delivery : attachments )
+			{
+				Button b = new Button( delivery.getTitle() );
+				b.setData( delivery );
+				b.addClickListener( new Button.ClickListener() 
+				{
+					private static final long serialVersionUID = 8366445806178480507L;
+
+					public void buttonClick(ClickEvent event) 
+		            {
+						onAttachmentClick( event.getButton() );
+		            }
+		        });
+				rowAttachments.addComponent( b );
+			}
+		}
+		
+		Button buttonAddAttachment = new Button( "+" );
+		buttonAddAttachment.addClickListener( new Button.ClickListener() 
+		{
+			private static final long serialVersionUID = 4681649653209480755L;
+
+			public void buttonClick(ClickEvent event) 
+            {
+				onAttachmentAddClick();
+            }
+        });
+		
+		rowAttachments.addComponent( buttonAddAttachment );
+	}
+
+	private void onAttachmentClick( Button button )
+	{
+		new ModalNewShipmentAttachment( getContext(), OperationCRUD.OP_MODIFY, (ShipmentAttachment)button.getData(), this ).showModalWindow();
+	}
+	
+	private void onAttachmentAddClick()
+	{
+		new ModalNewShipmentAttachment( getContext(), OperationCRUD.OP_ADD, null, this ).showModalWindow();
 	}
 
 	private void showShipmentBoxes()
@@ -651,23 +742,36 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 
 	private void fillComboStatus()
 	{
-		comboStatus.addItem( Shipment.STATUS_CREATED );
-		comboStatus.setItemCaption( Shipment.STATUS_CREATED, getContext().getString( "shipment.status." + Shipment.STATUS_CREATED ) );
-
-		comboStatus.addItem( Shipment.STATUS_SENT );
-		comboStatus.setItemCaption( Shipment.STATUS_SENT, getContext().getString( "shipment.status." + Shipment.STATUS_SENT ) );
-
-		comboStatus.addItem( Shipment.STATUS_TRANSIT );
-		comboStatus.setItemCaption( Shipment.STATUS_TRANSIT, getContext().getString( "shipment.status." + Shipment.STATUS_TRANSIT ) );
-
-		comboStatus.addItem( Shipment.STATUS_DELIVERED );
-		comboStatus.setItemCaption( Shipment.STATUS_DELIVERED, getContext().getString( "shipment.status." + Shipment.STATUS_DELIVERED ) );
+		for ( int i = Shipment.STATUS_CREATED; i <= Shipment.STATUS_DELIVERED; i++ )
+		{
+			comboStatus.addItem( i );
+			comboStatus.setItemCaption( i, getContext().getString( "shipment.status." + i ) );
+		}
 	}
 
+	private void reloadShipment()
+	{
+		try
+		{
+			ShipmentQuery query = new ShipmentQuery();
+			query.setId( newShipment.getId() );
+			
+			Shipment temp = (Shipment)IOCManager._ShipmentsManager.getRow( getContext(), query );
+			
+			newShipment.setAttachments( temp.getAttachments() );
+		}
+		catch ( Throwable e )
+		{
+			Utils.logException( e, LOG );
+		}
+	}
+	
 	@Override
 	public void refreshVisibleContent( boolean repage )
 	{
-		configBoxes.refreshVisibleContent( repage );
+		reloadShipment();
+		
+		showShipmentAttachments();
 		
 		getModalParent().refreshVisibleContent( true );
 	}
@@ -990,5 +1094,167 @@ public class ModalNewShipment extends ModalWindowsCRUD implements ModalParent
 			}
 		);
 		getUI().addWindow( dlg );
+	}
+
+	public void onEmailCustomerNotification()
+	{
+		if ( onModify() )
+		{
+			try
+			{
+				AppContext ctx1 = new AppContext( newShipment.getConsignee().getLanguage() );
+				IOCManager._ParametersManager.loadParameters( ctx1 );
+				ctx1.setUser( getContext().getUser() );
+				ctx1.addData( "Url", getContext().getData( "Url" ) );
+		    	ctx1.loadOwnerCompany();
+
+				List<Attachment> attachments = new ArrayList<Attachment>();
+				
+				IOCManager._ShipmentsManager.getShipmentNotificationDocuments( ctx1, newShipment, attachments );
+				
+				String subject = ctx1.getString( "modalNewShipment.emailSubject" ).
+						replaceAll( "%incoterms%", newShipment.getIncoterms() ).
+						replaceAll( "%shipment_number%", newShipment.getFormattedNumber() );
+				
+				String text = ctx1.getString( "modalNewShipment.emailText" ).
+						replaceAll( "%contact_person%", newShipment.getConsignee_contact().getName() ).
+						replaceAll( "%shipment_number%", newShipment.getFormattedNumber() ).
+						replaceAll( "%incoterms%", newShipment.getIncoterms() ).
+						replaceAll( "%purchase_orders%", newShipment.getOrders( ctx1 ) );
+	
+				String body = text + "\n\n" + ctx1.getCompanyDataAndLegal( newShipment.getUser() ); 
+	
+				final SendEmailDlg dlg = new SendEmailDlg( getContext(), getContext().getString( "modalNewShipment.emailTitle" ), attachments, newShipment.getConsignee().getContacts() );
+				dlg.setTo( newShipment.getConsignee_contact().getEmail() );
+				dlg.setCopy( newShipment.getNotify_contact().getEmail() );
+				dlg.setReply_to( newShipment.getUser().getEmail() );
+				dlg.setSubject( subject );
+				dlg.setBody( body );
+				dlg.setData( newShipment );
+				dlg.addCloseListener
+				( 
+					new Window.CloseListener() 
+					{
+						private static final long serialVersionUID = 9117288238745037294L;
+
+						@Override
+					    public void windowClose( CloseEvent e ) 
+					    {
+							if ( dlg.isSuccess() )
+							{
+								try
+								{
+									Shipment org = (Shipment)dlg.getData();
+									Shipment clone = (Shipment)Utils.clone( org ); 
+
+									org.setStatus( Shipment.STATUS_NOTIFIED );
+									
+									IOCManager._ShipmentsManager.setRow( getContext(), clone, org );
+									
+									Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+									dashboard.refreshShipmentsTab();
+								}
+								catch ( Throwable e1 )
+								{
+									Utils.logException( e1, LOG );
+						
+									Utils.showNotification( getContext(), getContext().getString( "modalNewShipment.emailError" ), Notification.Type.ERROR_MESSAGE );
+								}
+							}
+					    }
+					}
+				);
+				getUI().addWindow( dlg );
+				
+				closeModalWindow( true, true );
+			}
+			catch ( Throwable e )
+			{
+				Utils.logException( e, LOG );
+	
+				Utils.showNotification( getContext(), getContext().getString( "modalNewShipment.emailError" ), Notification.Type.ERROR_MESSAGE );
+			}
+		}
+	}
+
+	public void onEmailTransporterRequest()
+	{
+		if ( onModify() )
+		{
+			try
+			{
+				AppContext ctx1 = new AppContext( newShipment.getConsignee().getLanguage() );
+				IOCManager._ParametersManager.loadParameters( ctx1 );
+				ctx1.setUser( getContext().getUser() );
+				ctx1.addData( "Url", getContext().getData( "Url" ) );
+		    	ctx1.loadOwnerCompany();
+
+				List<Attachment> attachments = new ArrayList<Attachment>();
+				
+				IOCManager._ShipmentsManager.getShipmentRequestDocuments( ctx1, newShipment, attachments );
+				
+				String subject = ctx1.getString( "modalNewShipment.emailRequestSubject" ).
+						replaceAll( "%incoterms%", newShipment.getIncoterms() ).
+						replaceAll( "%shipment_number%", newShipment.getFormattedNumber() );
+				
+				String text = ctx1.getString( "modalNewShipment.emailRequestText" ).
+						replaceAll( "%contact_person%", newShipment.getTransporter_contact().getName() ).
+						replaceAll( "%consignee%", newShipment.getConsignee().getName() ).
+						replaceAll( "%shipment_number%", newShipment.getFormattedNumber() ).
+						replaceAll( "%incoterms%", newShipment.getIncoterms() );
+	
+				String body = text + "\n\n" + ctx1.getCompanyDataAndLegal( newShipment.getUser() ); 
+	
+				final SendEmailDlg dlg = new SendEmailDlg( getContext(), getContext().getString( "modalNewShipment.emailRequestTitle" ), attachments, newShipment.getConsignee().getContacts() );
+				dlg.setTo( newShipment.getConsignee_contact().getEmail() );
+				dlg.setCopy( newShipment.getNotify_contact().getEmail() );
+				dlg.setReply_to( newShipment.getUser().getEmail() );
+				dlg.setSubject( subject );
+				dlg.setBody( body );
+				dlg.setData( newShipment );
+				dlg.addCloseListener
+				( 
+					new Window.CloseListener() 
+					{
+						private static final long serialVersionUID = -403520358316847664L;
+
+						@Override
+					    public void windowClose( CloseEvent e ) 
+					    {
+							if ( dlg.isSuccess() )
+							{
+								try
+								{
+									Shipment org = (Shipment)dlg.getData();
+									Shipment clone = (Shipment)Utils.clone( org ); 
+
+									org.setStatus( Shipment.STATUS_REQUESTED );
+									
+									IOCManager._ShipmentsManager.setRow( getContext(), clone, org );
+									
+									Dashboard dashboard = (Dashboard)getContext().getData( "dashboard" );
+									dashboard.refreshShipmentsTab();
+								}
+								catch ( Throwable e1 )
+								{
+									Utils.logException( e1, LOG );
+						
+									Utils.showNotification( getContext(), getContext().getString( "modalNewShipment.emailError" ), Notification.Type.ERROR_MESSAGE );
+								}
+							}
+					    }
+					}
+				);
+				getUI().addWindow( dlg );
+				
+				closeModalWindow( true, true );
+			}
+			catch ( Throwable e )
+			{
+				Utils.logException( e, LOG );
+	
+				Utils.showNotification( getContext(), getContext().getString( "modalNewShipment.emailError" ), Notification.Type.ERROR_MESSAGE );
+			}
+		}
 	}
 }

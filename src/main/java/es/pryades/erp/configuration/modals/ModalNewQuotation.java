@@ -301,12 +301,12 @@ public class ModalNewQuotation extends ModalWindowsCRUD implements ModalParent
 			rowDeliveries = new HorizontalLayout();
 			rowDeliveries.setSpacing( true );
 
-			rowAttachments = new HorizontalLayout();
-			rowAttachments.setSpacing( true );
-			
 			showQuotationDeliveries();
 			rowCombined.addComponent( rowDeliveries );
 
+			rowAttachments = new HorizontalLayout();
+			rowAttachments.setSpacing( true );
+			
 			showQuotationAttachments();
 			rowCombined.addComponent( rowAttachments );
 

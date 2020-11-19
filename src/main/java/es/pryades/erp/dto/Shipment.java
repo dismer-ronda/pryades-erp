@@ -32,9 +32,11 @@ public class Shipment extends BaseDto
 	private static final Logger LOG = Logger.getLogger( Shipment.class );
 	
 	public static final int STATUS_CREATED 		= 0;
-	public static final int STATUS_SENT 		= 1;
-	public static final int STATUS_TRANSIT		= 2;
-	public static final int STATUS_DELIVERED	= 3;
+	public static final int STATUS_REQUESTED	= 1;
+	public static final int STATUS_SENT 		= 2;
+	public static final int STATUS_NOTIFIED		= 3;
+	public static final int STATUS_TRANSIT		= 4;
+	public static final int STATUS_DELIVERED	= 5;
 	
 	private Integer number;		
 	
@@ -75,6 +77,7 @@ public class Shipment extends BaseDto
 	private User user;
 
 	private List<ShipmentBox> boxes;
+	private List<ShipmentAttachment> attachments;
 
 	public String getFormattedNumber() 
 	{
@@ -121,13 +124,8 @@ public class Shipment extends BaseDto
 	
 			String headers = "";
 			
-			String invoices = XmlUtils.getBlockDiv( 
-					XmlUtils.getDiv( "padding_all text_regular_size text_bold text_left vtop", ctx.getString( "template.shipment.packing.invoices" ) + ":" ) +
-					XmlUtils.getDiv( "padding_all text_regular_size", getInvoices( ctx ) ) );
-			String orders = XmlUtils.getBlockDiv( 
-					XmlUtils.getDiv( "padding_all text_regular_size text_bold text_left vtop", ctx.getString( "template.shipment.packing.orders" ) + ":" ) +
-					XmlUtils.getDiv( "padding_all text_regular_size", getOrders( ctx ) ) );
-	
+			String invoices = XmlUtils.getDiv( "padding_all text_regular_size", "<span style=\"font-weight:bold\">" + ctx.getString( "template.shipment.packing.invoices" ) + ": </span>" + getInvoices( ctx ) ); 
+			String orders = XmlUtils.getDiv( "padding_all text_regular_size", "<span style=\"font-weight:bold\">" + ctx.getString( "template.shipment.packing.orders" ) + ": </span>" + getOrders( ctx ) );
 	
 			headers += XmlUtils.getTableCol( "", "borde", invoices );
 			headers += XmlUtils.getTableCol( "", "borde", orders  );
@@ -173,67 +171,35 @@ public class Shipment extends BaseDto
 			
 			String ret = XmlUtils.getTable( "100%", "border_no_spacing", XmlUtils.getTableRow( "", headers ) ) + XmlUtils.getTable( "100%", "border_no_spacing", rows ) + XmlUtils.getTable( "100%", "border_no_spacing", XmlUtils.getTableRow( "", footers ) );
 			
-			//ret += XmlUtils.newline();
-			
 			String leyends = "";
 			if ( (Integer)ctx.getData( Integer.toString( ShipmentBox.TYPE_CONTAINER ) ) > 0 )
 			{
-				String tmp = XmlUtils.getBlockDiv( 
-						XmlUtils.getDiv( "padding_all text_regular_size text_bold text_left vtop", ctx.getString( "shipment.box.type.alias." + ShipmentBox.TYPE_CONTAINER ) + ":" ) +
-						XmlUtils.getDiv( "padding_all text_regular_size", ctx.getString( "shipment.box.type." + ShipmentBox.TYPE_CONTAINER ) ) );
-	
+				String tmp = XmlUtils.getDiv( "padding_all text_regular_size", "<span style=\"font-weight:bold\">" + ctx.getString( "shipment.box.type.alias." + ShipmentBox.TYPE_CONTAINER ) + ": </span>" + ctx.getString( "shipment.box.type." + ShipmentBox.TYPE_CONTAINER ) );
 				leyends += XmlUtils.getTableCol( "", "borde", tmp );
-	
-				//leyends += XmlUtils.getTableCol( "48px", "borde", XmlUtils.getDiv( CLASS_DIV_LEYEND_LEFT, ctx.getString( "shipment.box.type.alias." + ShipmentBox.TYPE_CONTAINER ) + ":" ) );
-				//leyends += XmlUtils.getTableCol( "", "", XmlUtils.getDiv(  CLASS_DIV_LEYEND_RIGHT, ctx.getString( "shipment.box.type." + ShipmentBox.TYPE_CONTAINER ) ) );
 			}
 	
 			if ( (Integer)ctx.getData( Integer.toString( ShipmentBox.TYPE_PALLET ) ) > 0 )
 			{
-				String tmp = XmlUtils.getBlockDiv( 
-						XmlUtils.getDiv( "padding_all text_regular_size text_bold text_left vtop", ctx.getString( "shipment.box.type.alias." + ShipmentBox.TYPE_PALLET ) + ":" ) +
-						XmlUtils.getDiv( "padding_all text_regular_size", ctx.getString( "shipment.box.type." + ShipmentBox.TYPE_PALLET ) ) );
-	
+				String tmp = XmlUtils.getDiv( "padding_all text_regular_size", "<span style=\"font-weight:bold\">" + ctx.getString( "shipment.box.type.alias." + ShipmentBox.TYPE_PALLET ) + ": </span>" + ctx.getString( "shipment.box.type." + ShipmentBox.TYPE_PALLET ) );
 				leyends += XmlUtils.getTableCol( "", "borde", tmp );
-	
-				/*leyends += XmlUtils.getTableCol( "48px", "borde", XmlUtils.getDiv(  CLASS_DIV_LEYEND_LEFT, ctx.getString( "shipment.box.type.alias." + ShipmentBox.TYPE_PALLET ) + ":" ) );
-				leyends += XmlUtils.getTableCol( "", "", XmlUtils.getDiv(  CLASS_DIV_LEYEND_RIGHT, ctx.getString( "shipment.box.type." + ShipmentBox.TYPE_PALLET ) ) );*/
 			}
 	
 			if ( (Integer)ctx.getData( Integer.toString( ShipmentBox.TYPE_WOOD_BOX ) ) > 0 )
 			{
-				String tmp = XmlUtils.getBlockDiv( 
-						XmlUtils.getDiv( "padding_all text_regular_size text_bold text_left vtop", ctx.getString( "shipment.box.type.alias." + ShipmentBox.TYPE_WOOD_BOX ) + ":" ) +
-						XmlUtils.getDiv( "padding_all text_regular_size", ctx.getString( "shipment.box.type." + ShipmentBox.TYPE_WOOD_BOX ) ) );
-	
+				String tmp = XmlUtils.getDiv( "padding_all text_regular_size", "<span style=\"font-weight:bold\">" + ctx.getString( "shipment.box.type.alias." + ShipmentBox.TYPE_WOOD_BOX ) + ": </span>" + ctx.getString( "shipment.box.type." + ShipmentBox.TYPE_WOOD_BOX ) );
 				leyends += XmlUtils.getTableCol( "", "borde", tmp );
-	
-				//leyends += XmlUtils.getTableCol( "48px", "borde", XmlUtils.getDiv(  CLASS_DIV_LEYEND_LEFT, ctx.getString( "shipment.box.type.alias." + ShipmentBox.TYPE_WOOD_BOX ) + ":" ) );
-				//leyends += XmlUtils.getTableCol( "", "", XmlUtils.getDiv(  CLASS_DIV_LEYEND_RIGHT, ctx.getString( "shipment.box.type." + ShipmentBox.TYPE_WOOD_BOX ) ) );
 			}
 	
 			if ( (Integer)ctx.getData( Integer.toString( ShipmentBox.TYPE_CARDBOARD_BOX ) ) > 0 )
 			{
-				String tmp = XmlUtils.getBlockDiv( 
-						XmlUtils.getDiv( "padding_all text_regular_size text_bold text_left vtop", ctx.getString( "shipment.box.type.alias." + ShipmentBox.TYPE_CARDBOARD_BOX ) + ":" ) +
-						XmlUtils.getDiv( "padding_all text_regular_size", ctx.getString( "shipment.box.type." + ShipmentBox.TYPE_CARDBOARD_BOX ) ) );
-	
+				String tmp = XmlUtils.getDiv( "padding_all text_regular_size", "<span style=\"font-weight:bold\">" + ctx.getString( "shipment.box.type.alias." + ShipmentBox.TYPE_CARDBOARD_BOX ) + ": </span>" + ctx.getString( "shipment.box.type." + ShipmentBox.TYPE_CARDBOARD_BOX ) );
 				leyends += XmlUtils.getTableCol( "", "borde", tmp );
-				
-				/*leyends += XmlUtils.getTableCol( "48px", "borde", XmlUtils.getDiv(  CLASS_DIV_LEYEND_LEFT, ctx.getString( "shipment.box.type.alias." + ShipmentBox.TYPE_CARDBOARD_BOX ) + ":" ) );
-				leyends += XmlUtils.getTableCol( "", "" , XmlUtils.getDiv(  CLASS_DIV_LEYEND_RIGHT, ctx.getString( "shipment.box.type." + ShipmentBox.TYPE_CARDBOARD_BOX ) ) );*/
 			}
 	
 			if ( (Integer)ctx.getData( Integer.toString( ShipmentBox.TYPE_BULK ) ) > 0 )
 			{
-				String tmp = XmlUtils.getBlockDiv( 
-						XmlUtils.getDiv( "padding_all text_regular_size text_bold text_left vtop", ctx.getString( "shipment.box.type.alias." + ShipmentBox.TYPE_BULK ) + ":" ) +
-						XmlUtils.getDiv( "padding_all text_regular_size", ctx.getString( "shipment.box.type." + ShipmentBox.TYPE_BULK ) ) );
-	
+				String tmp = XmlUtils.getDiv( "padding_all text_regular_size", "<span style=\"font-weight:bold\">" + ctx.getString( "shipment.box.type.alias." + ShipmentBox.TYPE_BULK ) + ": </span>" + ctx.getString( "shipment.box.type." + ShipmentBox.TYPE_BULK ) );
 				leyends += XmlUtils.getTableCol( "", "borde", tmp );
-	
-				//leyends += XmlUtils.getTableCol( "48px", "borde", XmlUtils.getDiv(  CLASS_DIV_LEYEND_LEFT, ctx.getString( "shipment.box.type.alias." + ShipmentBox.TYPE_BULK ) + ":" ) );
-				//leyends += XmlUtils.getTableCol( "", "" , XmlUtils.getDiv(  CLASS_DIV_LEYEND_RIGHT, ctx.getString( "shipment.box.type." + ShipmentBox.TYPE_BULK ) ) );
 			}
 	
 			ret += XmlUtils.getTable( "100%", "border_no_spacing",
@@ -429,7 +395,8 @@ public class Shipment extends BaseDto
 			for ( String str : labels )
 			{
 				String height = " height=\"" + colHeight + "mm\"";
-				contents += "<td" + height +">" + str + "</td>\n";
+				String width = " width=\"" + colWidth + "mm\"";
+				contents += "<td" + width + height + ">" + str + "</td>\n";
 				j++;
 				
 				if ( j == c )
@@ -438,6 +405,12 @@ public class Shipment extends BaseDto
 					contents += "</tr>\n\n<tr>\n";
 				}
 			}
+			
+			if ( j < c )
+			{
+				String height = " height=\"" + colHeight + "mm\"";
+				contents += "<td" + height +"></td>\n";
+			}			
 
 			contents += "</tr>\n\n";
 			

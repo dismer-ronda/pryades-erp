@@ -37,4 +37,8 @@ public class XmlUtils
 		return "<div class=\"" + clazz + "\" id=\"block_container\">" + contents + "</div>";
 	}
 
+	public static String getSpam( String style, String contents )
+	{
+		return "<span style=\"" + style + "\">" + contents + "</span>";
+	}
 }
