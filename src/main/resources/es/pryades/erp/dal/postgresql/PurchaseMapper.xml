@@ -195,7 +195,7 @@
 	        </if>
 			<if test="for_payment != null">
 				<if test="for_payment.booleanValue()">
-					AND (purchases.net_price + purchases.net_tax - purchases.net_retention) - purchases.payed > 0    
+					AND (purchases.net_price + purchases.net_tax - purchases.net_retention) - purchases.payed > 0.1    
 	        	</if>
 	        </if>
 		</where>

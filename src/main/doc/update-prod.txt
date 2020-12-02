@@ -5,7 +5,7 @@ echo Creando bases de datos de imedig-cloud
 su - postgres -c "createdb --owner pryades pryades-erp"
 
 echo Inicializando datos de imedig-cloud
-su - postgres -c "psql -u pryades -d pryades-erp < /opt/pryades-erp/sql/pryades-erp.sql"
+su - postgres -c "psql -d pryades-erp < /home/backup/postgres/pryades-erp.sql"
 
 su - postgres -c "psql -d pryades-erp < /home/dismer/Documentos/Proyectos/pryades-erp/src/main/postgresql/scripts/11-data.sql"
 

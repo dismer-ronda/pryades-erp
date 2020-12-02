@@ -186,11 +186,11 @@ create table quotations
 	delivery varchar(64) not null,
 	warranty varchar(64) not null,
 	payment_terms text not null,
-	tax_rate real not null default 0,
+	tax_rate double precision not null default 0,
 	status int not null default 0,
 	
-	weight real not null default 0,
-	volume  real not null default 0,
+	weight double precision not null default 0,
+	volume double precision not null default 0,
 
 	ref_contact bigint not null,
 	ref_user bigint not null,
@@ -217,7 +217,7 @@ create table quotations_deliveries
 	arrival_port varchar(64),
 	
 	incoterms varchar(32),
-	cost real not null,
+	cost double precision not null,
 	
 	free_delivery boolean not null, 	
 
@@ -239,10 +239,9 @@ create table quotations_lines
 	title varchar (64) not null,
 	description text,
 
-	cost real not null,
-	real_cost real not null,
-	margin real not null,
-	tax_rate real not null default 0,
+	cost double precision not null,
+	margin double precision not null,
+	tax_rate double precision not null default 0,
 
 	ref_provider bigint,
 
@@ -343,10 +342,10 @@ create table invoices
 	number int not null,						
 	invoice_date bigint not null,						
 
-	transport_cost real not null,
+	transport_cost double precision not null,
 
 	free_delivery boolean not null, 	
-	collected real not null default 0,
+	collected double precision not null default 0,
 
   	constraint pk_invoices primary key( id ),
 
@@ -382,9 +381,9 @@ create table shipments_boxes
 	label varchar(32) not null,
 	label_type int not null default 0,
 	
-	width real not null,						
-	length real not null,						
-	height real not null,
+	width double precision not null,						
+	length double precision not null,						
+	height double precision not null,
 	
   	constraint pk_shipments_boxes primary key( id ),
 
@@ -402,8 +401,8 @@ create table shipments_boxes_lines
 	
 	quantity int not null,
 	
-	net_weight real not null,
-	gross_weight real not null, 
+	net_weight double precision not null,
+	gross_weight double precision not null, 
 	
 	constraint pk_shipments_boxes_lines primary key( id ),
 
@@ -469,11 +468,11 @@ create table purchases
 	purchase_date bigint not null,
 	register_date bigint not null,
 
-	net_price real not null,
-	net_tax real not null,					-- total de impuestos (por si hay más de uno o algún error de redondeo del proveedor)
-	net_retention real not null,			-- total de retenciones (por si hay más de uno o algún error de redondeo del proveedor)
+	net_price double precision not null,
+	net_tax double precision not null,					-- total de impuestos (por si hay más de uno o algún error de redondeo del proveedor)
+	net_retention double precision not null,			-- total de retenciones (por si hay más de uno o algún error de redondeo del proveedor)
 
-	payed real not null default 0,
+	payed double precision not null default 0,
 	
 	status int not null,
 
@@ -505,7 +504,7 @@ create table accounts
 	account_type int not null,
   	name varchar(128) not null,
   	number varchar(128),
-  	credit real not null,
+  	credit double precision not null,
 
 	ref_company bigint not null,
 	
@@ -521,8 +520,8 @@ create table transactions
 	transaction_date bigint not null,
 	transaction_type bigint not null,
 
-	amount real not null,
-  	balance	real not null,
+	amount double precision not null,
+  	balance	double precision not null,
   	
 	description varchar(64),
 

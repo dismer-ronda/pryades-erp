@@ -291,13 +291,13 @@ public class TransactionsManagerImpl extends BaseManagerImpl implements Transact
 				source.setRef_target( lastDest.getRef_account() );
 				source.setTransfer( uid );
 				source.setAmount( -1 * source.getAmount() );
-				source.setBalance( Utils.roundDouble( lastSource.getBalance() + source.getAmount(), 2 ) );
+				source.setBalance( Utils.roundDouble( Utils.roundDouble( lastSource.getBalance(), 2 ) + Utils.roundDouble( source.getAmount(), 2 ), 2 ) );
 				setRow( ctx, null, source );
 				source.setAmount( -1 * source.getAmount() );
 
 				dest.setRef_target( lastSource.getRef_account() );
 				dest.setTransfer( uid );
-				dest.setBalance( Utils.roundDouble( lastDest.getBalance() + dest.getAmount(), 2 ) );
+				dest.setBalance( Utils.roundDouble( Utils.roundDouble( lastDest.getBalance(), 2 ) + Utils.roundDouble( dest.getAmount(), 2 ), 2 ) );
 				setRow( ctx, null, dest);
 			}
 			
